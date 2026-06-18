@@ -9,6 +9,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 
 class UserForm
 {
@@ -38,7 +39,13 @@ class UserForm
                             ->required(fn (string $operation): bool => $operation === 'create'),
 
                         Select::make('roles')
-                            ->relationship('roles', 'name')
+                            ->relationship(
+                                'roles',
+                                'name',
+                                fn (Builder $query) => auth()->user()?->hasRole('Super Admin')
+                                    ? $query
+                                    : $query->where('name', '!=', 'Super Admin')
+                            )
                             ->multiple()
                             ->preload()
                             ->visible(fn () => auth()->user()?->can('manage-roles'))
@@ -47,16 +54,38 @@ class UserForm
                                     return false;
                                 }
 
-                                return auth()->id() === $record->id;
+                                // Cannot edit your own roles
+                                if (auth()->id() === $record->id) {
+                                    return true;
+                                }
+
+                                // Only Super Admin can modify a Super Admin's roles
+                                if (
+                                    $record->hasRole('Super Admin') &&
+                                    ! auth()->user()?->hasRole('Super Admin')
+                                ) {
+                                    return true;
+                                }
+
+                                return false;
                             })
                             ->helperText(function ($record) {
                                 if (! $record) {
                                     return null;
                                 }
 
-                                return auth()->id() === $record->id
-                                    ? 'You cannot modify your own role assignments.'
-                                    : null;
+                                if (auth()->id() === $record->id) {
+                                    return 'You cannot modify your own role assignments.';
+                                }
+
+                                if (
+                                    $record->hasRole('Super Admin') &&
+                                    ! auth()->user()?->hasRole('Super Admin')
+                                ) {
+                                    return 'Only Super Admin can modify Super Admin role assignments.';
+                                }
+
+                                return null;
                             }),
 
                         Toggle::make('is_active')

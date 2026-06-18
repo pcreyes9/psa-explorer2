@@ -62,19 +62,24 @@ class MemberResource extends Resource
         return [];
     }
 
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->can('members.view') ?? false;
+    }
+
     public static function canCreate(): bool
     {
-        return false;
+        return auth()->user()?->can('members.create') ?? false;
     }
 
     public static function canEdit($record): bool
     {
-        return false;
+        return auth()->user()?->can('members.edit') ?? false;
     }
 
     public static function canDelete($record): bool
     {
-        return false;
+        return auth()->user()?->can('members.delete') ?? false;
     }
 
     public static function shouldRegisterNavigation(): bool

@@ -68,15 +68,32 @@ class UsersTable
             ->recordActions([
                 ViewAction::make(),
 
-                EditAction::make(),
+                EditAction::make()
+                    ->visible(function ($record) {
+                        return ! (
+                            $record->hasRole('Super Admin')
+                            && ! auth()->user()?->hasRole('Super Admin')
+                        );
+                    }),
 
                 DeleteAction::make()
-                    ->visible(fn () => auth()->user()?->can('delete-users'))
+                    ->visible(function ($record) {
+                        if (! auth()->user()?->can('delete-users')) {
+                            return false;
+                        }
+
+                        return ! (
+                            $record->hasRole('Super Admin')
+                            && ! auth()->user()?->hasRole('Super Admin')
+                        );
+                    })
                     ->disabled(fn ($record) => $record->hasRole('Super Admin'))
                     ->tooltip(fn ($record) => $record->hasRole('Super Admin')
                         ? 'Super Admin accounts cannot be deleted.'
                         : null),
-            ])
+
+                ])
+
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()

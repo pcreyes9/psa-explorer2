@@ -14,9 +14,7 @@ class ViewMember extends ViewRecord
 
     protected function getHeaderActions(): array
     {
-        return auth()->user()->hasRole('Super Admin')
-            || auth()->user()->hasRole('Admin')
-            || auth()->user()->hasRole('Encoder')
+        return auth()->user()?->can('members.edit')
             ? [
                 EditAction::make(),
             ]
@@ -25,7 +23,11 @@ class ViewMember extends ViewRecord
 
     public function getTitle(): string
     {
-        return $this->record->member_id_no . ' - ' . $this->record->mem_last_name . ', ' . $this->record->mem_first_name;
+        return $this->record->member_id_no
+            . ' - '
+            . $this->record->mem_last_name
+            . ', '
+            . $this->record->mem_first_name;
     }
 
     public function getHeading(): string
@@ -36,7 +38,7 @@ class ViewMember extends ViewRecord
     public function getBreadcrumbs(): array
     {
         return [
-             url('/admin/member-search') => 'PSA Member',
+            url('/admin/member-search') => 'PSA Member',
 
             '#' => sprintf(
                 '%s - %s',

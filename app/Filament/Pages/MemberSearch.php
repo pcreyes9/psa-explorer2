@@ -41,7 +41,7 @@ class MemberSearch extends Page implements HasTable
     {
         return $table
             ->query($this->getQuery())
-            ->defaultPaginationPageOption(10)
+            ->defaultPaginationPageOption(25)
             ->paginated([10, 25, 50, 100])
             ->recordUrl(
                 fn (Member $record): string => MemberResource::getUrl('view', [

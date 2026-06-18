@@ -26,4 +26,13 @@ class Payment extends Model
             'member_id_no'
         );
     }
+    
+    public function ledgerEntries()
+    {
+        return $this->hasMany(
+            MemberLedger::class,
+            'payment_ref_no',
+            'payment_ref_no'
+        );
+    }
 }
