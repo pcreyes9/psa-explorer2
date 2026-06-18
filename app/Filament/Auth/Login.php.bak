@@ -1,0 +1,32 @@
+<?php
+
+namespace App\Filament\Auth;
+
+use Filament\Auth\Pages\Login as BaseLogin;
+use Filament\Forms\Components\TextInput;
+
+class Login extends BaseLogin
+{
+    public function getHeading(): string
+    {
+        return 'Sign in';
+    }
+
+    protected function getEmailFormComponent(): TextInput
+    {
+        return TextInput::make('username')
+            ->label('Username')
+            ->required()
+            ->autocomplete('username')
+            ->autofocus();
+    }
+
+    protected function getCredentialsFromFormData(array $data): array
+    {
+        return [
+            'username' => $data['username'],
+            'password' => $data['password'],
+            'is_active' => true,
+        ];
+    }
+}
