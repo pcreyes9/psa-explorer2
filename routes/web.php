@@ -3,8 +3,21 @@
 use Illuminate\Support\Facades\Route;
 use App\Models\Member;
 
+Route::get('/debug-php', function () {
+    return [
+        'php_version' => PHP_VERSION,
+        'openssl_loaded' => extension_loaded('openssl'),
+        'openssl_function' => function_exists('openssl_cipher_iv_length'),
+        'ini' => php_ini_loaded_file(),
+    ];
+});
+
+// Route::get('/', function () {
+//     return view('welcome');
+// });
+
 Route::get('/', function () {
-    return view('welcome');
+    return redirect('/admin');
 });
 
 Route::get('/member-photo/{member}', function (Member $member) {

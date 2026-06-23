@@ -13,5 +13,13 @@
         TAILWIND TEST
     </div>
 
+    <x-filament::button
+        tag="a"
+        :href="route('filament.admin.auth.login')"
+    >
+        Login
+    </x-filament::button>
+
+
 </body>
 </html>
