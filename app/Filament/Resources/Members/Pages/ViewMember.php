@@ -39,7 +39,36 @@ class ViewMember extends ViewRecord
                 ])
                 ->action(function (array $data): void {
 
-                    // your photo upload code here
+                    $path = storage_path(
+                        'app/private/' . $data['photo']
+                    );
+
+                    $binary = file_get_contents($path);
+
+                    $hex = bin2hex($binary);
+
+                    DB::statement(
+                        "
+                        UPDATE member
+                        SET mem_pic = CONVERT(varbinary(max), ?, 2)
+                        WHERE member_id_no = ?
+                        ",
+                        [
+                            $hex,
+                            $this->record->member_id_no,
+                        ]
+                    );
+
+                    Storage::disk('local')->delete(
+                        $data['photo']
+                    );
+
+                    $this->record->refresh();
+
+                    Notification::make()
+                        ->title('Photo updated successfully')
+                        ->success()
+                        ->send();
 
                 }),
 
