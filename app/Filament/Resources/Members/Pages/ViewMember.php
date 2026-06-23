@@ -5,6 +5,12 @@ namespace App\Filament\Resources\Members\Pages;
 use App\Filament\Resources\Members\MemberResource;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
+use Illuminate\Support\Facades\DB;
+use Filament\Notifications\Notification;
+use Filament\Actions\Action;
+use Filament\Forms\Components\FileUpload;
+use Illuminate\Support\Facades\Storage;
+use Filament\Actions\ActionGroup;
 
 class ViewMember extends ViewRecord
 {
@@ -13,13 +19,49 @@ class ViewMember extends ViewRecord
     protected string $view = 'filament.members.view-member';
 
     protected function getHeaderActions(): array
-    {
-        return auth()->user()?->can('members.edit')
-            ? [
-                EditAction::make(),
-            ]
-            : [];
-    }
+{
+    return [
+
+        ActionGroup::make([
+
+            EditAction::make()->color('gray'),
+
+            Action::make('updatePhoto')
+                ->label('Update Photo')
+                ->icon('heroicon-o-camera')
+                ->color('gray')
+                ->form([
+                    FileUpload::make('photo')
+                        ->image()
+                        ->required()
+                        ->disk('local')
+                        ->directory('temp/member-photos'),
+                ])
+                ->action(function (array $data): void {
+
+                    // your photo upload code here
+
+                }),
+
+            Action::make('payDues')
+                ->label('Payment')
+                ->icon('heroicon-o-banknotes')
+                ->color('gray')
+                ->url(
+                    fn () => url(
+                        '/admin/new-payment?member=' .
+                        $this->record->member_id_no
+                    )
+                ),
+
+        ])
+            ->label('Actions')
+            ->color('gray')
+            ->icon('heroicon-o-ellipsis-vertical')
+            ->button(),
+
+    ];
+}
 
     public function getTitle(): string
     {

@@ -19,6 +19,7 @@ use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Filament\View\PanelsRenderHook;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -28,6 +29,10 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            ->renderHook(
+                PanelsRenderHook::BODY_END,
+                fn () => view('components.global-loader')
+            )
             ->viteTheme('resources/css/filament/admin/theme.css')
 
             ->login(\App\Filament\Auth\Login::class)
@@ -35,6 +40,7 @@ class AdminPanelProvider extends PanelProvider
 
             ->colors([
                 'primary' => Color::Blue,
+                'secondary'=> Color::Green,
             ])
 
             ->discoverResources(

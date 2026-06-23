@@ -6,8 +6,7 @@
             <img
                 src="{{ $record->photo_url }}"
                 alt="{{ $record->mem_last_name }}"
-                class="h-40 w-40 rounded-full object-cover shrink-0"
-        >
+                class="h-45 w-45 rounded-full border-4 border-gray-300 object-cover object-[50%_20%] shadow-sm"        >
         </div>
 
         {{-- Member Details --}}
@@ -39,7 +38,7 @@
             </div>
 
             {{-- Quick Information --}}
-            <div class="mt-8 grid grid-cols-2 gap-x-16 gap-y-5">
+            <div class="mt-8 grid grid-cols-4 gap-x-16 gap-y-5">
 
                 <div>
                     <div class="text-sm text-gray-500">

@@ -61,12 +61,15 @@ class MemberSearch extends Page implements HasTable
                     ->label('First Name')
                     ->sortable(),
 
-                TextColumn::make('psa_chapter_code')
-                    ->label('Chapter'),
+                TextColumn::make('chapter.psa_chapter_desc')
+                    ->label('Chapter')
+                    ->formatStateUsing(fn ($record) =>
+                        "{$record->psa_chapter_code} - {$record->chapter?->psa_chapter_desc} "
+                    ),
 
-                TextColumn::make('psa_mem_stat')
-                    ->label('Status')
-                    ->badge(),
+                // TextColumn::make('psa_mem_stat')
+                //     ->label('Status')
+                //     ->badge(),
             ])
             ->emptyStateHeading('Search for a member')
             ->emptyStateDescription('Enter a Member ID or Last Name above.');
@@ -82,7 +85,7 @@ class MemberSearch extends Page implements HasTable
                 'mem_last_name',
                 'mem_first_name',
                 'psa_chapter_code',
-                'psa_mem_stat',
+                // 'psa_mem_stat',
             ]);
 
         if (blank($search)) {
@@ -90,12 +93,14 @@ class MemberSearch extends Page implements HasTable
         }
 
         if (is_numeric($search)) {
-            return $query->where('member_id_no', $search);
+            return $query
+                ->where('member_id_no',  $search);
+                // ->limit(20);
         }
 
         return $query
-            ->where('mem_last_name', 'like', $search . '%')
-            ->orderBy('mem_last_name')
-            ->orderBy('mem_first_name');
+            ->where('mem_last_name', 'like', '%'. $search . '%')
+            ->orderBy('mem_last_name');
+            // ->limit(20);
     }
 }

@@ -30,7 +30,8 @@ class Member extends Model
 
     public function getPhotoUrlAttribute(): string
     {
-        return route('member.photo', $this);
+        return route('member.photo', $this)
+            . '?t=' . time();
     }
 
     /*
@@ -106,4 +107,6 @@ class Member extends Model
             'member_id_no'
         );
     }
+
+
 }
