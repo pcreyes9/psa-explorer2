@@ -78,7 +78,7 @@ class UsersTable
 
                 DeleteAction::make()
                     ->visible(function ($record) {
-                        if (! auth()->user()?->can('delete-users')) {
+                        if (! auth()->user()?->can('users_delete')) {
                             return false;
                         }
 
@@ -97,7 +97,7 @@ class UsersTable
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->visible(fn () => auth()->user()?->can('delete-users'))
+                        ->visible(fn () => auth()->user()?->can('users_delete'))
                         ->action(function ($records) {
                             $records
                                 ->reject(fn ($record) => $record->hasRole('Super Admin'))

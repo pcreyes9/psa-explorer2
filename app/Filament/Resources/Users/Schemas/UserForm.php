@@ -48,7 +48,7 @@ class UserForm
                             )
                             ->multiple()
                             ->preload()
-                            ->visible(fn () => auth()->user()?->can('manage-roles'))
+                            ->visible(fn () => auth()->user()?->can('roles_manage'))
                             ->disabled(function ($record) {
                                 if (! $record) {
                                     return false;

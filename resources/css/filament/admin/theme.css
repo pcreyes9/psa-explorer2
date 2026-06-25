@@ -4,3 +4,7 @@
 @source '../../../../resources/views/**/*';
 @source '../../../../resources/**/*.blade.php';
 @source '../../../../resources/**/*.php';
+
+.fi-in-entry-label {
+    @apply font-bold;
+}

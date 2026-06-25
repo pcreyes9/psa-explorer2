@@ -39,6 +39,16 @@ class PaymentResource extends Resource
         ];
     }
 
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->can('payment_view');
+    }
+
+    public static function canCreate(): bool
+    {
+        return auth()->user()?->can('payment_create');
+    }
+
     public static function getPages(): array
     {
         return [

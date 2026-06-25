@@ -55,21 +55,21 @@ class PermissionResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()?->can('manage-permissions') ?? false;
+        return auth()->user()?->can('permissions_manage') ?? false;
     }
 
     public static function canCreate(): bool
     {
-        return auth()->user()?->can('manage-permissions') ?? false;
+        return auth()->user()?->can('permissions_manage') ?? false;
     }
 
     public static function canEdit($record): bool
     {
-        return auth()->user()?->can('manage-permissions') ?? false;
+        return auth()->user()?->can('permissions_manage') ?? false;
     }
 
     public static function canDelete($record): bool
     {
-        return auth()->user()?->can('manage-permissions') ?? false;
+        return auth()->user()?->can('permissions_manage') ?? false;
     }
 }

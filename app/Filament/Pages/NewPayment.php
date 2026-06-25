@@ -30,6 +30,10 @@ class NewPayment extends Page implements HasForms, HasActions
         Heroicon::OutlinedBanknotes;
 
     protected static string|UnitEnum|null $navigationGroup = 'Payments';
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()?->can('payment_create') ?? false;
+    }
 
     // protected static ?string $navigationLabel = 'New Payment';
 

@@ -10,11 +10,12 @@ class PermissionsSeeder extends Seeder
     public function run(): void
     {
         $permissions = [
-            'manage-users',
-            'manage-roles',
-            'manage-permissions',
-            'delete-users',
-            'reset-passwords',
+            'users_manage',
+            'roles_manage',
+            'permissions_manage',
+            'users_delete',
+            'passwords_delete',
+
         ];
 
         foreach ($permissions as $permission) {

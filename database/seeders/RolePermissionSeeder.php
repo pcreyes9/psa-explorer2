@@ -15,16 +15,16 @@ class RolePermissionSeeder extends Seeder
         $viewer = Role::findByName('Viewer');
 
         $superAdmin->givePermissionTo([
-            'manage-users',
-            'manage-roles',
-            'manage-permissions',
-            'delete-users',
-            'reset-passwords',
+            'users_manage',
+            'roles_manage',
+            'permissions_manage',
+            'users_delete',
+            'passwords_delete',
         ]);
 
         $admin->givePermissionTo([
-            'manage-users',
-            'reset-passwords',
+            'users_manage',
+            'passwords_delete',
         ]);
     }
 }

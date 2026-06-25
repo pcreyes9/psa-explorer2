@@ -19,78 +19,78 @@ class ViewMember extends ViewRecord
     protected string $view = 'filament.members.view-member';
 
     protected function getHeaderActions(): array
-{
-    return [
+    {
+        return [
 
-        ActionGroup::make([
+            ActionGroup::make([
 
-            EditAction::make()->color('gray'),
+                EditAction::make()->color('gray')->visible(fn () => auth()->user()?->can('members_edit')),
 
-            Action::make('updatePhoto')
-                ->label('Update Photo')
-                ->icon('heroicon-o-camera')
+                Action::make('updatePhoto')->visible(fn () => auth()->user()?->can('members_edit'))
+                    ->label('Update Photo')
+                    ->icon('heroicon-o-camera')
+                    ->color('gray')
+                    ->form([
+                        FileUpload::make('photo')
+                            ->image()
+                            ->required()
+                            ->disk('local')
+                            ->directory('temp/member-photos'),
+                    ])
+                    ->action(function (array $data): void {
+
+                        $path = storage_path(
+                            'app/private/' . $data['photo']
+                        );
+
+                        $binary = file_get_contents($path);
+
+                        $hex = bin2hex($binary);
+
+                        DB::statement(
+                            "
+                            UPDATE member
+                            SET mem_pic = CONVERT(varbinary(max), ?, 2)
+                            WHERE member_id_no = ?
+                            ",
+                            [
+                                $hex,
+                                $this->record->member_id_no,
+                            ]
+                        );
+
+                        Storage::disk('local')->delete(
+                            $data['photo']
+                        );
+
+                        $this->record->refresh();
+
+                        Notification::make()
+                            ->title('Photo updated successfully')
+                            ->success()
+                            ->send();
+
+                    }),
+
+                Action::make('payDues')->visible(fn () => auth()->user()?->can('members_edit'))
+                    ->label('Payment')
+                    ->icon('heroicon-o-banknotes')
+                    ->color('gray')
+                    ->url(
+                        fn () => url(
+                            '/admin/new-payment?member=' .
+                            $this->record->member_id_no
+                        )
+                    ),
+
+            ])
+                ->label('Actions')
                 ->color('gray')
-                ->form([
-                    FileUpload::make('photo')
-                        ->image()
-                        ->required()
-                        ->disk('local')
-                        ->directory('temp/member-photos'),
-                ])
-                ->action(function (array $data): void {
+                ->icon('heroicon-o-ellipsis-vertical')
+                ->button(),
 
-                    $path = storage_path(
-                        'app/private/' . $data['photo']
-                    );
-
-                    $binary = file_get_contents($path);
-
-                    $hex = bin2hex($binary);
-
-                    DB::statement(
-                        "
-                        UPDATE member
-                        SET mem_pic = CONVERT(varbinary(max), ?, 2)
-                        WHERE member_id_no = ?
-                        ",
-                        [
-                            $hex,
-                            $this->record->member_id_no,
-                        ]
-                    );
-
-                    Storage::disk('local')->delete(
-                        $data['photo']
-                    );
-
-                    $this->record->refresh();
-
-                    Notification::make()
-                        ->title('Photo updated successfully')
-                        ->success()
-                        ->send();
-
-                }),
-
-            Action::make('payDues')
-                ->label('Payment')
-                ->icon('heroicon-o-banknotes')
-                ->color('gray')
-                ->url(
-                    fn () => url(
-                        '/admin/new-payment?member=' .
-                        $this->record->member_id_no
-                    )
-                ),
-
-        ])
-            ->label('Actions')
-            ->color('gray')
-            ->icon('heroicon-o-ellipsis-vertical')
-            ->button(),
-
-    ];
-}
+        ];
+    }
 
     public function getTitle(): string
     {
@@ -122,5 +122,9 @@ class ViewMember extends ViewRecord
                 )
             ),
         ];
+    }
+    public static function getNavigationItem(): ?string
+    {
+        return \App\Filament\Pages\MemberSearch::class;
     }
 }

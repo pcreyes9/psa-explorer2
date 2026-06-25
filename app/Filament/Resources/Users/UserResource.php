@@ -51,12 +51,12 @@ class UserResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()?->can('manage-users') ?? false;
+        return auth()->user()?->can('users_manage') ?? false;
     }
 
     public static function canCreate(): bool
     {
-        return auth()->user()?->can('manage-users') ?? false;
+        return auth()->user()?->can('users_manage') ?? false;
     }
 
     public static function canEdit($record): bool
@@ -68,7 +68,7 @@ class UserResource extends Resource
             return false;
         }
 
-        return auth()->user()?->can('manage-users') ?? false;
+        return auth()->user()?->can('users_manage') ?? false;
     }
 
     public static function canDelete($record): bool
@@ -80,7 +80,7 @@ class UserResource extends Resource
             return false;
         }
 
-        return auth()->user()?->can('delete-users') ?? false;
+        return auth()->user()?->can('users_delete') ?? false;
     }
 
     public static function getPages(): array

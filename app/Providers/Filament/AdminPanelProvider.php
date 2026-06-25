@@ -27,6 +27,13 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
+            ->navigationGroups([
+                'Membership',
+                'Payments',
+                'Continuing Medical Education',
+                'Reports',
+                'Administration',
+            ])
             ->id('admin')
             ->path('admin')
             ->renderHook(
@@ -63,8 +70,9 @@ class AdminPanelProvider extends PanelProvider
             )
 
             ->widgets([
-                AccountWidget::class,
-                FilamentInfoWidget::class,
+                // AccountWidget::class,
+                // FilamentInfoWidget::class,
+                \App\Filament\Widgets\DashboardStats::class,
             ])
 
             ->middleware([
