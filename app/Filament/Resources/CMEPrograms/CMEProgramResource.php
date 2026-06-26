@@ -64,6 +64,26 @@ class CMEProgramResource extends Resource
         ];
     }
 
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->can('cme_view') ?? false;
+    }
+
+    public static function canCreate(): bool
+    {
+        return auth()->user()?->can('cme_create') ?? false;
+    }
+
+    public static function canEdit($record): bool
+    {
+        return auth()->user()?->can('cme_edit') ?? false;
+    }
+
+    public static function canDelete($record): bool
+    {
+        return auth()->user()?->can('cme_delete') ?? false;
+    }
+
     public static function getPages(): array
     {
         return [

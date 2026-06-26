@@ -22,6 +22,17 @@ class ViewMember extends ViewRecord
     {
         return [
 
+            Action::make('certificateOfGoodStanding')
+                ->label('Certificate of Good Standing')
+                ->icon('heroicon-o-document-text')
+                ->color('warning')
+                // ->visible(fn () => auth()->user()->can('member_print_cogs'))
+                ->url(fn () =>
+                    \App\Filament\Pages\CertificateOfGoodStanding::getUrl([
+                        'member' => $this->record->member_id_no,
+                    ])
+                ),
+
             ActionGroup::make([
 
                 EditAction::make()->color('gray')->visible(fn () => auth()->user()?->can('members_edit')),
