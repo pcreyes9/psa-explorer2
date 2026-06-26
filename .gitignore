@@ -1,27 +1,31 @@
-# *.log
+*.log
 # .DS_Store
 # .env
 # .env.backup
 # .env.production
-# .phpactor.json
-# .phpunit.result.cache
+.phpactor.json
+.phpunit.result.cache
 # /.codex
 # /.cursor/
 # /.idea
 # /.nova
 # /.phpunit.cache
-# /.vscode
+/.vscode
 # /.zed
 # /auth.json
-# /node_modules
+/node_modules
 # /public/build
-# /public/fonts-manifest.dev.json
-# /public/hot
+/public/fonts-manifest.dev.json
+/public/hot
 # /public/storage
 # /storage/*.key
 # /storage/pail
-# /vendor
+/vendor
 # _ide_helper.php
 # Homestead.json
 # Homestead.yaml
 # Thumbs.db
+
+# macOS
+.DS_Store
+**/.DS_Store
