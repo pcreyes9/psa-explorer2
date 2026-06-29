@@ -13,7 +13,7 @@
         <div class="flex-1 pt-2">
 
             <h2 class="text-3xl font-bold tracking-tight">
-                {{ strtoupper($record->mem_first_name . ' ' . $record->mem_last_name) }}
+                {{ strtoupper($record->mem_first_name . ' ' .$record->mem_middle_name . ' ' . $record->mem_last_name) }}
             </h2>
 
             <p class="mt-2 text-sm text-gray-500">

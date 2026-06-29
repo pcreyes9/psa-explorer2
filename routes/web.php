@@ -2,6 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Models\Member;
+use App\Http\Controllers\CertificateController;
+
+Route::get(
+    '/certificate/good-standing/{member}',
+    [CertificateController::class, 'cogs']
+)->name('certificate.cogs');
 
 Route::get('/debug-php', function () {
     return [

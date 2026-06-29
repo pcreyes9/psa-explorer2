@@ -109,7 +109,9 @@ class ViewMember extends ViewRecord
             . ' - '
             . $this->record->mem_last_name
             . ', '
-            . $this->record->mem_first_name;
+            . $this->record->mem_first_name
+            . ' '
+            . $this->record->mem_middle_name;
     }
 
     public function getHeading(): string
@@ -128,6 +130,7 @@ class ViewMember extends ViewRecord
                 strtoupper(
                     trim(
                         $this->record->mem_first_name . ' ' .
+                        $this->record->mem_middle_name .
                         $this->record->mem_last_name
                     )
                 )

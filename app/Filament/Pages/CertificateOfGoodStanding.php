@@ -4,6 +4,8 @@ namespace App\Filament\Pages;
 
 use App\Models\Member;
 use Filament\Pages\Page;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Services\CertificateOfGoodStandingService;
 
 class CertificateOfGoodStanding extends Page
 {
@@ -27,6 +29,16 @@ class CertificateOfGoodStanding extends Page
 
     public function generate(): void
     {
-        dd($this->purpose);
+        $this->validate([
+            'purpose' => ['required'],
+        ]);
+        $url = route('certificate.cogs', [
+            'member' => $this->member,
+            'purpose' => $this->purpose,
+        ]);
+
+        $this->js("
+            window.open('{$url}', '_blank');
+        ");
     }
 }
