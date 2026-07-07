@@ -7,6 +7,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
+use Filament\Schemas\Components\View;
 
 class MemberInfolist
 {
@@ -187,29 +188,32 @@ class MemberInfolist
                                     ]),
                             ]),
 
-                        // Tab::make('Ledger')
-                        //     ->icon('heroicon-m-banknotes')
-                        //     ->schema([
-                        //         Section::make('Member Ledger')
-                        //             ->description('Coming soon')
-                        //             ->schema([]),
-                        //     ]),
+                        Tab::make('Membership Dues')
+                            ->icon('heroicon-m-banknotes')
+                            ->schema([
+                                View::make('filament.members.financial.tabs.summary')
+                                    ->viewData(fn ($record) => [
+                                        'record' => $record,
+                                    ]),
+                            ]),
 
-                        // Tab::make('Payments')
-                        //     ->icon('heroicon-m-credit-card')
-                        //     ->schema([
-                        //         Section::make('Payment History')
-                        //             ->description('Coming soon')
-                        //             ->schema([]),
-                        //     ]),
+                        Tab::make('Payments')
+                            ->icon('heroicon-m-credit-card')
+                            ->schema([
+                                View::make('filament.members.financial.tabs.payments')
+                                    ->viewData(fn ($record) => [
+                                    'record' => $record,
+                                ]),
+                            ]),
 
-                        // Tab::make('Balance Summary')
-                        //     ->icon('heroicon-m-calculator')
-                        //     ->schema([
-                        //         Section::make('Balance Summary')
-                        //             ->description('Coming soon')
-                        //             ->schema([]),
-                        //     ]),
+                        Tab::make('Archive History')
+                            ->icon('heroicon-m-archive-box')
+                            ->schema([
+                                View::make('filament.members.financial.tabs.archive')
+                                    ->viewData(fn ($record) => [
+                                    'record' => $record,
+                                ]),
+                            ]),
                     ])
                     ->columnSpanFull(),
             ]);

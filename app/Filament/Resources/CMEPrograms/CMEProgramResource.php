@@ -29,7 +29,7 @@ class CMEProgramResource extends Resource
         return 'CME Programs';
     }
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::AcademicCap;
 
     protected static ?string $recordTitleAttribute = 'cme_title';
 

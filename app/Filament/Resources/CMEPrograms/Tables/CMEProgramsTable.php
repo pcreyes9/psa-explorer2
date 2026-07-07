@@ -28,9 +28,9 @@ class CMEProgramsTable
                     ->label('Year')
                     ->sortable(),
 
-                TextColumn::make('cme_program_type')
-                    ->label('Program Type')
-                    ->searchable(),
+                // TextColumn::make('cme_program_type')
+                //     ->label('Program Type')
+                //     ->searchable(),
 
                 TextColumn::make('cme_title')
                     ->label('Program Title')
@@ -47,9 +47,9 @@ class CMEProgramsTable
                     ->date()
                     ->sortable(),
 
-                IconColumn::make('stat')
-                    ->label('Active')
-                    ->boolean(),
+                // IconColumn::make('stat')
+                //     ->label('Active')
+                //     ->boolean(),
 
             ])
             ->actions([

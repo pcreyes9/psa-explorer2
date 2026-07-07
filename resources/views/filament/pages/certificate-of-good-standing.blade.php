@@ -2,7 +2,7 @@
 
     <x-filament::section heading="Member Information">
 
-        <div class="grid grid-cols-2 gap-6">
+        <div class="grid grid-cols-3 gap-6">
 
             <div>
                 <div class="text-sm text-gray-500">
@@ -11,16 +11,6 @@
 
                 <div class="font-semibold">
                     {{ $this->member->member_id_no }}
-                </div>
-            </div>
-
-            <div>
-                <div class="text-sm text-gray-500">
-                    Membership Status
-                </div>
-
-                <div class="font-semibold">
-                    {{ $this->member->psa_mem_stat }}
                 </div>
             </div>
 
@@ -35,6 +25,18 @@
                     {{ $this->member->mem_middle_name }}
                 </div>
             </div>
+
+            <div>
+                <div class="text-sm text-gray-500">
+                    Membership Status
+                </div>
+
+                <div class="font-semibold">
+                    {{ $this->member->psa_mem_stat }}
+                </div>
+            </div>
+
+
 
             <div>
                 <div class="text-sm text-gray-500">

@@ -4,8 +4,6 @@ namespace App\Filament\Pages;
 
 use App\Models\Member;
 use Filament\Pages\Page;
-use Barryvdh\DomPDF\Facade\Pdf;
-use App\Services\CertificateOfGoodStandingService;
 
 class CertificateOfGoodStanding extends Page
 {

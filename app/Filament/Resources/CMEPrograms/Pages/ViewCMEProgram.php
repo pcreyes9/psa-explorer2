@@ -16,7 +16,7 @@ class ViewCMEProgram extends ViewRecord
 
     public function getTitle(): string
     {
-        return $this->record->cme_program_code;
+        return $this->record->cme_topic;
     }
 
     protected function getHeaderActions(): array

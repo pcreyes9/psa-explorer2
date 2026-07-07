@@ -8,7 +8,7 @@
         {{ $this->infolist }}
     </div>
 
-    @include('filament.members.financial.index', [
+    {{-- @include('filament.members.financial.index', [
         'record' => $this->record,
-    ])
+    ]) --}}
 </x-filament-panels::page>
