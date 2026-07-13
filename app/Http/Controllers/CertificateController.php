@@ -44,7 +44,8 @@ class CertificateController extends Controller
             )
         );
 
-        return $pdf->stream('Certificate of Good Standing.pdf');
+        // return $pdf->stream('Certificate of Good Standing.pdf');
+        return $pdf->download($member->member_id_no . '-COGS.pdf');
     }
 
     private function issueDate(): string
