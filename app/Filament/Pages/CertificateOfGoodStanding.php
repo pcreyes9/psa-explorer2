@@ -35,8 +35,9 @@ class CertificateOfGoodStanding extends Page
             'purpose' => $this->purpose,
         ]);
 
-        $this->js("
-            window.open('{$url}', '_blank');
-        ");
+        // $this->js("
+        //     window.open('{$url}', '_blank');
+        // ");
+        $this->redirect($url, navigate: false);
     }
 }
