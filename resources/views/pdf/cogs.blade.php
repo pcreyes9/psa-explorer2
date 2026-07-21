@@ -112,58 +112,77 @@
             font-weight: bold;
 
         }
-        .signatories {
+        .signature-block {
 
-            margin-top: 55px;
+            position: absolute;
 
-            text-align: center;
+            left: 118mm;
+            top: 212mm;
 
+            width: 150mm;
+
+            z-index: 2;
         }
 
-        .signatories img {
-
-            width: 260px;
-            height: auto;
-
-        }
-
-        .signatory-names {
-
-            margin-top: -15px;
-
-            text-align: center;
-
-        }
-
-        .signatory-name {
-
-            font-weight: bold;
-            font-size: 12pt;
-            line-height: 1.2;
-
-        }
-
-        .signatory-title {
-
-            font-size: 11pt;
-            margin-bottom: 18px;
-
-        }
         .dry-seal {
 
             position: absolute;
 
-            left: 50%;
+            left: 25%;
+            top: 2mm;
 
-            top: 480px;
-
-            /* width: 20px; */
+            width: 60mm;
 
             transform: translateX(-50%);
 
             opacity: .18;
 
             z-index: 1;
+        }
+
+        .signatories {
+
+            position: relative;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: flex-start;
+
+            z-index: 2;
+
+        }
+
+        .signatory {
+
+            width: 45%;
+
+            text-align: center;
+
+        }
+
+        .signatory img {
+
+            width: 100%;
+
+            height: auto;
+
+        }
+
+        .signatory-name {
+
+            margin-top: 5px;
+
+            font-weight: bold;
+
+            font-size: 11pt;
+
+        }
+
+        .signatory-title {
+
+            font-size: 10pt;
 
         }
     </style>
@@ -172,119 +191,123 @@
 
 <body>
 
-<div class="page">
+    <div class="page">
 
-    <img
-        class="background"
-        src="{{ public_path('images/letterhead-2026.png') }}">
+        <img
+            class="background"
+            src="{{ public_path('images/letterhead-2026.png') }}">
 
-    <div class="certificate">
+        <div class="certificate">
 
-        <h1>
-            CERTIFICATION
-        </h1>
+            <h1>
+                CERTIFICATION
+            </h1>
 
-        <div class="space"></div>
+            <div class="space"></div>
 
-        <p>
-            To Whom It May Concern:
-        </p>
+            <p>
+                To Whom It May Concern:
+            </p>
 
-        <div class="space"></div>
-        <div class="space"></div>
+            <div class="space"></div>
+            <div class="space"></div>
 
-        <p>
-            This certifies that <span class="inline-underline">
-                &emsp; {{ $memberName }} &emsp;
-            </span>
+            <p>
+                This certifies that <span class="inline-underline">
+                    &emsp; {{ $memberName }} &emsp;
+                </span>
 
-            is a member of Good Standing for Fiscal Year
+                is a member of Good Standing for Fiscal Year
 
-            <strong>  {{ $fiscalYear }} </strong>
+                <strong>  {{ $fiscalYear }} </strong>
 
-            and is classified as <span class="inline-underline">&emsp; {{ $membershipType }} &emsp;</span>
+                and is classified as <span class="inline-underline">&emsp; {{ $membershipType }} &emsp;</span>
 
 
-            of the Philippine Society of
-            Anesthesiologists, Inc. He/She is also a member of the
-            World Federation of Societies of
-            Anaesthesiologists (WFSA).
-        </p>
+                of the Philippine Society of
+                Anesthesiologists, Inc. He/She is also a member of the
+                World Federation of Societies of
+                Anaesthesiologists (WFSA).
+            </p>
 
-        <div class="space"></div>
+            <div class="space"></div>
 
-        <p>
+            <p>
 
-            This certification is being issued upon the request of
+                This certification is being issued upon the request of
 
-            <span class="inline-underline">
+                <span class="inline-underline">
 
-                &emsp; {{ $requestedBy }} &emsp;
+                    &emsp; {{ $requestedBy }} &emsp;
 
-            </span>
+                </span>
 
-            for
+                for
 
-            <span class="inline-underline">
+                <span class="inline-underline">
 
-                &emsp; {{ $purpose }} &emsp;
+                    &emsp; {{ $purpose }} &emsp;
 
-            </span>.
+                </span>.
 
-        </p>
+            </p>
 
-        <div class="space"></div>
+            <div class="space"></div>
 
-        <p>
+            <p>
 
-            Given this
+                Given this
 
-            <span class="inline-underline">
-                &emsp;
-                {{ $issueDate }}
-                &emsp;
-            </span>
+                <span class="inline-underline">
+                    &emsp;
+                    {{ $issueDate }}
+                    &emsp;
+                </span>
 
-            at Suite 102, PSA Secretariat Office,
-            PMA Building, North Avenue,
-            Quezon City, Philippines.
+                at Suite 102, PSA Secretariat Office,
+                PMA Building, North Avenue,
+                Quezon City, Philippines.
 
-        </p>
+            </p>
 
-        <div class="signatories">
-            <div class="signature-block">
+        </div>
 
-                <img
-                    src="{{ public_path('images/dry_seal.png') }}"
-                    class="dry-seal">
-            </div>
+        <div class="signature-block">
 
-            <div class="signatory">
-                <img
-                    src="{{ public_path('images/morete sig.png') }}"
-                    alt="PSA Signatories">
+            <img
+                src="{{ public_path('images/dry_seal.png') }}"
+                class="dry-seal">
 
-                <div class="signatory-name">
-                    {{ $secretary }}
+            <div class="signatories">
+
+                <div class="signatory">
+
+                    <img
+                        src="{{ public_path('images/morete sig.png') }}">
+
+                    <div class="signatory-name">
+                        {{ $secretary }}
+                    </div>
+
+                    <div class="signatory-title">
+                        Secretary, PSA Inc.
+                    </div>
+
                 </div>
 
-                <div class="signatory-title">
-                    Secretary, PSA Inc.
-                </div>
+                <div class="signatory">
 
-            </div>
+                    <img
+                        src="{{ public_path('images/mayuga sig.png') }}">
 
-            <div class="signatory">
-                <img
-                    src="{{ public_path('images/mayuga sig.png') }}"
-                    alt="PSA Signatories">
+                    <div class="signatory-name">
+                        {{ $president }}
+                    </div>
 
-                <div class="signatory-name">
-                    {{ $president }}
-                </div>
+                    <div class="signatory-title">
+                        President, PSA Inc.
+                    </div>
 
-                <div class="signatory-title">
-                    President, PSA Inc.
                 </div>
 
             </div>
@@ -292,8 +315,6 @@
         </div>
 
     </div>
-
-</div>
 
 </body>
 
