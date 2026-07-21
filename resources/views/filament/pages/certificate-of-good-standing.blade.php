@@ -36,8 +36,6 @@
                 </div>
             </div>
 
-
-
             <div>
                 <div class="text-sm text-gray-500">
                     Membership Type
@@ -67,45 +65,45 @@
         class="">
 
         <div>
-        <label class="block text-sm font-medium mb-2">
-            Purpose
-        </label>
+            <label class="block text-sm font-medium mb-2">
+                Purpose
+            </label>
 
-        <select
-            wire:model.live="purpose"
-            class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800"
-        >
-            <option value="">-- Select Purpose --</option>
+            <select
+                wire:model.live="purpose"
+                class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800"
+            >
+                <option value="">-- Select Purpose --</option>
 
-            <option value="PBA Written Exam">
-                PBA Written Exam
-            </option>
+                <option value="PBA Written Exam">
+                    PBA Written Exam
+                </option>
 
-            <option value="PBA Oral Exam">
-                PBA Oral Exam
-            </option>
+                <option value="PBA Oral Exam">
+                    PBA Oral Exam
+                </option>
 
-            <option value="PhilHealth Purposes">
-                PhilHealth Purposes
-            </option>
+                <option value="PhilHealth Purposes">
+                    PhilHealth Purposes
+                </option>
 
-            <option value="PhilHealth Renewal">
-                PhilHealth Renewal
-            </option>
+                <option value="PhilHealth Renewal">
+                    PhilHealth Renewal
+                </option>
 
-            <option value="PhilHealth Accreditation Renewal">
-                PhilHealth Accreditation Renewal
-            </option>
+                <option value="PhilHealth Accreditation Renewal">
+                    PhilHealth Accreditation Renewal
+                </option>
 
-            <option value="Whatever purpose it may serve her best">
-                Whatever purpose it may serve her best
-            </option>
+                <option value="Whatever purpose it may serve her best">
+                    Whatever purpose it may serve her best
+                </option>
 
-            <option value="Whatever purpose it may serve him best">
-                Whatever purpose it may serve him best
-            </option>
-        </select>
-    </div>
+                <option value="Whatever purpose it may serve him best">
+                    Whatever purpose it may serve him best
+                </option>
+            </select>
+        </div>
 
     </x-filament::section>
 
