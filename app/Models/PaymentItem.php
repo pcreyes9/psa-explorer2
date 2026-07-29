@@ -29,4 +29,13 @@ class PaymentItem extends Model
             'member_id_no'
         );
     }
+
+    public function transactionTypeItem()
+    {
+        return $this->belongsTo(
+            TransactionTypeItem::class,
+            'item_code',
+            'item_code'
+        );
+    }
 }

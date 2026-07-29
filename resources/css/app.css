@@ -7,3 +7,54 @@
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
 }
+
+/*
+|--------------------------------------------------------------------------
+| PSA Explorer Loading Screen
+|--------------------------------------------------------------------------
+*/
+
+.logo-float {
+    animation: logoFloat 2.5s ease-in-out infinite;
+}
+
+@keyframes logoFloat {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.06);
+    }
+}
+
+.loading-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 9999px;
+    background: #2563eb;
+    animation: bounce 1.2s infinite ease-in-out;
+}
+
+.loading-dot:nth-child(2) {
+    animation-delay: .2s;
+}
+
+.loading-dot:nth-child(3) {
+    animation-delay: .4s;
+}
+
+@keyframes bounce {
+    0%,
+    80%,
+    100% {
+        transform: scale(.5);
+        opacity: .4;
+    }
+
+    40% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+}

@@ -11,8 +11,4 @@ class TransactionTypeItem extends Model
     public $timestamps = false;
 
     protected $guarded = [];
-
-    protected $primaryKey = null;
-
-    public $incrementing = false;
 }

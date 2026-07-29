@@ -157,7 +157,7 @@ class NewPayment extends Page implements HasForms, HasActions
             ->modalWidth('7xl')
             ->schema([
                 \Filament\Schemas\Components\View::make(
-                    'filament.payment.transaction-items-modal'
+                    'filament.payments.transaction-items-modal'
                 ),
             ])
             ->action(function () {

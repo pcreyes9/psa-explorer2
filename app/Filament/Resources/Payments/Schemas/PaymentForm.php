@@ -26,11 +26,11 @@ class PaymentForm
                             ->live()
                             ->options(
                                 Member::query()
-                                    ->orderBy('lname')
+                                    ->orderBy('mem_last_name')
                                     ->get()
                                     ->mapWithKeys(fn ($member) => [
                                         $member->member_id_no =>
-                                            "{$member->member_id_no} - {$member->lname}, {$member->fname}",
+                                            "{$member->member_id_no} - {$member->mem_last_name}, {$member->mem_first_name}",
                                     ])
                             ),
 
@@ -43,7 +43,7 @@ class PaymentForm
                                 );
 
                                 return $member
-                                    ? "{$member->lname}, {$member->fname}"
+                                    ? "{$member->mem_last_name}, {$member->mem_first_name}"
                                     : '-';
                             }),
 

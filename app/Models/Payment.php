@@ -35,4 +35,13 @@ class Payment extends Model
             'payment_ref_no'
         );
     }
+
+    public function paymentItems()
+    {
+        return $this->hasMany(
+            PaymentItem::class,
+            'payment_ref_no',
+            'payment_ref_no'
+        );
+    }
 }

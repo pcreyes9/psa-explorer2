@@ -68,7 +68,7 @@ class MemberInfolist
                             ->schema([
 
                                 Section::make('Contact Information')
-                                    ->columns(2)
+                                    ->columns(3)
                                     ->schema([
 
                                         TextEntry::make('mem_mobile_no1')
@@ -81,8 +81,7 @@ class MemberInfolist
 
                                         TextEntry::make('mem_email_address')
                                             ->label('Email Address')
-                                            ->placeholder('-')
-                                            ->columnSpanFull(),
+                                            ->placeholder('-'),
 
                                         TextEntry::make('mem_home_address')
                                             ->label('Home Address')
@@ -188,32 +187,32 @@ class MemberInfolist
                                     ]),
                             ]),
 
-                        Tab::make('Membership Dues')
-                            ->icon('heroicon-m-banknotes')
-                            ->schema([
-                                View::make('filament.members.financial.tabs.summary')
-                                    ->viewData(fn ($record) => [
-                                        'record' => $record,
-                                    ]),
-                            ]),
+                        // Tab::make('Membership Dues')
+                        //     ->icon('heroicon-m-banknotes')
+                        //     ->schema([
+                        //         View::make('filament.members.financial.tabs.summary')
+                        //             ->viewData(fn ($record) => [
+                        //                 'record' => $record,
+                        //             ]),
+                        //     ]),
 
-                        Tab::make('Payments')
-                            ->icon('heroicon-m-credit-card')
-                            ->schema([
-                                View::make('filament.members.financial.tabs.payments')
-                                    ->viewData(fn ($record) => [
-                                    'record' => $record,
-                                ]),
-                            ]),
+                        // Tab::make('Payments')
+                        //     ->icon('heroicon-m-credit-card')
+                        //     ->schema([
+                        //         View::make('filament.members.financial.tabs.payments')
+                        //             ->viewData(fn ($record) => [
+                        //             'record' => $record,
+                        //         ]),
+                        //     ]),
 
-                        Tab::make('Archive History')
-                            ->icon('heroicon-m-archive-box')
-                            ->schema([
-                                View::make('filament.members.financial.tabs.archive')
-                                    ->viewData(fn ($record) => [
-                                    'record' => $record,
-                                ]),
-                            ]),
+                        // Tab::make('Archive History')
+                        //     ->icon('heroicon-m-archive-box')
+                        //     ->schema([
+                        //         View::make('filament.members.financial.tabs.archive')
+                        //             ->viewData(fn ($record) => [
+                        //             'record' => $record,
+                        //         ]),
+                        //     ]),
                     ])
                     ->columnSpanFull(),
             ]);
