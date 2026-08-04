@@ -72,9 +72,10 @@ class AdminPanelProvider extends PanelProvider
             )
 
             ->widgets([
-                // AccountWidget::class,
                 // FilamentInfoWidget::class,
                 \App\Filament\Widgets\DashboardStats::class,
+                \App\Filament\Widgets\AnnualDuesChart::class,
+                // AccountWidget::class,
             ])
 
             ->middleware([

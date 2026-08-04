@@ -70,7 +70,7 @@ class PaymentsTable
                 Action::make('view')
                     // ->hidden()
                     ->modalHeading('Payment Details')
-                    ->modalWidth('5xl')
+                    ->modalWidth('4xl')
                     ->modalSubmitAction(false)
                     ->modalContent(fn (Payment $record) => view(
                         'filament.payments.payment-details', [
