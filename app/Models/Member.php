@@ -108,5 +108,14 @@ class Member extends Model
         );
     }
 
+    public function scopeActiveMembers($query)
+    {
+        return $query
+            ->where('mem_stat', 'Active')
+            ->whereNotIn('mem_last_name', ['Invalid', 'TEST'])
+            ->where('psa_chapter_code', '!=', '-')
+            ->where('psa_mem_type', '!=', 'OT');
+    }
+
 
 }

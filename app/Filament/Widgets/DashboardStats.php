@@ -14,14 +14,30 @@ class DashboardStats extends StatsOverviewWidget
 
             Stat::make(
                 'Total Members',
-                number_format(Member::where('mem_stat', 'Active')
-                ->where('mem_last_name', '!=', 'Invalid')
-                ->where('mem_last_name', '!=', 'TEST')
-                ->where('psa_chapter_code', '!=', '-')
-                ->where('psa_mem_type', '!=', 'OT')
-                ->count())
+                number_format(Member::activeMembers()->count())
             )
                 ->description('Active Members')
+                ->icon('heroicon-o-users'),
+
+            Stat::make(
+                'Total Regular Members',
+                number_format(Member::activeMembers()->where('psa_mem_type', 'RM')->count())
+            )
+                ->description('Total Regular Members')
+                ->icon('heroicon-o-users'),
+
+            Stat::make(
+                'Total Trainee Members',
+                number_format(Member::activeMembers()->where('psa_mem_type', 'TM')->count())
+            )
+                ->description('Total Trainee Members')
+                ->icon('heroicon-o-users'),
+
+            Stat::make(
+                'Total Life Members',
+                number_format(Member::activeMembers()->where('psa_mem_type', 'LM')->count())
+            )
+                ->description('Total Life Members')
                 ->icon('heroicon-o-users'),
 
             // Stat::make(
@@ -57,45 +73,6 @@ class DashboardStats extends StatsOverviewWidget
             // )
             //     ->description('Active Chapters')
             //     ->icon('heroicon-o-building-office-2'),
-
-            Stat::make(
-                'Total Regular Members',
-                number_format(Member::where('mem_stat', 'Active')
-                ->where('mem_last_name', '!=', 'Invalid')
-                ->where('mem_last_name', '!=', 'TEST')
-                ->where('psa_chapter_code', '!=', '-')
-                ->where('mem_stat', '!=', 'OT')
-                ->where('psa_mem_type', '=', 'RM')
-                ->count())
-            )
-                ->description('Total Active Members')
-                ->icon('heroicon-o-users'),
-
-            Stat::make(
-                'Total Trainee Members',
-                number_format(Member::where('mem_stat', 'Active')
-                ->where('mem_last_name', '!=', 'Invalid')
-                ->where('mem_last_name', '!=', 'TEST')
-                ->where('psa_chapter_code', '!=', '-')
-                ->where('mem_stat', '!=', 'OT')
-                ->where('psa_mem_type', '=', 'TM')
-                ->count())
-            )
-                ->description('Total Active Members')
-                ->icon('heroicon-o-users'),
-
-            Stat::make(
-                'Total Life Members',
-                number_format(Member::where('mem_stat', 'Active')
-                ->where('mem_last_name', '!=', 'Invalid')
-                ->where('mem_last_name', '!=', 'TEST')
-                ->where('psa_chapter_code', '!=', '-')
-                ->where('mem_stat', '!=', 'OT')
-                ->where('psa_mem_type', '=', 'LM')
-                ->count())
-            )
-                ->description('Total Active Members')
-                ->icon('heroicon-o-users'),
         ];
     }
 }

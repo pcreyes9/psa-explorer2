@@ -86,6 +86,7 @@
 
                     <x-filament::input
                         wire:model.live="searchValue"
+                        wire:keydown.enter="search"
                         placeholder="{{ $this->searchPlaceholder }}"
                     />
 
@@ -112,7 +113,7 @@
 
             </div>
 
-           
+
 
         </div>
 

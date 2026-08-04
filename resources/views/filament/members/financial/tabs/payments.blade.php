@@ -101,7 +101,7 @@ $payments = $record->payments()
 
         <div
             x-transition.scale
-            class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden"
+            class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden"
         >
 
             <div class="px-6 py-4 border-b flex justify-between items-center">
@@ -119,7 +119,7 @@ $payments = $record->payments()
 
             </div>
 
-            <div class="p-6">
+            <div class="p-6 max-h-[70vh] overflow-y-auto">
 
                 <div class="grid grid-cols-2 gap-4 text-sm">
 
@@ -185,95 +185,101 @@ $payments = $record->payments()
 
                 </h3>
 
-                <table class="w-full border text-sm">
+                <div class="max-h-80 overflow-y-auto border rounded-lg">
 
-                    <thead class="bg-gray-100">
+                    <table class="w-full border text-sm">
 
-                        <tr>
+                        <thead class="sticky top-0 bg-gray-100 z-10">
 
-                            <th class="text-left p-3">
-                                Description
-                            </th>
+                            <tr>
 
-                            <th class="text-center p-3">
-                                Fiscal Year
-                            </th>
+                                <th class="text-left p-3">
+                                    Description
+                                </th>
 
-                            <th class="text-right p-3">
-                                Amount
-                            </th>
+                                <th class="text-center p-3">
+                                    Fiscal Year
+                                </th>
 
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        <template
-                            x-for="item in payment.payment_items"
-                            :key="item.item_code"
-                        >
-
-                            <tr class="border-t">
-
-                                <td class="p-3">
-
-                                    <span
-                                        x-text="item.transaction_type_item.item_details"
-                                    ></span>
-
-                                </td>
-
-                                <td class="p-3 text-center">
-
-                                    <span
-                                        x-text="item.transaction_type_item.fiscal_year"
-                                    ></span>
-
-                                </td>
-
-                                <td class="p-3 text-right">
-
-                                    <span
-                                        x-text="'₱' + Number(item.amount_due).toLocaleString(undefined,{
-                                            minimumFractionDigits:2,
-                                            maximumFractionDigits:2
-                                        })"
-                                    ></span>
-
-                                </td>
+                                <th class="text-right p-3">
+                                    Amount
+                                </th>
 
                             </tr>
 
-                        </template>
+                        </thead>
 
-                    </tbody>
+                        <tbody>
 
-                    <tfoot>
+                            <template
+                                x-for="item in payment.payment_items"
+                                :key="item.item_code"
+                            >
 
-                        <tr class="border-t bg-gray-50 font-bold">
+                                <tr class="border-t">
 
-                            <td class="p-3">
-                                TOTAL
-                            </td>
+                                    <td class="p-3">
 
-                            <td class="p-3">
-                                
-                            </td>
+                                        <span
+                                            x-text="item.transaction_type_item.item_details"
+                                        ></span>
 
-                            <td
-                                class="p-3 text-right"
-                                x-text="'₱' + Number(payment.payment_total_amt).toLocaleString(undefined,{
-                                    minimumFractionDigits:2,
-                                    maximumFractionDigits:2
-                                })"
-                            ></td>
+                                    </td>
 
-                        </tr>
+                                    <td class="p-3 text-center">
 
-                    </tfoot>
+                                        <span
+                                            x-text="item.transaction_type_item.fiscal_year"
+                                        ></span>
 
-                </table>
+                                    </td>
+
+                                    <td class="p-3 text-right">
+
+                                        <span
+                                            x-text="'₱' + Number(item.amount_due).toLocaleString(undefined,{
+                                                minimumFractionDigits:2,
+                                                maximumFractionDigits:2
+                                            })"
+                                        ></span>
+
+                                    </td>
+
+                                </tr>
+
+                            </template>
+
+                        </tbody>
+
+                        <tfoot>
+
+                            <tr class="border-t bg-gray-50 font-bold">
+
+                                <td class="p-3">
+                                    TOTAL
+                                </td>
+
+                                <td class="p-3">
+
+                                </td>
+
+                                <td
+                                    class="p-3 text-right"
+                                    x-text="'₱' + Number(payment.payment_total_amt).toLocaleString(undefined,{
+                                        minimumFractionDigits:2,
+                                        maximumFractionDigits:2
+                                    })"
+                                ></td>
+
+                            </tr>
+
+                        </tfoot>
+
+                    </table>
+
+                </div>
+
+
 
                 <div class="mt-6">
 
