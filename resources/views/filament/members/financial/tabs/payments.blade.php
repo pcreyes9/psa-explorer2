@@ -1,8 +1,8 @@
 @php
-$payments = $record->payments()
-    ->with('paymentItems.transactionTypeItem')
-    ->orderByDesc('payment_date')
-    ->get();
+    $payments = $record->payments()
+        ->with('paymentItems.transactionTypeItem')
+        ->orderByDesc('payment_date')
+        ->get();
 @endphp
 
 <div
@@ -11,6 +11,28 @@ $payments = $record->payments()
         payment: null
     }"
 >
+
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f3f4f6;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #9ca3af;
+            border-radius: 8px;
+            border: 2px solid #f3f4f6;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background-color: #6b7280;
+        }
+        .custom-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: #9ca3af #f3f4f6;
+        }
+    </style>
 
     <div class="overflow-x-auto">
 
@@ -101,7 +123,7 @@ $payments = $record->payments()
 
         <div
             x-transition.scale
-            class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden"
+            class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl h-[85vh] flex flex-col overflow-hidden"
         >
 
             <div class="px-6 py-4 border-b flex justify-between items-center">
@@ -119,7 +141,7 @@ $payments = $record->payments()
 
             </div>
 
-            <div class="p-6 max-h-[70vh] overflow-y-auto">
+            <div class="flex-1 overflow-y-auto p-6 custom-scrollbar">
 
                 <div class="grid grid-cols-2 gap-4 text-sm">
 
@@ -185,7 +207,7 @@ $payments = $record->payments()
 
                 </h3>
 
-                <div class="max-h-80 overflow-y-auto border rounded-lg">
+                <div class="max-h-80 overflow-y-auto border rounded-lg custom-scrollbar">
 
                     <table class="w-full border text-sm">
 
@@ -278,8 +300,6 @@ $payments = $record->payments()
                     </table>
 
                 </div>
-
-
 
                 <div class="mt-6">
 

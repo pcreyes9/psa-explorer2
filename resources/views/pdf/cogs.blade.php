@@ -107,7 +107,7 @@
 
             border-bottom: 1px solid #000;
 
-            padding: 0 30px 0 30px;
+            padding: 0 5px 0 5px;
 
             font-weight: bold;
 
