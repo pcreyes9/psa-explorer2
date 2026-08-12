@@ -34,7 +34,9 @@ class AdminPanelProvider extends PanelProvider
                 'Payments',
                 'Continuing Medical Education',
                 'Reports',
+                'Printing',
                 'Administration',
+                
             ])
             ->id('admin')
             ->path('admin')

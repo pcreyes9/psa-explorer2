@@ -3,6 +3,17 @@
 use Illuminate\Support\Facades\Route;
 use App\Models\Member;
 use App\Http\Controllers\CertificateController;
+use App\Http\Controllers\CashVoucherController;
+
+Route::get(
+    '/cash-vouchers/{cashVoucher}/pdf',
+    [CashVoucherController::class, 'voucherPdf']
+)->name('cash-voucher.pdf');
+
+Route::get(
+    '/cash-vouchers/{cashVoucher}/check',
+    [CashVoucherController::class, 'checkPdf']
+)->name('cash-voucher.check');
 
 Route::get(
     '/certificate/good-standing/{member}',
