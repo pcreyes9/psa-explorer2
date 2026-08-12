@@ -11,6 +11,12 @@ class CashVoucherController extends Controller
     {
         $cashVoucher->load('items');
 
+        // dd(auth()->id());
+        $cashVoucher->update([
+            'printed_at' => now(),
+            'printed_by' => auth()->id(),
+        ]);
+
         $items = $cashVoucher->items
             ->map(function ($item) {
                 return [

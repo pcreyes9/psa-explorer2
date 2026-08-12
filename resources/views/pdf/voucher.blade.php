@@ -91,17 +91,16 @@
 
         .item-amount {
             position: absolute;
-
             right: 0;
-
             width: 1.25in;
-
             line-height: 0.20in;
+
             text-align: right;
-
             font-weight: normal;
-
             font-family: 'DejaVu Sans', sans-serif;
+
+            border-bottom: 1px solid #000;
+            padding-bottom: 2px;
         }
 
         .total {
@@ -207,12 +206,19 @@
 
                 $charactersPerLine = 55;
 
-                $lineCount = max(
-                    1,
-                    (int) ceil(
-                        mb_strlen($description) / $charactersPerLine
-                    )
-                );
+                $paragraphs = preg_split("/\r\n|\n|\r/", $description);
+
+                $lineCount = 0;
+
+                foreach ($paragraphs as $line) {
+
+                    $lineCount += max(
+                        1,
+                        (int) ceil(
+                            mb_strlen($line) / $charactersPerLine
+                        )
+                    );
+                }
 
                 /*
                 |--------------------------------------------------------------------------
@@ -249,7 +255,7 @@
             >
 
                 <div class="item-description">
-                    {{ $description }}
+                    {!! nl2br(e($item['description'])) !!}
                 </div>
 
                 <div

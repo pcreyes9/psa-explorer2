@@ -5,36 +5,26 @@ namespace App\Filament\Resources\CashVouchers;
 use App\Filament\Resources\CashVouchers\Pages\CreateCashVoucher;
 use App\Filament\Resources\CashVouchers\Pages\EditCashVoucher;
 use App\Filament\Resources\CashVouchers\Pages\ListCashVouchers;
-use App\Filament\Resources\CashVouchers\Schemas\CashVoucherForm;
-use App\Filament\Resources\CashVouchers\Tables\CashVouchersTable;
-use Filament\Support\Icons\Heroicon;
-
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
-
-use App\Filament\Resources\CashVoucherResource\Pages;
 use App\Models\CashVoucher;
-
 use BackedEnum;
-use UnitEnum;
-
 use Filament\Resources\Resource;
-
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-
 use Filament\Tables;
 use Filament\Tables\Table;
-
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
+use Filament\Forms\Components\Textarea;
+
 class CashVoucherResource extends Resource
 {
     protected static ?string $model = CashVoucher::class;
@@ -61,10 +51,36 @@ class CashVoucherResource extends Resource
                 */
 
                 Section::make('Voucher Information')
+                    ->columnSpanFull()
                     ->schema([
 
                         TextInput::make('voucher_no')
                             ->label('Voucher No.')
+                            ->default(function () {
+
+                                $lastVoucher = \App\Models\CashVoucher::query()
+                                    ->orderByDesc('id')
+                                    ->first();
+
+                                return $lastVoucher
+                                    ? ((int) $lastVoucher->voucher_no + 1)
+                                    : 1;
+                            })
+                            ->required()
+                            ->maxLength(100),
+
+                        TextInput::make('check_no')
+                            ->label('Check No.')
+                            ->default(function () {
+
+                                $lastVoucher = \App\Models\CashVoucher::query()
+                                    ->orderByDesc('id')
+                                    ->first();
+
+                                return $lastVoucher
+                                    ? ((int) $lastVoucher->check_no + 1)
+                                    : 1;
+                            })
                             ->required()
                             ->maxLength(100),
 
@@ -72,25 +88,6 @@ class CashVoucherResource extends Resource
                             ->label('Date')
                             ->required()
                             ->default(now()),
-
-                        TextInput::make('pay_to')
-                            ->label('Pay To')
-                            ->required()
-                            ->maxLength(255),
-
-                        TextInput::make('address')
-                            ->label('Address')
-                            ->maxLength(255),
-
-                        TextInput::make('check_no')
-                            ->label('Check No.')
-                            ->maxLength(100),
-
-                    ])
-                    ->columns(2),
-
-                Section::make('Signatories')
-                    ->schema([
 
                         TextInput::make('approved_by')
                             ->label('Approved By')
@@ -106,8 +103,40 @@ class CashVoucherResource extends Resource
                             ->label('Received By')
                             ->maxLength(255),
 
+                        TextInput::make('pay_to')
+                            ->label('Pay To')
+                            ->required()
+                            ->maxLength(255)
+                            ->columnSpan(3),
+
+                        TextInput::make('address')
+                            ->label('Address')
+                            ->maxLength(255)
+                            ->columnSpan(3),
+
+
                     ])
-                    ->columns(3),
+                    ->columns(6),
+
+                // Section::make('Signatories')
+                //     ->schema([
+
+                //         TextInput::make('approved_by')
+                //             ->label('Approved By')
+                //             ->default('FB MAYUGA, MD')
+                //             ->maxLength(255),
+
+                //         TextInput::make('checked_by')
+                //             ->label('Checked By')
+                //             ->default('CS LUNAS, MD')
+                //             ->maxLength(255),
+
+                //         TextInput::make('received_by')
+                //             ->label('Received By')
+                //             ->maxLength(255),
+
+                //     ])
+                //     ->columns(3),
 
 
                 /*
@@ -120,6 +149,7 @@ class CashVoucherResource extends Resource
                     ->description(
                         'Add the items included in this disbursement voucher.'
                     )
+                    ->columnSpanFull()
                     ->schema([
 
                         Repeater::make('items')
@@ -138,12 +168,22 @@ class CashVoucherResource extends Resource
 
                                 $set('total_amount', $total);
                             })
+
+                            // Prevent adding another item if an existing one is incomplete
+                            ->addable(fn (Get $get) => collect($get('items') ?? [])
+                                ->every(fn ($item) =>
+                                    filled(trim($item['description'] ?? ''))
+                                    && filled($item['amount'] ?? null)
+                                )
+                            )
+
                             ->schema([
 
-                                TextInput::make('description')
+                                Textarea::make('description')
                                     ->label('Description')
                                     ->required()
-                                    ->maxLength(500)
+                                    ->rows(2)
+                                    ->autosize()
                                     ->columnSpan(2),
 
                                 TextInput::make('amount')
@@ -156,13 +196,32 @@ class CashVoucherResource extends Resource
                             ])
                             ->columns(3)
                             ->defaultItems(1)
-                            ->addActionLabel('Add Item')
+                            ->addActionLabel('Add Voucher Item')
+
+                            ->addAction(fn ($action) =>
+
+                                $action
+                                    ->label('Add Voucher Item')
+                                    ->icon('heroicon-o-plus-circle')
+                                    ->color('info')
+                                    ->outlined()
+                                    ->extraAttributes([
+                                        'style' => 'height:35px; min-width:220px;',
+                                    ])
+
+                            )
+
                             ->reorderable()
+                            ->reorderableWithDragAndDrop()
+                            ->reorderableWithButtons()
                             ->collapsible()
                             ->cloneable()
+
                             ->itemLabel(
                                 fn (array $state): ?string =>
-                                    $state['description'] ?? 'Voucher Item'
+                                    filled($state['description'] ?? null)
+                                        ? \Illuminate\Support\Str::limit($state['description'], 50)
+                                        : 'Voucher Item'
                             ),
 
                         TextInput::make('total_amount')
@@ -200,7 +259,7 @@ class CashVoucherResource extends Resource
                 |--------------------------------------------------------------------------
                 */
 
-                
+
 
             ]);
     }
@@ -245,6 +304,24 @@ class CashVoucherResource extends Resource
                 Tables\Columns\TextColumn::make('items_count')
                     ->label('Items')
                     ->counts('items'),
+
+                Tables\Columns\TextColumn::make('printed_at')
+                    ->label('Status')
+                    ->badge()
+                    ->searchable()
+                    ->formatStateUsing(fn ($record) =>
+                        $record->printed_at ? 'Printed' : 'Not Printed'
+                    )
+                    ->color(fn ($record) =>
+                        $record->printed_at ? 'success' : 'gray'
+                    )
+                    ->tooltip(fn ($record) =>
+                        $record->printed_at
+                            ?   $record->printed_at->format('M d, Y')
+                                . ' | '
+                                . ($record->printer?->username ?? 'Unknown')
+                            : 'Not Printed'
+                    ),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Created')

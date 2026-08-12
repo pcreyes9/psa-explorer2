@@ -26,7 +26,7 @@ class PaymentSearch extends Page implements HasTable
 
     public static function getNavigationLabel(): string
     {
-        return 'Payment History';
+        return 'Payment Search';
     }
 
     public static function getNavigationGroup(): ?string

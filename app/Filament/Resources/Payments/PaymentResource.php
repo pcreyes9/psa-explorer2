@@ -58,12 +58,12 @@ class PaymentResource extends Resource
         ];
     }
 
-    public static function getNavigationLabel(): string
-    {
-        return 'Payment History';
-    }
-    public static function getNavigationGroup(): ?string
-    {
-        return 'Payments';
-    }
+    // public static function getNavigationLabel(): string
+    // {
+    //     return 'Payment History';
+    // }
+    // public static function getNavigationGroup(): ?string
+    // {
+    //     return 'Payments';
+    // }
 }

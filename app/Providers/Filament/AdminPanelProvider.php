@@ -36,7 +36,7 @@ class AdminPanelProvider extends PanelProvider
                 'Reports',
                 'Printing',
                 'Administration',
-                
+
             ])
             ->id('admin')
             ->path('admin')
@@ -95,9 +95,9 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-            
+
             ->globalSearch(false)
-            
+
             ->renderHook(
                 PanelsRenderHook::BODY_END,
                 fn () => Blade::render('<x-loading-overlay />'),
