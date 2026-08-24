@@ -1,136 +1,180 @@
-@php
-    $balances = $record->ledgerBalances()
-    ->orderByDesc('fiscal_year')
-    ->get();
-@endphp
-
 <div class="overflow-x-auto">
 
-    <table class="w-full text-sm border border-gray-200 dark:border-gray-700">
+    @if ($balances === null)
 
-        <thead class="bg-gray-100 dark:bg-gray-800">
+        <div class="p-8 text-center text-gray-500">
+            Loading membership dues...
+        </div>
 
-            <tr>
+    @else
 
-                <th class="p-3 text-left">
-                    Fiscal Year
-                </th>
+        <table
+            class="w-full text-sm
+                   border border-gray-200
+                   dark:border-gray-700"
+        >
 
-                <th class="p-3 text-left">
-                    Description
-                </th>
+            <thead
+                class="bg-gray-100 dark:bg-gray-800"
+            >
 
-                <th class="p-3 text-right">
-                    Debit
-                </th>
+                <tr>
 
-                <th class="p-3 text-right">
-                    Credit
-                </th>
+                    <th class="p-3 text-left">
+                        Fiscal Year
+                    </th>
 
-                <th class="p-3 text-right">
-                    Balance
-                </th>
+                    <th class="p-3 text-left">
+                        Description
+                    </th>
 
-                <th class="p-3 text-center">
-                    Status
-                </th>
+                    <th class="p-3 text-right">
+                        Debit
+                    </th>
 
-            </tr>
+                    <th class="p-3 text-right">
+                        Credit
+                    </th>
 
-        </thead>
+                    <th class="p-3 text-right">
+                        Balance
+                    </th>
 
-        <tbody>
-
-            @foreach ($balances as $balance)
-
-                <tr class="border-t border-gray-200 dark:border-gray-700">
-
-                    <td class="p-3 font-medium">
-                        {{ $balance->fiscal_year }}
-                    </td>
-
-                    <td class="p-3">
-                        {{ $balance->tran_desc }}
-                    </td>
-
-                    <td class="p-3 text-right">
-                        ₱{{ number_format($balance->dbit, 2) }}
-                    </td>
-
-                    <td class="p-3 text-right">
-                        ₱{{ number_format($balance->cbit, 2) }}
-                    </td>
-
-                    <td class="p-3 text-right font-semibold">
-                        ₱{{ number_format($balance->bal, 2) }}
-                    </td>
-
-                    <td class="p-3 text-center">
-
-                        @if ($balance->bal > 0)
-
-                            <span class="font-semibold text-red-600">
-                                Outstanding
-                            </span>
-
-                        @else
-
-                            <span class="font-semibold text-green-600">
-                                Paid
-                            </span>
-
-                        @endif
-
-                    </td>
+                    <th class="p-3 text-center">
+                        Status
+                    </th>
 
                 </tr>
 
-            @endforeach
+            </thead>
 
-        </tbody>
 
-        <tfoot>
+            <tbody>
 
-            <tr class="border-t bg-green-50 dark:bg-green-900/20 font-semibold">
+                @forelse ($balances as $balance)
 
-                <td colspan="2" class="p-3">
-                    Totals
-                </td>
+                    <tr
+                        class="border-t
+                               border-gray-200
+                               dark:border-gray-700"
+                    >
 
-                <td class="p-3 text-right">
-                    ₱{{ number_format($balances->sum('dbit'), 2) }}
-                </td>
+                        <td class="p-3 font-medium">
+                            {{ $balance->fiscal_year }}
+                        </td>
 
-                <td class="p-3 text-right">
-                    ₱{{ number_format($balances->sum('cbit'), 2) }}
-                </td>
+                        <td class="p-3">
+                            {{ $balance->tran_desc }}
+                        </td>
 
-                <td class="p-3 text-right">
-                    ₱{{ number_format($balances->sum('bal'), 2) }}
-                </td>
+                        <td class="p-3 text-right">
+                            ₱{{ number_format($balance->dbit, 2) }}
+                        </td>
 
-                <td class="p-3 text-center">
+                        <td class="p-3 text-right">
+                            ₱{{ number_format($balance->cbit, 2) }}
+                        </td>
 
-                    @if ($balances->sum('bal') > 0)
+                        <td class="p-3 text-right font-semibold">
+                            ₱{{ number_format($balance->bal, 2) }}
+                        </td>
 
-                        <span class="font-semibold text-red-600">
-                            With Balance
-                        </span>
+                        <td class="p-3 text-center">
 
-                    @else
+                            @if ($balance->bal > 0)
 
-                        <span class="font-semibold text-green-600">
-                            Fully Paid
-                        </span>
+                                <span class="font-semibold text-red-600">
+                                    Outstanding
+                                </span>
 
-                    @endif
+                            @else
 
-                </td>
+                                <span class="font-semibold text-green-600">
+                                    Paid
+                                </span>
 
-            </tr>
+                            @endif
 
-        </tfoot>
+                        </td>
 
-    </table>
+                    </tr>
+
+                @empty
+
+                    <tr>
+
+                        <td
+                            colspan="6"
+                            class="p-8 text-center text-gray-500"
+                        >
+
+                            No membership dues found.
+
+                        </td>
+
+                    </tr>
+
+                @endforelse
+
+            </tbody>
+
+
+            @if ($balances->isNotEmpty())
+
+                <tfoot>
+
+                    <tr
+                        class="border-t
+                               bg-green-50
+                               dark:bg-green-900/20
+                               font-semibold"
+                    >
+
+                        <td
+                            colspan="2"
+                            class="p-3"
+                        >
+                            Totals
+                        </td>
+
+                        <td class="p-3 text-right">
+                            ₱{{ number_format($balances->sum('dbit'), 2) }}
+                        </td>
+
+                        <td class="p-3 text-right">
+                            ₱{{ number_format($balances->sum('cbit'), 2) }}
+                        </td>
+
+                        <td class="p-3 text-right">
+                            ₱{{ number_format($balances->sum('bal'), 2) }}
+                        </td>
+
+                        <td class="p-3 text-center">
+
+                            @if ($balances->sum('bal') > 0)
+
+                                <span class="font-semibold text-red-600">
+                                    With Balance
+                                </span>
+
+                            @else
+
+                                <span class="font-semibold text-green-600">
+                                    Fully Paid
+                                </span>
+
+                            @endif
+
+                        </td>
+
+                    </tr>
+
+                </tfoot>
+
+            @endif
+
+        </table>
+
+    @endif
+
 </div>

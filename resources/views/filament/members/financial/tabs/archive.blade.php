@@ -1,10 +1,5 @@
-@php
-    $archives = $record->archivedPayments()
-        ->orderByDesc('payment_date')
-        ->get();
-@endphp
-
 <div class="overflow-x-auto">
+    
 
     <table class="w-full text-sm border border-gray-200 dark:border-gray-700">
 
@@ -88,6 +83,28 @@
             @endforelse
 
         </tbody>
+
+        @if ($archives->isNotEmpty())
+
+            <tfoot>
+
+                <tr class="border-t bg-gray-50 dark:bg-gray-800 font-semibold">
+
+                    <td colspan="3" class="p-3">
+                        Total
+                    </td>
+
+                    <td class="p-3 text-right">
+                        ₱{{ number_format($archives->sum('payment_total_amt'), 2) }}
+                    </td>
+
+                    <td colspan="2"></td>
+
+                </tr>
+
+            </tfoot>
+
+        @endif
 
     </table>
 

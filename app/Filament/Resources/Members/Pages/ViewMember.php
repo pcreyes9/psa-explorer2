@@ -3,20 +3,100 @@
 namespace App\Filament\Resources\Members\Pages;
 
 use App\Filament\Resources\Members\MemberResource;
+use App\Models\MemberLedgerBalance;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\EditAction;
+use Filament\Actions\FileUpload;
+use Filament\Forms\Components\FileUpload as FormFileUpload;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Support\Facades\DB;
-use Filament\Notifications\Notification;
-use Filament\Actions\Action;
-use Filament\Forms\Components\FileUpload;
 use Illuminate\Support\Facades\Storage;
-use Filament\Actions\ActionGroup;
 
 class ViewMember extends ViewRecord
 {
     protected static string $resource = MemberResource::class;
 
     protected string $view = 'filament.members.view-member';
+
+    /*
+    |--------------------------------------------------------------------------
+    | Financial Records
+    |--------------------------------------------------------------------------
+    */
+
+    public bool $financialRecordsLoaded = false;
+
+    public $financialPayments = [];
+
+    public $financialArchives = [];
+
+    public $financialBalances = [];
+
+    /**
+     * Load financial records only when requested.
+     */
+    public function loadFinancialRecords(): void
+    {
+        $memberId = $this->record->member_id_no;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Payments
+        |--------------------------------------------------------------------------
+        */
+
+        $this->financialPayments = $this->record
+            ->payments()
+            ->with('paymentItems.transactionTypeItem')
+            ->orderByDesc('payment_date')
+            ->get();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Archived Payments
+        |--------------------------------------------------------------------------
+        */
+
+        $this->financialArchives = $this->record
+            ->archivedPayments()
+            ->orderByDesc('payment_date')
+            ->get();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Ledger Balances
+        |--------------------------------------------------------------------------
+        |
+        | Do NOT eager-load this relationship.
+        |
+        | member_ledger_bal does not have a normal Eloquent primary key,
+        | so querying it directly prevents Laravel from generating:
+        |
+        | [member_ledger_bal].[]
+        |
+        */
+
+        $this->financialBalances = MemberLedgerBalance::query()
+            ->where('member_id_no', $memberId)
+            ->orderByDesc('fiscal_year')
+            ->get();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Mark Financial Records as Loaded
+        |--------------------------------------------------------------------------
+        */
+
+        $this->financialRecordsLoaded = true;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Header Actions
+    |--------------------------------------------------------------------------
+    */
 
     protected function getHeaderActions(): array
     {
@@ -26,7 +106,6 @@ class ViewMember extends ViewRecord
                 ->label('Certificate of Good Standing')
                 ->icon('heroicon-o-document-text')
                 ->color('warning')
-                // ->visible(fn () => auth()->user()->can('member_print_cogs'))
                 ->url(fn () =>
                     \App\Filament\Pages\CertificateOfGoodStanding::getUrl([
                         'member' => $this->record->member_id_no,
@@ -35,18 +114,29 @@ class ViewMember extends ViewRecord
 
             ActionGroup::make([
 
-                EditAction::make()->color('gray')->visible(fn () => auth()->user()?->can('members_edit')),
+                EditAction::make()
+                    ->color('gray')
+                    ->visible(
+                        fn () =>
+                            auth()->user()?->can('members_edit')
+                    ),
 
-                Action::make('updatePhoto')->visible(fn () => auth()->user()?->can('members_edit'))
+                Action::make('updatePhoto')
                     ->label('Update Photo')
                     ->icon('heroicon-o-camera')
                     ->color('gray')
+                    ->visible(
+                        fn () =>
+                            auth()->user()?->can('members_edit')
+                    )
                     ->form([
-                        FileUpload::make('photo')
+
+                        FormFileUpload::make('photo')
                             ->image()
                             ->required()
                             ->disk('local')
                             ->directory('temp/member-photos'),
+
                     ])
                     ->action(function (array $data): void {
 
@@ -80,29 +170,38 @@ class ViewMember extends ViewRecord
                             ->title('Photo updated successfully')
                             ->success()
                             ->send();
-
                     }),
 
-                Action::make('payDues')->visible(fn () => auth()->user()?->can('members_edit'))
+                Action::make('payDues')
                     ->label('Payment')
                     ->icon('heroicon-o-banknotes')
                     ->color('gray')
+                    ->visible(
+                        fn () =>
+                            auth()->user()?->can('members_edit')
+                    )
                     ->url(
-                        fn () => url(
-                            '/admin/new-payment?member=' .
-                            $this->record->member_id_no
-                        )
+                        fn () =>
+                            url(
+                                '/admin/new-payment?member=' .
+                                $this->record->member_id_no
+                            )
                     ),
 
-                Action::make('soa')->visible(fn () => auth()->user()?->can('members_edit'))
+                Action::make('soa')
                     ->label('Statement of Account')
                     ->icon('heroicon-o-presentation-chart-line')
                     ->color('gray')
+                    ->visible(
+                        fn () =>
+                            auth()->user()?->can('members_edit')
+                    )
                     ->url(
-                        fn () => url(
-                            '/admin/new-payment?member=' .
-                            $this->record->member_id_no
-                        )
+                        fn () =>
+                            url(
+                                '/admin/new-payment?member=' .
+                                $this->record->member_id_no
+                            )
                     ),
 
             ])
@@ -110,9 +209,14 @@ class ViewMember extends ViewRecord
                 ->color('gray')
                 ->icon('heroicon-o-ellipsis-vertical')
                 ->button(),
-
         ];
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Page Title
+    |--------------------------------------------------------------------------
+    */
 
     public function getTitle(): string
     {
@@ -130,6 +234,12 @@ class ViewMember extends ViewRecord
         return '';
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Breadcrumbs
+    |--------------------------------------------------------------------------
+    */
+
     public function getBreadcrumbs(): array
     {
         return [
@@ -141,13 +251,20 @@ class ViewMember extends ViewRecord
                 strtoupper(
                     trim(
                         $this->record->mem_first_name . ' ' .
-                        $this->record->mem_middle_name .
+                        $this->record->mem_middle_name . ' ' .
                         $this->record->mem_last_name
                     )
                 )
             ),
         ];
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Navigation
+    |--------------------------------------------------------------------------
+    */
+
     public static function getNavigationItem(): ?string
     {
         return \App\Filament\Pages\MemberSearch::class;
