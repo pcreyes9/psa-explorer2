@@ -1,12 +1,15 @@
 <x-filament-panels::page>
 
-    <div class="grid grid-cols-2 gap-6">    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        {{-- Member Information --}}
         <x-filament::section heading="Member Information">
 
-            <div class="grid grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
+                {{-- Member ID --}}
                 <div>
-                    <div class="text-sm text-gray-500">
+                    <div class="text-sm text-gray-500 dark:text-gray-400">
                         Member ID
                     </div>
 
@@ -15,8 +18,9 @@
                     </div>
                 </div>
 
+                {{-- Member Name --}}
                 <div>
-                    <div class="text-sm text-gray-500">
+                    <div class="text-sm text-gray-500 dark:text-gray-400">
                         Member Name
                     </div>
 
@@ -27,8 +31,9 @@
                     </div>
                 </div>
 
+                {{-- Membership Status --}}
                 <div>
-                    <div class="text-sm text-gray-500">
+                    <div class="text-sm text-gray-500 dark:text-gray-400">
                         Membership Status
                     </div>
 
@@ -37,23 +42,25 @@
                     </div>
                 </div>
 
+                {{-- Membership Type --}}
                 <div>
-                    <div class="text-sm text-gray-500">
+                    <div class="text-sm text-gray-500 dark:text-gray-400">
                         Membership Type
                     </div>
 
                     <div class="font-semibold">
-                        {{ $this->member->membershipType?->Memtype }}
+                        {{ $this->member->membershipType?->Memtype ?? '-' }}
                     </div>
                 </div>
 
-                <div class="col-span-2">
-                    <div class="text-sm text-gray-500">
+                {{-- Chapter --}}
+                <div class="col-span-1 sm:col-span-2">
+                    <div class="text-sm text-gray-500 dark:text-gray-400">
                         Chapter
                     </div>
 
                     <div class="font-semibold">
-                        {{ $this->member->chapter?->psa_chapter_desc }}
+                        {{ $this->member->chapter?->psa_chapter_desc ?? '-' }}
                     </div>
                 </div>
 
@@ -61,20 +68,29 @@
 
         </x-filament::section>
 
-        <x-filament::section
-            heading="Certificate Details"
-            class="">
 
+        {{-- Certificate Details --}}
+        <x-filament::section heading="Certificate Details">
+
+            {{-- Purpose --}}
             <div>
-                <label class="block text-sm font-medium mb-2">
+
+                <label
+                    for="purpose"
+                    class="block text-sm font-medium mb-2"
+                >
                     Purpose
                 </label>
 
                 <select
+                    id="purpose"
                     wire:model.live="purpose"
                     class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800"
                 >
-                    <option value="">-- Select Purpose --</option>
+
+                    <option value="">
+                        -- Select Purpose --
+                    </option>
 
                     <option value="PBA Written Exam">
                         PBA Written Exam
@@ -103,23 +119,79 @@
                     <option value="Whatever purpose it may serve him best">
                         Whatever purpose it may serve him best
                     </option>
+
+                    <option value="custom">
+                        Custom Purpose
+                    </option>
+
                 </select>
+
+                @error('purpose')
+                    <p class="mt-1 text-sm text-danger-600">
+                        {{ $message }}
+                    </p>
+                @enderror
+
             </div>
 
+
+            {{-- Custom Purpose --}}
+            @if ($purpose === 'custom')
+
+                <div class="mt-5">
+
+                    {{-- <label
+                        for="customPurpose"
+                        class="block text-sm font-medium mb-2"
+                    >
+                        Custom Purpose
+                    </label> --}}
+
+                    <textarea
+                        id="customPurpose"
+                        wire:model.live="customPurpose"
+                        rows="4"
+                        maxlength="500"
+                        placeholder="Enter the purpose of the certificate..."
+                        class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800"
+                    ></textarea>
+
+                    @error('customPurpose')
+                        <p class="mt-1 text-sm text-danger-600">
+                            {{ $message }}
+                        </p>
+                    @enderror
+
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        Maximum 500 characters.
+                    </p>
+
+                </div>
+
+            @endif
+
+
+            {{-- Generate Button --}}
             <div class="mt-6">
 
                 <x-filament::button
                     color="success"
-                    wire:click="generate">
+                    wire:click="generate"
+                    wire:loading.attr="disabled"
+                >
+                    <span wire:loading.remove wire:target="generate">
+                        Generate Certificate
+                    </span>
 
-                    Generate Certificate
-
+                    <span wire:loading wire:target="generate">
+                        Generating...
+                    </span>
                 </x-filament::button>
 
             </div>
 
         </x-filament::section>
-    </div>
 
+    </div>
 
 </x-filament-panels::page>

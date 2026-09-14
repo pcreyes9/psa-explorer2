@@ -187,6 +187,23 @@ class MemberInfolist
                                     ]),
                             ]),
 
+                        Tab::make('CME Records')
+                            ->icon('heroicon-m-academic-cap')
+                            ->schema([
+
+                                Section::make('Continuing Medical Education')
+                                    ->description('CME programs attended by this member.')
+                                    ->schema([
+
+                                        View::make('filament.members.cme.records')
+                                            ->viewData(fn ($record) => [
+                                                'record' => $record,
+                                            ]),
+
+                                    ]),
+
+                            ]),
+
                         // Tab::make('Membership Dues')
                         //     ->icon('heroicon-m-banknotes')
                         //     ->schema([

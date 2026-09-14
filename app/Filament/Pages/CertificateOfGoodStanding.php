@@ -15,6 +15,8 @@ class CertificateOfGoodStanding extends Page
 
     public string $purpose = '';
 
+    public ?string $customPurpose = null;
+
     public function mount(): void
     {
         $memberId = request()->query('member');
@@ -29,15 +31,24 @@ class CertificateOfGoodStanding extends Page
     {
         $this->validate([
             'purpose' => ['required'],
-        ]);
-        $url = route('certificate.cogs', [
-            'member' => $this->member,
-            'purpose' => $this->purpose,
+
+            'customPurpose' => [
+                'nullable',
+                'required_if:purpose,custom',
+                'string',
+                'max:500',
+            ],
         ]);
 
-        // $this->js("
-        //     window.open('{$url}', '_blank');
-        // ");
+        $finalPurpose = $this->purpose === 'custom'
+            ? $this->customPurpose
+            : $this->purpose;
+
+        $url = route('certificate.cogs', [
+            'member' => $this->member,
+            'purpose' => $finalPurpose,
+        ]);
+
         $this->redirect($url, navigate: false);
     }
 }

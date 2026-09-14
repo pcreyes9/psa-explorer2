@@ -43,4 +43,13 @@ class CMEProgram extends Model
             'stat'          => 'boolean',
         ];
     }
+
+    public function registrations()
+    {
+        return $this->hasMany(
+            CMEProgramRegistration::class,
+            'cme_program_code',
+            'cme_program_code'
+        );
+    }
 }

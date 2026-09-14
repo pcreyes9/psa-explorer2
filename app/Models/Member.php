@@ -9,6 +9,8 @@ use App\Models\Payment;
 use App\Models\PaymentItem;
 use App\Models\MemberLedger;
 use App\Models\MemberLedgerBalance;
+use App\Models\CMEProgram;
+
 
 class Member extends Model
 {
@@ -115,6 +117,18 @@ class Member extends Model
             ->whereNotIn('mem_last_name', ['Invalid', 'TEST'])
             ->where('psa_chapter_code', '!=', '-')
             ->where('psa_mem_type', '!=', 'OT');
+    }
+
+    public function cmePrograms()
+{
+        return $this->belongsToMany(
+            CMEProgram::class,
+            'cme_program_attendance',
+            'member_id_no',
+            'cme_program_code',
+            'member_id_no',
+            'cme_program_code'
+        );
     }
 
 
