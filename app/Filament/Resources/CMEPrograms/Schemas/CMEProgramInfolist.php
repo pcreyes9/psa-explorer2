@@ -7,6 +7,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
+use Filament\Schemas\Components\View;
 
 class CMEProgramInfolist
 {
@@ -110,42 +111,60 @@ class CMEProgramInfolist
                         Tab::make('Rates')
                             ->icon('heroicon-m-banknotes')
                             ->schema([
+
                                 Section::make('Convention Fees')
-                                    ->description('Coming soon.')
-                                    ->schema([]),
+                                    ->description('Registration rates for this CME program.')
+                                    ->schema([
+
+                                        View::make('filament.cme-program.rates')
+                                            ->viewData(fn ($record) => [
+                                                'record' => $record,
+                                            ]),
+
+                                    ]),
+
                             ]),
 
-                        Tab::make('Units')
-                            ->icon('heroicon-m-academic-cap')
-                            ->schema([
-                                Section::make('CME Units')
-                                    ->description('Coming soon.')
-                                    ->schema([]),
-                            ]),
+                        // Tab::make('Units')
+                        //     ->icon('heroicon-m-academic-cap')
+                        //     ->schema([
+                        //         Section::make('CME Units')
+                        //             ->description('Coming soon.')
+                        //             ->schema([]),
+                        //     ]),
 
-                        Tab::make('Lecturers')
-                            ->icon('heroicon-m-user-group')
-                            ->schema([
-                                Section::make('Lecturers')
-                                    ->description('Coming soon.')
-                                    ->schema([]),
-                            ]),
+                        // Tab::make('Lecturers')
+                        //     ->icon('heroicon-m-user-group')
+                        //     ->schema([
+                        //         Section::make('Lecturers')
+                        //             ->description('Coming soon.')
+                        //             ->schema([]),
+                        //     ]),
 
-                        Tab::make('Sponsors')
-                            ->icon('heroicon-m-building-office')
-                            ->schema([
-                                Section::make('Sponsors')
-                                    ->description('Coming soon.')
-                                    ->schema([]),
-                            ]),
+                        // Tab::make('Sponsors')
+                        //     ->icon('heroicon-m-building-office')
+                        //     ->schema([
+                        //         Section::make('Sponsors')
+                        //             ->description('Coming soon.')
+                        //             ->schema([]),
+                        //     ]),
 
-                        Tab::make('Registrations')
-                            ->icon('heroicon-m-clipboard-document-list')
-                            ->schema([
-                                Section::make('Registrations')
-                                    ->description('Coming soon.')
-                                    ->schema([]),
-                            ]),
+                        // Tab::make('Registrations')
+                        //     ->icon('heroicon-m-clipboard-document-list')
+                        //     ->schema([
+
+                        //         Section::make('Registrations')
+                        //             ->description('Members registered for this CME program.')
+                        //             ->schema([
+
+                        //                 View::make('filament.cme-program.registrations')
+                        //                     ->viewData(fn ($record) => [
+                        //                         'record' => $record,
+                        //                     ]),
+
+                        //             ]),
+
+                        //     ]),
 
                         Tab::make('Attendance')
                             ->icon('heroicon-m-check-badge')

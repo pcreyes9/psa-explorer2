@@ -1,12 +1,11 @@
 @php
-    $cmeRecords = $record->cmePrograms()
-        ->with([
-            'registrations' => function ($query) use ($record) {
-                $query->where('member_id_no', $record->member_id_no);
-            },
-        ])
-        ->orderByDesc('cme_startdate')
-        ->get();
+    $cmeRecords = $record->cmeRegistrations()
+        ->with('cmeProgram')
+        ->get()
+        ->sortByDesc(
+            fn ($registration) =>
+                $registration->cmeProgram?->cme_startdate
+        );
 @endphp
 
 <div class="overflow-x-auto border rounded-xl">
@@ -47,73 +46,76 @@
 
         <tbody>
 
-            @forelse ($cmeRecords as $cme)
+            @forelse ($cmeRecords as $registration)
 
-                <tr class="border-t hover:bg-gray-50 dark:hover:bg-gray-800">
+                @php
+                    $cme = $registration->cmeProgram;
+                @endphp
 
-                    <td class="p-3 whitespace-nowrap">
+                @if ($cme)
 
-                        @if ($cme->cme_startdate)
+                    <tr
+                        class="border-t cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+                        onclick="window.location.href='{{ route('filament.admin.resources.c-m-e-programs.view', ['record' => $cme->cme_program_code]) }}'"
+                    >
 
-                            {{ $cme->cme_startdate->format('M d, Y') }}
+                        {{-- Date --}}
+                        <td class="p-3 whitespace-nowrap">
 
-                            @if (
-                                $cme->cme_enddate &&
-                                $cme->cme_enddate->ne($cme->cme_startdate)
-                            )
+                            @if ($cme->cme_startdate)
 
+                                {{ $cme->cme_startdate->format('M d, Y') }}
+
+                                @if (
+                                    $cme->cme_enddate &&
+                                    $cme->cme_enddate->ne($cme->cme_startdate)
+                                )
+                                    -
+                                    {{ $cme->cme_enddate->format('M d, Y') }}
+                                @endif
+
+                            @else
                                 -
-                                {{ $cme->cme_enddate->format('M d, Y') }}
-
                             @endif
 
-                        @else
+                        </td>
 
-                            -
+                        {{-- CME Program --}}
+                        <td class="p-3 font-semibold">
+                            {{ $cme->cme_title ?: '-' }}
+                        </td>
 
-                        @endif
+                        {{-- Topic --}}
+                        <td class="p-3">
+                            {{ $cme->cme_topic ?: '-' }}
+                        </td>
 
-                    </td>
+                        {{-- Type --}}
+                        <td class="p-3">
+                            {{ $cme->cme_program_type ?: '-' }}
+                        </td>
 
-                    <td class="p-3 font-semibold">
+                        {{-- Payment Reference --}}
+                        <td class="p-3">
+                            {{ $registration->payment_ref_no ?: '-' }}
+                        </td>
 
-                        {{ $cme->cme_title }}
+                        {{-- Venue --}}
+                        <td class="p-3">
+                            {{ $cme->cme_venue ?: '-' }}
+                        </td>
 
-                    </td>
+                    </tr>
 
-                    <td class="p-3">
-
-                        {{ $cme->cme_topic ?: '-' }}
-
-                    </td>
-
-                    <td class="p-3">
-
-                        {{ $cme->cme_program_type ?: '-' }}
-
-                    </td>
-
-                    <td class="p-3">
-                        {{ $cme->registrations->first()?->payment_ref_no ?? '-' }}
-                    </td>
-
-                    <td class="p-3">
-
-                        {{ $cme->cme_venue ?: '-' }}
-
-                    </td>
-
-                </tr>
+                @endif
 
             @empty
 
                 <tr>
-
                     <td
                         colspan="6"
                         class="p-8 text-center text-gray-500"
                     >
-
                         <div class="flex flex-col items-center gap-2">
 
                             <x-heroicon-o-academic-cap
@@ -121,13 +123,11 @@
                             />
 
                             <span>
-                                No CME attendance records found.
+                                No CME registration records found.
                             </span>
 
                         </div>
-
                     </td>
-
                 </tr>
 
             @endforelse

@@ -80,6 +80,7 @@ class CashVoucherController extends Controller
         $pdf = Pdf::loadView(
             'pdf.check',
             [
+                'checkNo'       => $cashVoucher->check_no,
                 'date'          => $cashVoucher->date,
                 'payTo'         => $cashVoucher->pay_to,
                 'amount'        => $totalAmount,

@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
 
-    <title>Cash Voucher</title>
+    <title>Voucher - {{ $voucherNo }}</title>
 
     <style>
 
@@ -19,92 +20,184 @@
         body {
             margin: 0;
             padding: 0;
+
             background: #ffffff;
+
             font-family: Arial, Helvetica, sans-serif;
             font-size: 11pt;
+
             color: #000000;
         }
 
         .voucher {
             position: relative;
+
             width: 8.5in;
             height: 11in;
         }
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | Pay To
+        |--------------------------------------------------------------------------
+        */
+
         .pay-to {
             position: absolute;
+
             top: 1.55in;
             left: 1.10in;
+
             width: 4.8in;
+
             font-size: 11pt;
         }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Voucher Number
+        |--------------------------------------------------------------------------
+        */
 
         .voucher-number {
             position: absolute;
+
             top: 1.50in;
-            right: 1.20in;
+            right: 0.90in;
+
             width: 1.4in;
-            text-align: right;
+
+            text-align: center;
+
             font-size: 11pt;
+
+            white-space: nowrap;
         }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Address
+        |--------------------------------------------------------------------------
+        */
 
         .address {
             position: absolute;
+
             top: 2.00in;
             left: 1.10in;
+
             width: 4.8in;
+
             font-size: 11pt;
         }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Date
+        |--------------------------------------------------------------------------
+        */
 
         .date {
             position: absolute;
+
             top: 2.00in;
             right: 1.40in;
+
             width: 1.4in;
+
             text-align: right;
+
             font-size: 11pt;
+
+            white-space: nowrap;
         }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Items
+        |--------------------------------------------------------------------------
+        */
 
         .items {
             position: absolute;
+
             top: 2.85in;
+
             left: 0.60in;
             right: 0.86in;
         }
 
-        .item-row {
-            position: relative;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Items Table
+        |--------------------------------------------------------------------------
+        */
+
+        .items-table {
             width: 100%;
+
+            border-collapse: collapse;
+
+            table-layout: fixed;
         }
 
-        .item-description {
-            width: 4.5in;
-            padding-left: 0;
-            padding-right: 0.15in;
 
+        .description-cell {
+            width: 68%;
+            padding: 0 0.15in 0 0;
+            vertical-align: bottom;
             line-height: 0.20in;
             text-align: left;
-
-            white-space: normal;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
-        .item-amount {
-            position: absolute;
-            right: 0;
-            width: 1.25in;
-            line-height: 0.20in;
-
+        .amount-cell {
+            width: 32%;
+            padding: 0 0 2px 0;
+            vertical-align: bottom;
             text-align: right;
-            font-weight: normal;
             font-family: 'DejaVu Sans', sans-serif;
-
-            border-bottom: 1px solid #000;
-            padding-bottom: 2px;
+            font-size: 11pt;
+            line-height: 0.20in;
+            white-space: nowrap;
+            /* border-bottom: 1px solid #000000; */
         }
+
+        .amount-underline {
+            display: inline-block;
+            border-bottom: 1px solid #000;
+            padding: 0 0.05in 2px 0.05in;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Item Spacing
+        |--------------------------------------------------------------------------
+        */
+
+        .item-row td {
+            padding-bottom: 0.08in;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Total
+        |--------------------------------------------------------------------------
+        */
 
         .total {
             position: absolute;
+
+            top: 4.65in;
 
             right: 0.85in;
 
@@ -113,202 +206,249 @@
             text-align: right;
 
             font-weight: bold;
+
             font-size: 12pt;
 
+            font-family: 'DejaVu Sans', sans-serif;
+
+            white-space: nowrap;
+
             border-bottom: 3px double #000000;
+
             padding-bottom: 3px;
         }
 
-        .item-amount,
-        .total {
-            font-family: 'DejaVu Sans', sans-serif;
-        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Approval Section
+        |--------------------------------------------------------------------------
+        */
 
         .approved-by {
             position: absolute;
+
             left: 0.70in;
             top: 5.60in;
+
             width: 1.6in;
+
             text-align: left;
+
             font-size: 10pt;
         }
+
 
         .checked-by {
             position: absolute;
+
             left: 2.60in;
             top: 5.60in;
+
             width: 1.6in;
+
             text-align: left;
+
             font-size: 10pt;
         }
+
 
         .received-by {
             position: absolute;
+
             left: 4.85in;
             top: 5.60in;
+
             width: 1.8in;
+
             text-align: left;
+
             font-size: 10pt;
         }
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | Check Number
+        |--------------------------------------------------------------------------
+        */
+
         .check-number {
             position: absolute;
+
             top: 1.90in;
             right: 1.10in;
+
             width: 1.4in;
+
             text-align: right;
+
+            white-space: nowrap;
         }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | General Amount
+        |--------------------------------------------------------------------------
+        */
 
         .amount {
             white-space: nowrap;
         }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Description
+        |--------------------------------------------------------------------------
+        */
 
         .description {
             line-height: 1.25;
         }
 
     </style>
+
 </head>
+
 
 <body>
 
 <div class="voucher">
 
+
+    {{-- ============================================================
+         PAY TO
+         ============================================================ --}}
+
     <div class="pay-to">
         {{ $payTo }}
     </div>
+
+
+    {{-- ============================================================
+         VOUCHER NUMBER
+         ============================================================ --}}
 
     <div class="voucher-number">
         {{ $checkNo }}
     </div>
 
+
+    {{-- ============================================================
+         ADDRESS
+         ============================================================ --}}
+
     <div class="address">
         {{ $address }}
     </div>
+
+
+    {{-- ============================================================
+         DATE
+         ============================================================ --}}
 
     <div class="date">
         {{ \Carbon\Carbon::parse($date)->format('m/d/Y') }}
     </div>
 
+
+    {{-- ============================================================
+         ITEMS
+         ============================================================ --}}
+
     <div class="items">
 
-        @foreach($items as $item)
+        <table class="items-table">
 
-            @php
-                $description = $item['description'] ?? '';
+            <tbody>
 
-                /*
-                |--------------------------------------------------------------------------
-                | Estimate description lines
-                |--------------------------------------------------------------------------
-                */
+                @foreach($items as $item)
 
-                $charactersPerLine = 55;
+                    <tr class="item-row">
 
-                $paragraphs = preg_split("/\r\n|\n|\r/", $description);
+                        {{-- Description --}}
 
-                $lineCount = 0;
+                        <td class="description-cell">
 
-                foreach ($paragraphs as $line) {
+                            {!! nl2br(
+                                e($item['description'] ?? '')
+                            ) !!}
 
-                    $lineCount += max(
-                        1,
-                        (int) ceil(
-                            mb_strlen($line) / $charactersPerLine
-                        )
-                    );
-                }
-
-                /*
-                |--------------------------------------------------------------------------
-                | Description line height
-                |--------------------------------------------------------------------------
-                */
-
-                $lineHeight = 0.20;
-
-                /*
-                |--------------------------------------------------------------------------
-                | Amount must sit on the LAST description line
-                |--------------------------------------------------------------------------
-                */
-
-                $amountTop = ($lineCount - 1) * $lineHeight;
-
-                /*
-                |--------------------------------------------------------------------------
-                | Height of this item
-                |--------------------------------------------------------------------------
-                */
-
-                $itemHeight = $lineCount * $lineHeight;
-            @endphp
+                        </td>
 
 
-            <div
-                class="item-row"
-                style="
-                    height: {{ $itemHeight }}in;
-                    margin-bottom: 0.07in;
-                "
-            >
+                        {{-- Amount --}}
 
-                <div class="item-description">
-                    {!! nl2br(e($item['description'])) !!}
-                </div>
+                        <td class="amount-cell">
+                            <span class="amount-underline">
+                                ₱{{ number_format((float) ($item['amount'] ?? 0), 2) }}
+                            </span>
+                        </td>
 
-                <div
-                    class="item-amount"
-                    style="top: {{ $amountTop }}in;"
-                >
-                    ₱{{ number_format((float) $item['amount'], 2) }}
-                </div>
+                    </tr>
 
-            </div>
+                @endforeach
 
-        @endforeach
+            </tbody>
+
+        </table>
 
     </div>
 
-    @php
-        $itemCount = count($items);
 
-        // Starting position of the total.
-        $baseTotalTop = 3.70;
+    {{-- ============================================================
+         TOTAL
+         ============================================================ --}}
 
-        // Height of each item row.
-        $itemHeight = 0.27;
+    <div class="total">
 
-        // Calculate total position based on number of items.
-        $totalTop = $baseTotalTop + ($itemCount * $itemHeight);
-    @endphp
-
-    <div
-        class="total"
-        style="top: {{ $totalTop }}in;"
-    >
         ₱{{ number_format(
             collect($items)->sum(function ($item) {
-                return (float) $item['amount'];
+                return (float) ($item['amount'] ?? 0);
             }),
             2
         ) }}
+
     </div>
+
+
+    {{-- ============================================================
+         APPROVED BY
+         ============================================================ --}}
 
     <div class="approved-by">
+
         {{ $approvedBy }}
+
     </div>
+
+
+    {{-- ============================================================
+         CHECKED BY
+         ============================================================ --}}
 
     <div class="checked-by">
+
         {{ $checkedBy }}
+
     </div>
 
+
+    {{-- ============================================================
+         RECEIVED BY
+         ============================================================ --}}
+
     <div class="received-by">
+
         {{ $receivedBy }}
+
     </div>
+
 
 </div>
 
 </body>
+
 </html>

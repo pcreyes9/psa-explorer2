@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\CMEProgramRate;
 
 class CMEProgram extends Model
 {
@@ -48,6 +49,14 @@ class CMEProgram extends Model
     {
         return $this->hasMany(
             CMEProgramRegistration::class,
+            'cme_program_code',
+            'cme_program_code'
+        );
+    }
+    public function rates()
+    {
+        return $this->hasMany(
+            CMEProgramRate::class,
             'cme_program_code',
             'cme_program_code'
         );

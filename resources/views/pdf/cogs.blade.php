@@ -43,14 +43,10 @@
         */
 
         .certificate {
-
             position: absolute;
-
-            left: 82mm;
+            left: 83mm;
             top: 65mm;
-
             width: 118mm;
-
         }
 
         h1 {
@@ -102,15 +98,10 @@
         }
 
         .inline-underline {
-
-            display: inline-block;
-
+            display: inline;
             border-bottom: 1px solid #000;
-
-            padding: 0 5px 0 5px;
-
+            padding: 0 3px;
             font-weight: bold;
-
         }
         .signature-block {
 
@@ -214,7 +205,7 @@
 
             <p>
                 This certifies that <span class="inline-underline">
-                    &emsp; {{ $memberName }} &emsp;
+                    {{ $memberName }}
                 </span>
 
                 is a member of Good Standing for Fiscal Year

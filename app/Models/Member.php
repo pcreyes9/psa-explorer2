@@ -120,7 +120,7 @@ class Member extends Model
     }
 
     public function cmePrograms()
-{
+    {
         return $this->belongsToMany(
             CMEProgram::class,
             'cme_program_attendance',
@@ -128,6 +128,15 @@ class Member extends Model
             'cme_program_code',
             'member_id_no',
             'cme_program_code'
+        );
+    }
+
+    public function cmeRegistrations()
+    {
+        return $this->hasMany(
+            \App\Models\CMEProgramRegistration::class,
+            'member_id_no',
+            'member_id_no'
         );
     }
 
