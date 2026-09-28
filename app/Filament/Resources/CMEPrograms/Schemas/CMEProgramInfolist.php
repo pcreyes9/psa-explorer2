@@ -149,22 +149,22 @@ class CMEProgramInfolist
                         //             ->schema([]),
                         //     ]),
 
-                        // Tab::make('Registrations')
-                        //     ->icon('heroicon-m-clipboard-document-list')
-                        //     ->schema([
+                        Tab::make('Registrations')
+                            ->icon('heroicon-m-clipboard-document-list')
+                            ->schema([
 
-                        //         Section::make('Registrations')
-                        //             ->description('Members registered for this CME program.')
-                        //             ->schema([
+                                Section::make('Registrations')
+                                    ->description('Members registered for this CME program.')
+                                    ->schema([
 
-                        //                 View::make('filament.cme-program.registrations')
-                        //                     ->viewData(fn ($record) => [
-                        //                         'record' => $record,
-                        //                     ]),
+                                        View::make('filament.cme-program.registrations')
+                                            ->viewData(fn ($record) => [
+                                                'record' => $record,
+                                            ]),
 
-                        //             ]),
+                                    ]),
 
-                        //     ]),
+                            ]),
 
                         Tab::make('Attendance')
                             ->icon('heroicon-m-check-badge')
