@@ -4,6 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Models\Member;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\CashVoucherController;
+use App\Exports\CMERegistrationExport;
+use App\Models\CMEProgram;
+use Maatwebsite\Excel\Facades\Excel;
 
 Route::get(
     '/cash-vouchers/{cashVoucher}/pdf',
@@ -53,3 +56,17 @@ Route::get('/member-photo/{member}', function (Member $member) {
         ->header('Content-Type', 'image/jpeg');
 
 })->name('member.photo');
+
+Route::get(
+    '/admin/cme-programs/{cmeProgram}/registrations/export',
+    function (CMEProgram $cmeProgram) {
+
+        return Excel::download(
+            new CMERegistrationExport($cmeProgram),
+            'CME-Registrations-' .
+            $cmeProgram->cme_program_code .
+            '.xlsx'
+        );
+
+    }
+)->name('cme-program.registrations.export');
