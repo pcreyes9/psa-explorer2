@@ -128,6 +128,23 @@ class MemberInfolist
                                     ]),
                             ]),
 
+                        Tab::make('Hospitals')
+                            ->icon('heroicon-m-building-office-2')
+                            ->schema([
+
+                                Section::make('Hospital Affiliations')
+                                    ->description('Hospitals affiliated with this member.')
+                                    ->schema([
+
+                                        View::make('filament.members.hospitals')
+                                            ->viewData(fn ($record) => [
+                                                'record' => $record,
+                                            ]),
+
+                                    ]),
+
+                            ]),
+
                         Tab::make('Government IDs')
                             ->icon('heroicon-m-identification')
                             ->schema([

@@ -29,6 +29,9 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
+            ->favicon(asset('images/PSA_LOGO.png'))
+            // ->brandLogo(asset('images/PSA_LOGO.png'))
+            // ->brandLogoHeight('40px')
             ->navigationGroups([
                 'Membership',
                 'Payments',

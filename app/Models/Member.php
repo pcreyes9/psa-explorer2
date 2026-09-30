@@ -10,6 +10,7 @@ use App\Models\PaymentItem;
 use App\Models\MemberLedger;
 use App\Models\MemberLedgerBalance;
 use App\Models\CMEProgram;
+use App\Models\MemberHospital;
 
 
 class Member extends Model
@@ -135,6 +136,15 @@ class Member extends Model
     {
         return $this->hasMany(
             \App\Models\CMEProgramRegistration::class,
+            'member_id_no',
+            'member_id_no'
+        );
+    }
+
+    public function hospitals()
+    {
+        return $this->hasMany(
+            MemberHospital::class,
             'member_id_no',
             'member_id_no'
         );

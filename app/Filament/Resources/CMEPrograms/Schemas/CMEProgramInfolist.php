@@ -8,6 +8,7 @@ use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\View;
+use Filament\Actions\Action;
 
 class CMEProgramInfolist
 {
@@ -155,6 +156,16 @@ class CMEProgramInfolist
 
                                 Section::make('Registrations')
                                     ->description('Members registered for this CME program.')
+                                    ->headerActions([
+                                        Action::make('export')
+                                            ->label('Export Excel')
+                                            ->icon('heroicon-o-arrow-down-tray')
+                                            ->color('success')
+                                            ->url(fn ($record) => route(
+                                                'cme-program.registrations.export',
+                                                $record->cme_program_code
+                                            ))
+                                    ])
                                     ->schema([
 
                                         View::make('filament.cme-program.registrations')
