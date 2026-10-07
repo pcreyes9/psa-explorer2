@@ -26,7 +26,7 @@ class CertificateController extends Controller
 
         $purpose = $request->string('purpose')->toString();
 
-        $fiscalYear = now()->year;
+        $fiscalYear = 2027;
 
         $issueDate = $this->issueDate();
 
