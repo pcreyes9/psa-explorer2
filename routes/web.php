@@ -6,6 +6,7 @@ use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\CashVoucherController;
 use App\Exports\CMERegistrationExport;
 use App\Models\CMEProgram;
+use App\Http\Controllers\StatementOfAccountController;
 use Maatwebsite\Excel\Facades\Excel;
 
 Route::get(
@@ -57,16 +58,20 @@ Route::get('/member-photo/{member}', function (Member $member) {
 
 })->name('member.photo');
 
+Route::get('/admin/cme-programs/{cmeProgram}/registrations/export', function (CMEProgram $cmeProgram) {
+
+    return Excel::download(
+        new CMERegistrationExport($cmeProgram),
+        'CME-Registrations-' .
+        $cmeProgram->cme_program_code .
+        '.xlsx'
+    );
+
+})->name('cme-program.registrations.export');
+
 Route::get(
-    '/admin/cme-programs/{cmeProgram}/registrations/export',
-    function (CMEProgram $cmeProgram) {
-
-        return Excel::download(
-            new CMERegistrationExport($cmeProgram),
-            'CME-Registrations-' .
-            $cmeProgram->cme_program_code .
-            '.xlsx'
-        );
-
-    }
-)->name('cme-program.registrations.export');
+    '/admin/members/{member}/statement-of-account',
+    [StatementOfAccountController::class, 'generate']
+)
+    ->middleware('auth')
+    ->name('members.statement-of-account');

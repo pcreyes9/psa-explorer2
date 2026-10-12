@@ -190,19 +190,17 @@ class ViewMember extends ViewRecord
 
                 Action::make('soa')
                     ->label('Statement of Account')
-                    ->icon('heroicon-o-presentation-chart-line')
+                    ->icon('heroicon-o-document-text')
                     ->color('gray')
                     ->visible(
-                        fn () =>
-                            auth()->user()?->can('members_edit')
+                        fn () => auth()->user()?->can('members_edit')
                     )
                     ->url(
-                        fn () =>
-                            url(
-                                '/admin/new-payment?member=' .
-                                $this->record->member_id_no
-                            )
-                    ),
+                        fn () => route('members.statement-of-account', [
+                            'member' => $this->record->member_id_no,
+                        ])
+                    )
+                    ->openUrlInNewTab(),
 
             ])
                 ->label('Actions')

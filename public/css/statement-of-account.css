@@ -1,0 +1,270 @@
+@page {
+            size: A4 portrait;
+            margin: 15mm 14mm 61mm 14mm;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: DejaVu Sans, sans-serif;
+            font-size: 9px;
+            color: #243247;
+            line-height: 1.45;
+        }
+
+        .brand-bar {
+            height: 5px;
+            background: #163d70;
+            margin-bottom: 17px;
+        }
+
+        .letterhead {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 18px;
+        }
+
+        .letterhead td {
+            vertical-align: middle;
+        }
+
+        .brand-name {
+            font-size: 13px;
+            font-weight: bold;
+            color: #163d70;
+            letter-spacing: .25px;
+        }
+
+        .brand-subtitle {
+            font-size: 8px;
+            color: #627187;
+            margin-top: 4px;
+        }
+
+        .contact {
+            text-align: right;
+            font-size: 8px;
+            color: #526176;
+            line-height: 1.7;
+        }
+
+        .document-heading {
+            background: #f0f5fb;
+            border-left: 4px solid #2463a6;
+            padding: 12px 14px;
+            margin-bottom: 15px;
+        }
+
+        .document-heading h1 {
+            margin: 0;
+            font-size: 16px;
+            color: #163d70;
+            letter-spacing: .5px;
+        }
+
+        .document-heading p {
+            margin: 4px 0 0;
+            color: #627187;
+            font-size: 8px;
+        }
+
+        .member-card {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 19px;
+            border: 1px solid #dce4ee;
+        }
+
+        .member-card td {
+            padding: 8px 10px;
+            vertical-align: top;
+            border-bottom: 1px solid #e8edf3;
+        }
+
+        .member-card tr:last-child td {
+            border-bottom: none;
+        }
+
+        .field-label {
+            display: block;
+            color: #718096;
+            font-size: 7px;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            margin-bottom: 3px;
+        }
+
+        .field-value {
+            font-size: 9px;
+            color: #243247;
+            font-weight: bold;
+            overflow-wrap: break-word;
+        }
+
+        .section-heading {
+            font-size: 10px;
+            font-weight: bold;
+            color: #163d70;
+            margin-bottom: 8px;
+        }
+
+        .dues-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        .dues-table thead th {
+            background: #163d70;
+            color: #ffffff;
+            text-align: left;
+            padding: 9px 7px;
+            font-size: 8px;
+            text-transform: uppercase;
+            letter-spacing: .3px;
+        }
+
+        .dues-table tbody td {
+            padding: 10px 7px;
+            border-bottom: 1px solid #e5eaf0;
+            vertical-align: middle;
+        }
+
+        .dues-table tbody tr:nth-child(even) td {
+            background: #f7f9fc;
+        }
+
+        .year {
+            width: 13%;
+            font-weight: bold;
+            color: #163d70;
+        }
+
+        .description {
+            width: 31%;
+        }
+
+        .amount {
+            width: 18.66%;
+            text-align: right !important;
+            white-space: nowrap;
+        }
+
+        .balance {
+            color: #173f73;
+            font-weight: bold;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #718096;
+            padding: 20px !important;
+        }
+
+        .total-box {
+            margin-top: 14px;
+            margin-left: auto;
+            width: 58%;
+            border-collapse: collapse;
+        }
+
+        .total-box td {
+            padding: 10px 12px;
+            background: #edf3fa;
+            border-top: 2px solid #2463a6;
+        }
+
+        .total-label {
+            color: #163d70;
+            font-weight: bold;
+            font-size: 9px;
+        }
+
+        .total-value {
+            text-align: right;
+            color: #163d70;
+            font-size: 14px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: -54mm;
+            left: 0;
+            right: 0;
+            font-size: 7.5px;
+            color: #536176;
+        }
+
+        .footer-rule {
+            border-top: 1px solid #cbd6e3;
+            margin-bottom: 8px;
+        }
+
+        .notice-title {
+            color: #163d70;
+            font-size: 8px;
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+
+        .notice {
+            line-height: 1.5;
+            margin-bottom: 7px;
+            text-align: justify;
+        }
+
+        .remit-heading {
+            background: #edf3fa;
+            color: #163d70;
+            font-weight: bold;
+            padding: 5px 8px;
+            margin-top: 7px;
+            margin-bottom: 5px;
+            text-align: center;
+            letter-spacing: .6px;
+        }
+
+        .account-name {
+            text-align: center;
+            font-weight: bold;
+            color: #243247;
+            margin-bottom: 5px;
+        }
+
+        .bank-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .bank-table td {
+            width: 50%;
+            padding: 5px 8px;
+            border: 1px solid #dce4ee;
+            vertical-align: top;
+            line-height: 1.6;
+        }
+
+        .bank-name {
+            color: #163d70;
+            font-weight: bold;
+        }
+
+        .account-number {
+            font-weight: bold;
+            color: #243247;
+        }
+        .logo-cell {
+            vertical-align: middle;
+            text-align: left;
+            padding-right: 8px;
+        }
+
+        .psa-logo {
+            width: 75px;
+            height: 75px;
+            object-fit: contain;
+        }
