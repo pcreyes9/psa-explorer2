@@ -24,6 +24,10 @@
             <div class="mt-5 flex flex-wrap gap-2">
 
                 <x-filament::badge color="success">
+                    {{ $record->mem_stat }}
+                </x-filament::badge>
+
+                <x-filament::badge color="warning">
                     {{ $record->psa_mem_stat }}
                 </x-filament::badge>
 

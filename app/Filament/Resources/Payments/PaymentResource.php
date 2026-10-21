@@ -39,6 +39,11 @@ class PaymentResource extends Resource
         ];
     }
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
+
     public static function canViewAny(): bool
     {
         return auth()->user()?->can('payment_view');
