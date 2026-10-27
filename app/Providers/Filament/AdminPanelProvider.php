@@ -11,16 +11,13 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Filament\View\PanelsRenderHook;
-
 use Illuminate\Support\Facades\Blade;
 
 class AdminPanelProvider extends PanelProvider
@@ -29,9 +26,12 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
+            ->id('admin')
+            ->path('admin')
+
             ->favicon(asset('images/PSA_LOGO.png'))
-            // ->brandLogo(asset('images/PSA_LOGO.png'))
-            // ->brandLogoHeight('40px')
+            ->brandName('PSA Membership System')
+
             ->navigationGroups([
                 'Membership',
                 'Payments',
@@ -39,14 +39,20 @@ class AdminPanelProvider extends PanelProvider
                 'Reports',
                 'Printing',
                 'Administration',
-
             ])
-            ->id('admin')
-            ->path('admin')
+
+            // Display the configured database name in the top navigation bar.
+            ->renderHook(
+                PanelsRenderHook::TOPBAR_END,
+                fn () => view('filament.components.database-name')
+            )
+
+            // Global loading components.
             ->renderHook(
                 PanelsRenderHook::BODY_END,
                 fn () => view('components.global-loader')
             )
+
             ->viteTheme('resources/css/filament/admin/theme.css')
 
             ->login(\App\Filament\Auth\Login::class)
@@ -54,7 +60,7 @@ class AdminPanelProvider extends PanelProvider
 
             ->colors([
                 'primary' => Color::Blue,
-                'secondary'=> Color::Green,
+                'secondary' => Color::Green,
             ])
 
             ->discoverResources(
@@ -77,10 +83,8 @@ class AdminPanelProvider extends PanelProvider
             )
 
             ->widgets([
-                // FilamentInfoWidget::class,
                 \App\Filament\Widgets\DashboardStats::class,
                 \App\Filament\Widgets\AnnualDuesChart::class,
-                // AccountWidget::class,
             ])
 
             ->middleware([
@@ -103,7 +107,7 @@ class AdminPanelProvider extends PanelProvider
 
             ->renderHook(
                 PanelsRenderHook::BODY_END,
-                fn () => Blade::render('<x-loading-overlay />'),
+                fn () => Blade::render('<x-loading-overlay />')
             );
     }
 }

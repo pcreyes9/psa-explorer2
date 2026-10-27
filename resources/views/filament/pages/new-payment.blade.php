@@ -2,7 +2,8 @@
 
     <div class="space-y-4">
 
-        @if($this->selectedMember)
+        {{-- MEMBER INFORMATION --}}
+        @if ($this->selectedMember)
 
             <div class="flex items-center gap-4">
 
@@ -41,10 +42,11 @@
 
         @endif
 
+        {{-- MEMBER, FISCAL YEAR, AND ACTIONS --}}
         <div class="flex items-end gap-4">
 
             <div class="flex-1">
-                {{  $this->form }}
+                {{ $this->form }}
             </div>
 
             <div class="flex gap-2 pb-1">
@@ -66,7 +68,8 @@
 
     </div>
 
-    @if(count($this->selectedItems))
+    {{-- SELECTED TRANSACTION ITEMS --}}
+    @if (count($this->selectedItems))
 
         <div class="mt-2 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
 
@@ -78,12 +81,12 @@
 
             <div class="overflow-x-auto">
 
-                <table class="w-full text-sm border border-gray-200 dark:border-gray-700">
+                <table class="w-full border border-gray-200 text-sm dark:border-gray-700">
 
                     <thead class="bg-gray-100 dark:bg-gray-800">
 
                         <tr>
-                            <th class="p-3">
+                            <th class="p-3 text-left">
                                 Year
                             </th>
 
@@ -106,16 +109,19 @@
                             <th class="p-3 text-center">
                                 Action
                             </th>
-
                         </tr>
 
                     </thead>
 
                     <tbody>
 
-                        @foreach($this->selectedItems as $item)
+                        @foreach ($this->selectedItems as $key => $item)
 
-                            <tr class="border-t border-gray-200 dark:border-gray-700">
+                            <tr
+                                wire:key="selected-payment-item-{{ $key }}"
+                                class="border-t border-gray-200 dark:border-gray-700"
+                            >
+
                                 <td class="p-3 font-medium">
                                     {{ $item['fiscal_year'] }}
                                 </td>
@@ -129,7 +135,7 @@
                                 </td>
 
                                 <td class="p-3 text-right">
-                                    ₱{{ number_format($item['amount_due'], 2) }}
+                                    ₱{{ number_format((float) ($item['amount_due'] ?? 0), 2) }}
                                 </td>
 
                                 <td class="p-3 text-right">
@@ -137,10 +143,11 @@
                                     <input
                                         type="number"
                                         min="0"
+                                        max="{{ (float) ($item['amount_due'] ?? 0) }}"
                                         step="0.01"
-                                        wire:model.live="selectedItems.{{ $item['item_code'] }}.amount_paying"
+                                        wire:model.live.debounce.300ms="selectedItems.{{ $key }}.amount_paying"
                                         wire:change="calculateTotal"
-                                        class="w-32 rounded-md border-gray-300 text-right"
+                                        class="w-32 rounded-md border-gray-300 text-right shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-800"
                                     >
 
                                 </td>
@@ -149,7 +156,7 @@
 
                                     <button
                                         type="button"
-                                        wire:click="removeItem('{{ $item['item_code'] }}')"
+                                        wire:click="removeItem(@js((string) $key))"
                                         class="font-semibold text-red-600 hover:text-red-800"
                                     >
                                         Remove
@@ -165,14 +172,14 @@
 
                     <tfoot>
 
-                        <tr class="border-t bg-blue-50 dark:bg-blue-900/20 font-semibold">
+                        <tr class="border-t bg-blue-50 font-semibold dark:bg-blue-900/20">
 
                             <td colspan="4" class="p-3 text-right">
                                 Total Payment
                             </td>
 
                             <td class="p-3 text-right text-lg">
-                                ₱{{ number_format($this->totalAmount, 2) }}
+                                ₱{{ number_format((float) $this->totalAmount, 2) }}
                             </td>
 
                             <td></td>
@@ -188,16 +195,25 @@
         </div>
 
     @endif
-    @if(count($this->selectedItems))
+
+    {{-- WARN BEFORE LEAVING WITH SELECTED ITEMS --}}
+    @if (count($this->selectedItems))
+
         <script>
-            window.addEventListener('beforeunload', function (e) {
+            document.addEventListener('livewire:init', () => {
+                if (window.paymentUnloadWarningInitialized) {
+                    return;
+                }
 
-                e.preventDefault();
+                window.paymentUnloadWarningInitialized = true;
 
-                e.returnValue = '';
-
+                window.addEventListener('beforeunload', function (event) {
+                    event.preventDefault();
+                    event.returnValue = '';
+                });
             });
         </script>
+
     @endif
 
 </x-filament-panels::page>
