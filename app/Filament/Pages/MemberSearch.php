@@ -72,12 +72,12 @@ class MemberSearch extends Page implements HasTable
                 //     ->badge(),
             ])
             ->emptyStateHeading('Search for a member')
-            ->emptyStateDescription('Enter a Member ID or Last Name above.');
+            ->emptyStateDescription('Enter a Member ID, First Name, or Last Name above.');
     }
 
     protected function getQuery(): Builder
     {
-        $search = trim($this->searchInput);
+        $search = trim($this->searchInput ?? '');
 
         $query = Member::query()
             ->select([
@@ -85,7 +85,6 @@ class MemberSearch extends Page implements HasTable
                 'mem_last_name',
                 'mem_first_name',
                 'psa_chapter_code',
-                // 'psa_mem_stat',
             ]);
 
         if (blank($search)) {
@@ -93,14 +92,16 @@ class MemberSearch extends Page implements HasTable
         }
 
         if (is_numeric($search)) {
-            return $query
-                ->where('member_id_no',  $search);
-                // ->limit(20);
+            return $query->where('member_id_no', $search);
         }
 
         return $query
-            ->where('mem_last_name', 'like', '%'. $search . '%')
-            ->orderBy('mem_last_name');
-            // ->limit(20);
+            ->where(function (Builder $query) use ($search) {
+                $query
+                    ->where('mem_last_name', 'like', '%' . $search . '%')
+                    ->orWhere('mem_first_name', 'like', '%' . $search . '%');
+            })
+            ->orderBy('mem_last_name')
+            ->orderBy('mem_first_name');
     }
 }

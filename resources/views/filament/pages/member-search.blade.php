@@ -9,7 +9,7 @@
                     <x-filament::input
                         wire:model.defer="searchInput"
                         wire:keydown.enter="searchMembers"
-                        placeholder="Enter Member ID or Last Name"
+                        placeholder="Enter a Member ID, First Name, or Last Name."
                     />
                 </x-filament::input.wrapper>
             </div>

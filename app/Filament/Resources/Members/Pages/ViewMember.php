@@ -105,7 +105,7 @@ class ViewMember extends ViewRecord
         |
         */
 
-        $fiscalYears = range(2027, 2023);
+        $fiscalYears = range(2027, 2020);
 
         /*
         |--------------------------------------------------------------------------
@@ -130,7 +130,7 @@ class ViewMember extends ViewRecord
                 SUM(t.item_amount) AS component_amount
             ")
             ->where('t.stat', 1)
-            ->whereBetween('t.fiscal_year', [2023, 2028])
+            ->whereBetween('t.fiscal_year', [2015, 2027])
             ->where(function ($query) {
                 $query->where('t.item_code', 'like', 'RM%')
                     ->orWhere('t.item_code', 'like', 'TM%')
@@ -227,7 +227,7 @@ class ViewMember extends ViewRecord
             ->where('pi.tran_code', 'MEMF')
             ->where('pi.stat', 1)
             ->where('p.stat', 1)
-            ->whereBetween('pi.fiscal_year', [2023, 2028])
+            ->whereBetween('pi.fiscal_year', [2015, 2027])
             ->where(function ($query) {
                 $query->where('pi.item_code', 'like', 'RM%')
                     ->orWhere('pi.item_code', 'like', 'TM%')
