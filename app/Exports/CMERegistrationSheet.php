@@ -50,12 +50,12 @@ class CMERegistrationSheet implements
             ->select([
                 'r.member_id_no',
                 'r.payment_ref_no',
+                'r.cme_reg_date',
                 'm.mem_last_name',
                 'm.mem_first_name',
                 'm.mem_middle_name',
                 'm.psa_mem_type',
             ])
-            ->orderBy('m.mem_last_name')
             ->get();
 
         foreach ($memberRegistrations as $registration) {
@@ -72,21 +72,18 @@ class CMERegistrationSheet implements
             );
 
             $rows->push([
-                'psa_id'          => $registration->member_id_no,
-                'member_name'     => $name,
-                'membership_type' => $registration->psa_mem_type,
-                'payment_ref_no'  => $registration->payment_ref_no ?: '-',
+                'registration_date' => $registration->cme_reg_date,
+                'psa_id'            => $registration->member_id_no,
+                'member_name'       => $name,
+                'membership_type'   => $registration->psa_mem_type,
+                'payment_ref_no'    => $registration->payment_ref_no ?: '-',
             ]);
         }
-
 
         /*
         |--------------------------------------------------------------------------
         | NM
         |--------------------------------------------------------------------------
-        |
-        | Non-members come from cme_program_registrationNM.
-        |
         */
 
         $nmRegistrations = DB::table('cme_program_registrationNM')
@@ -97,11 +94,6 @@ class CMERegistrationSheet implements
             ->get();
 
         foreach ($nmRegistrations as $registration) {
-
-            /*
-             * Adjust these fields if your NM table uses
-             * different column names.
-             */
 
             $lastName = $registration->nm_last_name
                 ?? $registration->last_name
@@ -131,10 +123,6 @@ class CMERegistrationSheet implements
                 . ($middleName ? ' ' . $middleName : '')
             );
 
-            /*
-             * If the NM table stores a complete name instead,
-             * use it as a fallback.
-             */
             if ($name === ',') {
                 $name =
                     $registration->name
@@ -143,26 +131,29 @@ class CMERegistrationSheet implements
             }
 
             $rows->push([
-                'psa_id'          => $memberId,
-                'member_name'     => $name,
-                'membership_type' => 'NM',
-                'payment_ref_no'  => $paymentRef,
+                'registration_date' => $registration->cme_reg_date ?? null,
+                'psa_id'            => $memberId,
+                'member_name'       => $name,
+                'membership_type'   => 'NM',
+                'payment_ref_no'    => $paymentRef,
             ]);
         }
 
-
         /*
         |--------------------------------------------------------------------------
-        | Sort
+        | Sort by Registration Date - Newest First
         |--------------------------------------------------------------------------
         */
 
         $rows = $rows
-            ->sortBy([
-                ['membership_type', 'asc'],
-                ['member_name', 'asc'],
-            ])
+            ->sortByDesc('registration_date')
             ->values();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Prepare Excel Rows
+        |--------------------------------------------------------------------------
+        */
 
         return $rows->map(
             function ($row, $index) {
