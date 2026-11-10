@@ -46,7 +46,7 @@
             position: absolute;
             left: 83mm;
             top: 65mm;
-            width: 118mm;
+            width: 115mm;
         }
 
         h1 {

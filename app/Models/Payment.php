@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Payment extends Model
 {
@@ -18,7 +20,20 @@ class Payment extends Model
 
     protected $guarded = [];
 
-    public function member()
+    protected function casts(): array
+    {
+        return [
+            'payment_total_amt' => 'decimal:2',
+            'payment_gross_amt' => 'decimal:2',
+            'payment_discounted_amt' => 'decimal:2',
+            'payment_tax_amt' => 'decimal:2',
+            'payment_date' => 'date',
+            'credit_card_exp' => 'date',
+            'stat' => 'boolean',
+        ];
+    }
+
+    public function member(): BelongsTo
     {
         return $this->belongsTo(
             Member::class,
@@ -26,8 +41,8 @@ class Payment extends Model
             'member_id_no'
         );
     }
-    
-    public function ledgerEntries()
+
+    public function ledgerEntries(): HasMany
     {
         return $this->hasMany(
             MemberLedger::class,
@@ -36,7 +51,7 @@ class Payment extends Model
         );
     }
 
-    public function paymentItems()
+    public function paymentItems(): HasMany
     {
         return $this->hasMany(
             PaymentItem::class,

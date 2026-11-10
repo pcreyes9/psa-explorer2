@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PaymentItem extends Model
 {
@@ -12,7 +13,16 @@ class PaymentItem extends Model
 
     protected $guarded = [];
 
-    public function payment()
+    protected function casts(): array
+    {
+        return [
+            'amount_due' => 'decimal:2',
+            'amount_paid' => 'decimal:2',
+            'stat' => 'boolean',
+        ];
+    }
+
+    public function payment(): BelongsTo
     {
         return $this->belongsTo(
             Payment::class,
@@ -21,21 +31,12 @@ class PaymentItem extends Model
         );
     }
 
-    public function member()
+    public function member(): BelongsTo
     {
         return $this->belongsTo(
             Member::class,
             'member_id_no',
             'member_id_no'
-        );
-    }
-
-    public function transactionTypeItem()
-    {
-        return $this->belongsTo(
-            TransactionTypeItem::class,
-            'item_code',
-            'item_code'
         );
     }
 }

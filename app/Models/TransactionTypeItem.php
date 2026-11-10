@@ -11,4 +11,12 @@ class TransactionTypeItem extends Model
     public $timestamps = false;
 
     protected $guarded = [];
+
+    protected function casts(): array
+    {
+        return [
+            'item_amount' => 'decimal:2',
+            'stat' => 'boolean',
+        ];
+    }
 }

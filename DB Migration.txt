@@ -1,0 +1,83 @@
+cash and voucher
+
+payments_items
+
+//adding amount_paid column
+ALTER TABLE dbo.payment_items
+ADD amount_paid DECIMAL(15,2) NULL;
+
+
+/* =========================================================
+   PSA EXPLORER - PAYMENT POSTING INDEXES
+   Safe to run more than once.
+   ========================================================= */
+
+-- 1. Find a member's payments for a particular charge
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.indexes
+    WHERE name = 'IX_payment_items_MemberCharge'
+      AND object_id = OBJECT_ID('dbo.payment_items')
+)
+BEGIN
+    CREATE NONCLUSTERED INDEX IX_payment_items_MemberCharge
+    ON dbo.payment_items (
+        member_id_no,
+        fiscal_year,
+        item_code,
+        tran_code,
+        stat
+    )
+    INCLUDE (
+        payment_ref_no,
+        amount_due,
+        amount_paid
+    );
+END;
+
+
+-- 2. Retrieve all items belonging to a receipt
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.indexes
+    WHERE name = 'IX_payment_items_Reference'
+      AND object_id = OBJECT_ID('dbo.payment_items')
+)
+BEGIN
+    CREATE NONCLUSTERED INDEX IX_payment_items_Reference
+    ON dbo.payment_items (payment_ref_no)
+    INCLUDE (
+        member_id_no,
+        fiscal_year,
+        item_code,
+        tran_code,
+        amount_due,
+        amount_paid,
+        stat
+    );
+END;
+
+
+-- 3. Retrieve active charge definitions
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.indexes
+    WHERE name = 'IX_transaction_type_item_Lookup'
+      AND object_id = OBJECT_ID('dbo.transaction_type_item')
+)
+BEGIN
+    CREATE NONCLUSTERED INDEX IX_transaction_type_item_Lookup
+    ON dbo.transaction_type_item (
+        tran_code,
+        fiscal_year,
+        stat,
+        charge_code
+    )
+    INCLUDE (
+        item_code,
+        item_details,
+        item_amount
+    );
+END;
+
+PRINT 'Payment Posting indexes checked and created where necessary.';

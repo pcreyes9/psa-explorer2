@@ -9,11 +9,15 @@ use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use UnitEnum;
@@ -34,16 +38,8 @@ class NewPayment extends Page implements HasForms, HasActions
 
     public array $transactionItems = [];
 
-    /**
-     * Transaction item codes selected in the modal.
-     */
     public array $selectedTransactionItems = [];
 
-    /**
-     * Items included in the payment table.
-     *
-     * Each item uses a unique array key.
-     */
     public array $selectedItems = [];
 
     public float $totalAmount = 0;
@@ -66,6 +62,8 @@ class NewPayment extends Page implements HasForms, HasActions
     {
         $this->form->fill([
             'fiscal_year' => date('Y'),
+            'payment_date' => now()->toDateString(),
+            'payment_type' => 'Cash',
         ]);
 
         $memberId = request()->query('member');
@@ -74,16 +72,25 @@ class NewPayment extends Page implements HasForms, HasActions
             $this->form->fill([
                 'member_id_no' => $memberId,
                 'fiscal_year' => date('Y'),
+                'payment_date' => now()->toDateString(),
+                'payment_type' => 'Cash',
             ]);
 
             $this->loadTransactionItems();
         }
     }
 
+    /**
+     * Main payment form.
+     */
     public function form(Schema $schema): Schema
     {
         return $schema
             ->components([
+
+                /*
+                 * MEMBER AND FISCAL YEAR
+                 */
                 Grid::make(4)
                     ->schema([
 
@@ -145,10 +152,6 @@ class NewPayment extends Page implements HasForms, HasActions
                                 }
                             )
                             ->afterStateUpdated(function ($state): void {
-                                /*
-                                 * A different member means a different payment.
-                                 * Clear the previous member's selected items.
-                                 */
                                 $this->resetTransactionSelection();
 
                                 $this->data['member_id_no'] = $state;
@@ -161,6 +164,7 @@ class NewPayment extends Page implements HasForms, HasActions
                             ->label('Fiscal Year')
                             ->options(
                                 TransactionTypeItem::query()
+                                    ->where('stat', 1)
                                     ->distinct()
                                     ->orderByDesc('fiscal_year')
                                     ->pluck('fiscal_year', 'fiscal_year')
@@ -169,35 +173,122 @@ class NewPayment extends Page implements HasForms, HasActions
                             ->required()
                             ->live()
                             ->afterStateUpdated(function ($state): void {
-                                /*
-                                 * Preserve the payment table when changing
-                                 * the fiscal year.
-                                 */
                                 $this->data['fiscal_year'] = $state;
 
-                                /*
-                                 * Clear only the modal selection.
-                                 * Do not clear selectedItems or totalAmount.
-                                 */
                                 $this->selectedTransactionItems = [];
 
                                 $this->loadTransactionItems();
 
-                                /*
-                                 * Restore matching codes from existing
-                                 * payment items into the modal selection.
-                                 */
                                 $this->restoreModalSelection();
                             })
                             ->columnSpan(1),
 
                     ]),
+
+                /*
+                 * PAYMENT DETAILS
+                 */
+                Grid::make(3)
+                    ->schema([
+
+                        DatePicker::make('payment_date')
+                            ->label('Payment Date')
+                            ->required()
+                            ->default(now()->toDateString())
+                            ->native(false),
+
+                        Select::make('payment_type')
+                            ->label('Payment Method')
+                            ->options([
+                                'Cash' => 'Cash',
+                                'Check' => 'Check',
+                                'Bank Transfer' => 'Bank Transfer',
+                            ])
+                            ->required()
+                            ->default('Cash')
+                            ->live()
+                            ->afterStateUpdated(function ($state): void {
+                                /*
+                                 * Clear fields that do not apply
+                                 * to the newly selected method.
+                                 */
+                                if ($state !== 'Check') {
+                                    $this->data['check_no'] = null;
+                                }
+
+                                if (! in_array(
+                                    $state,
+                                    ['Check', 'Bank Transfer'],
+                                    true
+                                )) {
+                                    $this->data['bank_name_code'] = null;
+                                }
+
+                                if ($state !== 'Bank Transfer') {
+                                    $this->data['bank_reference_no'] = null;
+                                }
+                            }),
+
+                        TextInput::make('or_no')
+                            ->label('Official Receipt Number')
+                            ->maxLength(18),
+
+                        TextInput::make('check_no')
+                            ->label('Check Number')
+                            ->visible(
+                                fn ($get): bool =>
+                                    $get('payment_type') === 'Check'
+                            )
+                            ->required(
+                                fn ($get): bool =>
+                                    $get('payment_type') === 'Check'
+                            )
+                            ->maxLength(18),
+
+                        TextInput::make('bank_name_code')
+                            ->label('Bank Name')
+                            ->visible(
+                                fn ($get): bool => in_array(
+                                    $get('payment_type'),
+                                    ['Check', 'Bank Transfer'],
+                                    true
+                                )
+                            )
+                            ->required(
+                                fn ($get): bool => in_array(
+                                    $get('payment_type'),
+                                    ['Check', 'Bank Transfer'],
+                                    true
+                                )
+                            )
+                            ->maxLength(50),
+
+                        TextInput::make('bank_reference_no')
+                            ->label('Bank Transfer Reference Number')
+                            ->visible(
+                                fn ($get): bool =>
+                                    $get('payment_type') === 'Bank Transfer'
+                            )
+                            ->required(
+                                fn ($get): bool =>
+                                    $get('payment_type') === 'Bank Transfer'
+                            )
+                            ->maxLength(50),
+
+                        Textarea::make('remarks')
+                            ->label('Remarks')
+                            ->rows(2)
+                            ->maxLength(50)
+                            ->columnSpanFull(),
+
+                    ]),
+
             ])
             ->statePath('data');
     }
 
     /**
-     * Modal action for selecting transaction items.
+     * Transaction item selection modal.
      */
     public function transactionItemsAction(): Action
     {
@@ -207,18 +298,9 @@ class NewPayment extends Page implements HasForms, HasActions
             ->modalHeading('Transaction Items')
             ->modalWidth('7xl')
             ->schema([
-                \Filament\Schemas\Components\View::make(
-                    'filament.payments.transaction-items-modal'
-                ),
+                View::make('filament.payments.transaction-items-modal'),
             ])
             ->action(function (): void {
-                /*
-                 * Build a new table from the current modal selection,
-                 * while preserving Amount Paying for existing rows.
-                 *
-                 * Items from previous fiscal years remain in the table
-                 * even when they are not available in the current modal.
-                 */
                 $newSelectedItems = $this->selectedItems;
 
                 foreach ($this->transactionItems as $index => $item) {
@@ -236,14 +318,33 @@ class NewPayment extends Page implements HasForms, HasActions
 
                     $key = $this->getSelectedItemKey($item, $index);
 
-                    $amountDue = (float) ($item['item_amount'] ?? 0);
+                    $amountDue = (float) (
+                        $item['original_amount']
+                        ?? $item['item_amount']
+                        ?? 0
+                    );
 
-                    $amountPaying = isset($this->selectedItems[$key])
-                        ? (float) (
+                    $balance = (float) (
+                        $item['balance']
+                        ?? $amountDue
+                    );
+
+                    if (isset($this->selectedItems[$key])) {
+                        $amountPaying = (float) (
                             $this->selectedItems[$key]['amount_paying']
-                            ?? $amountDue
-                        )
-                        : $amountDue;
+                            ?? $balance
+                        );
+
+                        $amountPaying = min(
+                            max($amountPaying, 0),
+                            $balance
+                        );
+                    } else {
+                        $amountPaying = (float) (
+                            $item['amount_paying']
+                            ?? $balance
+                        );
+                    }
 
                     $newSelectedItems[$key] = [
                         'fiscal_year' => $item['fiscal_year']
@@ -252,9 +353,17 @@ class NewPayment extends Page implements HasForms, HasActions
 
                         'item_code' => $itemCode,
 
+                        'tran_code' => $item['tran_code'] ?? null,
+
                         'description' => $item['item_details'] ?? '',
 
                         'amount_due' => $amountDue,
+
+                        'previously_paid' => (float) (
+                            $item['previously_paid'] ?? 0
+                        ),
+
+                        'balance' => $balance,
 
                         'amount_paying' => $amountPaying,
                     ];
@@ -270,8 +379,7 @@ class NewPayment extends Page implements HasForms, HasActions
     }
 
     /**
-     * Load available transaction items for the current member
-     * and selected fiscal year.
+     * Load available transaction items.
      */
     public function loadTransactionItems(): void
     {
@@ -300,7 +408,7 @@ class NewPayment extends Page implements HasForms, HasActions
     }
 
     /**
-     * Clear payment selections when changing members.
+     * Clear selections when changing members.
      */
     protected function resetTransactionSelection(): void
     {
@@ -312,7 +420,7 @@ class NewPayment extends Page implements HasForms, HasActions
     }
 
     /**
-     * Identify MEMF using the transaction code.
+     * Check whether an item is a MEMF item.
      */
     protected function isMemfItem(array $item): bool
     {
@@ -351,7 +459,7 @@ class NewPayment extends Page implements HasForms, HasActions
     }
 
     /**
-     * Select or deselect every item whose tran_code is MEMF.
+     * Select or deselect all MEMF items.
      */
     public function toggleMemfItems(): void
     {
@@ -397,7 +505,7 @@ class NewPayment extends Page implements HasForms, HasActions
     }
 
     /**
-     * Select or deselect an individual transaction item.
+     * Select or deselect one transaction item.
      */
     public function toggleTransactionItem(string $itemCode): void
     {
@@ -420,8 +528,7 @@ class NewPayment extends Page implements HasForms, HasActions
     }
 
     /**
-     * Restore modal selection from existing payment rows that match
-     * the currently available transaction items.
+     * Restore selected items in the modal.
      */
     protected function restoreModalSelection(): void
     {
@@ -447,39 +554,106 @@ class NewPayment extends Page implements HasForms, HasActions
     }
 
     /**
-     * Remove one selected payment item using its unique key.
+     * Remove a selected payment item.
      */
     public function removeItem(string $key): void
     {
+        if (! isset($this->selectedItems[$key])) {
+            return;
+        }
+
+        $itemCode = (string) $this->selectedItems[$key]['item_code'];
+
         unset($this->selectedItems[$key]);
 
-        $this->restoreModalSelection();
+        $this->selectedTransactionItems = array_values(
+            array_filter(
+                $this->selectedTransactionItems,
+                fn ($code) => (string) $code !== $itemCode
+            )
+        );
+
+        $this->totalAmount = round(
+            (float) collect($this->selectedItems)
+                ->sum('amount_paying'),
+            2
+        );
+    }
+
+    /**
+     * Clamp edited payment amounts to the outstanding balance.
+     */
+    public function updatedSelectedItems($value, $key): void
+    {
+        if (! str_ends_with($key, '.amount_paying')) {
+            return;
+        }
+
+        $itemKey = substr(
+            $key,
+            0,
+            -strlen('.amount_paying')
+        );
+
+        if (! isset($this->selectedItems[$itemKey])) {
+            return;
+        }
+
+        $balance = (float) (
+            $this->selectedItems[$itemKey]['balance']
+            ?? $this->selectedItems[$itemKey]['amount_due']
+            ?? 0
+        );
+
+        $amountPaying = is_numeric($value)
+            ? (float) $value
+            : 0;
+
+        $this->selectedItems[$itemKey]['amount_paying'] = round(
+            min(max($amountPaying, 0), $balance),
+            2
+        );
 
         $this->calculateTotal();
     }
 
     /**
-     * Recalculate the payment total.
+     * Recalculate total payment.
      */
     public function calculateTotal(): void
     {
-        $this->totalAmount = (float) collect($this->selectedItems)
-            ->sum(
-                fn ($item) => (float) (
+        $this->totalAmount = round(
+            (float) collect($this->selectedItems)
+                ->sum(fn ($item) => (float) (
                     $item['amount_paying'] ?? 0
-                )
-            );
+                )),
+            2
+        );
     }
 
     /**
-     * Temporary debugging method.
-     * Replace with actual payment posting logic when ready.
+     * Temporary posting preview.
+     * Actual database posting will be implemented separately.
      */
     public function postPayment(): void
     {
+        $paymentData = $this->form->getState();
+
         dd([
-            'member' => $this->selectedMember,
+            'member' => $this->selectedMember?->member_id_no,
+
+            'payment_details' => [
+                'payment_date' => $paymentData['payment_date'] ?? null,
+                'payment_type' => $paymentData['payment_type'] ?? null,
+                'check_no' => $paymentData['check_no'] ?? null,
+                'bank_name_code' => $paymentData['bank_name_code'] ?? null,
+                'bank_reference_no' => $paymentData['bank_reference_no'] ?? null,
+                'or_no' => $paymentData['or_no'] ?? null,
+                'remarks' => $paymentData['remarks'] ?? null,
+            ],
+
             'items' => $this->selectedItems,
+
             'total' => $this->totalAmount,
         ]);
     }
