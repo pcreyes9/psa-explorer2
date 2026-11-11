@@ -3,6 +3,8 @@
 namespace App\Filament\Pages;
 
 use App\Models\Member;
+use App\Models\Payment;
+use App\Models\PaymentItem;
 use App\Models\TransactionTypeItem;
 use App\Support\PaymentManager;
 use BackedEnum;
@@ -15,11 +17,14 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use UnitEnum;
 
 class NewPayment extends Page implements HasForms, HasActions
@@ -48,6 +53,12 @@ class NewPayment extends Page implements HasForms, HasActions
 
     public bool $openItemsModal = false;
 
+    /*
+    |--------------------------------------------------------------------------
+    | Navigation
+    |--------------------------------------------------------------------------
+    */
+
     public static function shouldRegisterNavigation(): bool
     {
         return auth()->user()?->can('payment_create') ?? false;
@@ -57,6 +68,12 @@ class NewPayment extends Page implements HasForms, HasActions
     {
         return '';
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Mount
+    |--------------------------------------------------------------------------
+    */
 
     public function mount(): void
     {
@@ -80,17 +97,23 @@ class NewPayment extends Page implements HasForms, HasActions
         }
     }
 
-    /**
-     * Main payment form.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Main Payment Form
+    |--------------------------------------------------------------------------
+    */
+
     public function form(Schema $schema): Schema
     {
         return $schema
             ->components([
 
                 /*
-                 * MEMBER AND FISCAL YEAR
-                 */
+                |--------------------------------------------------------------------------
+                | Member and Fiscal Year
+                |--------------------------------------------------------------------------
+                */
+
                 Grid::make(4)
                     ->schema([
 
@@ -186,8 +209,11 @@ class NewPayment extends Page implements HasForms, HasActions
                     ]),
 
                 /*
-                 * PAYMENT DETAILS
-                 */
+                |--------------------------------------------------------------------------
+                | Payment Details
+                |--------------------------------------------------------------------------
+                */
+
                 Grid::make(3)
                     ->schema([
 
@@ -208,12 +234,9 @@ class NewPayment extends Page implements HasForms, HasActions
                             ->default('Cash')
                             ->live()
                             ->afterStateUpdated(function ($state): void {
-                                /*
-                                 * Clear fields that do not apply
-                                 * to the newly selected method.
-                                 */
+
                                 if ($state !== 'Check') {
-                                    $this->data['check_no'] = null;
+                                    $this->data['check_no'] = '';
                                 }
 
                                 if (! in_array(
@@ -221,11 +244,11 @@ class NewPayment extends Page implements HasForms, HasActions
                                     ['Check', 'Bank Transfer'],
                                     true
                                 )) {
-                                    $this->data['bank_name_code'] = null;
+                                    $this->data['bank_name_code'] = '';
                                 }
 
                                 if ($state !== 'Bank Transfer') {
-                                    $this->data['bank_reference_no'] = null;
+                                    $this->data['bank_reference_no'] = '';
                                 }
                             }),
 
@@ -287,9 +310,12 @@ class NewPayment extends Page implements HasForms, HasActions
             ->statePath('data');
     }
 
-    /**
-     * Transaction item selection modal.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Transaction Item Selection Modal
+    |--------------------------------------------------------------------------
+    */
+
     public function transactionItemsAction(): Action
     {
         return Action::make('transactionItems')
@@ -301,9 +327,11 @@ class NewPayment extends Page implements HasForms, HasActions
                 View::make('filament.payments.transaction-items-modal'),
             ])
             ->action(function (): void {
+
                 $newSelectedItems = $this->selectedItems;
 
                 foreach ($this->transactionItems as $index => $item) {
+
                     $itemCode = (string) ($item['item_code'] ?? '');
 
                     if (
@@ -330,6 +358,7 @@ class NewPayment extends Page implements HasForms, HasActions
                     );
 
                     if (isset($this->selectedItems[$key])) {
+
                         $amountPaying = (float) (
                             $this->selectedItems[$key]['amount_paying']
                             ?? $balance
@@ -339,7 +368,9 @@ class NewPayment extends Page implements HasForms, HasActions
                             max($amountPaying, 0),
                             $balance
                         );
+
                     } else {
+
                         $amountPaying = (float) (
                             $item['amount_paying']
                             ?? $balance
@@ -378,12 +409,16 @@ class NewPayment extends Page implements HasForms, HasActions
             ->disabled(empty($this->transactionItems));
     }
 
-    /**
-     * Load available transaction items.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Load Transaction Items
+    |--------------------------------------------------------------------------
+    */
+
     public function loadTransactionItems(): void
     {
         $memberId = $this->data['member_id_no'] ?? null;
+
         $fiscalYear = $this->data['fiscal_year'] ?? null;
 
         if (! $memberId || ! $fiscalYear) {
@@ -407,21 +442,31 @@ class NewPayment extends Page implements HasForms, HasActions
         )->toArray();
     }
 
-    /**
-     * Clear selections when changing members.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Reset Transaction Selection
+    |--------------------------------------------------------------------------
+    */
+
     protected function resetTransactionSelection(): void
     {
         $this->transactionItems = [];
+
         $this->selectedTransactionItems = [];
+
         $this->selectedItems = [];
+
         $this->totalAmount = 0;
+
         $this->selectedMember = null;
     }
 
-    /**
-     * Check whether an item is a MEMF item.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | MEMF Detection
+    |--------------------------------------------------------------------------
+    */
+
     protected function isMemfItem(array $item): bool
     {
         return strtoupper(
@@ -429,13 +474,17 @@ class NewPayment extends Page implements HasForms, HasActions
         ) === 'MEMF';
     }
 
-    /**
-     * Generate a stable key for each transaction item.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Selected Item Key
+    |--------------------------------------------------------------------------
+    */
+
     protected function getSelectedItemKey(
         array $item,
         int $index
     ): string {
+
         $itemCode = (string) ($item['item_code'] ?? 'ITEM');
 
         $identity = $item['id']
@@ -458,9 +507,12 @@ class NewPayment extends Page implements HasForms, HasActions
         );
     }
 
-    /**
-     * Select or deselect all MEMF items.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Toggle All MEMF Items
+    |--------------------------------------------------------------------------
+    */
+
     public function toggleMemfItems(): void
     {
         $memfCodes = collect($this->transactionItems)
@@ -484,6 +536,7 @@ class NewPayment extends Page implements HasForms, HasActions
         );
 
         if ($allSelected) {
+
             $this->selectedTransactionItems = array_values(
                 array_diff(
                     $this->selectedTransactionItems,
@@ -504,12 +557,16 @@ class NewPayment extends Page implements HasForms, HasActions
         );
     }
 
-    /**
-     * Select or deselect one transaction item.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Toggle Individual Transaction Item
+    |--------------------------------------------------------------------------
+    */
+
     public function toggleTransactionItem(string $itemCode): void
     {
         if (in_array($itemCode, $this->selectedTransactionItems)) {
+
             $this->selectedTransactionItems = array_values(
                 array_filter(
                     $this->selectedTransactionItems,
@@ -527,9 +584,12 @@ class NewPayment extends Page implements HasForms, HasActions
         );
     }
 
-    /**
-     * Restore selected items in the modal.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Restore Modal Selection
+    |--------------------------------------------------------------------------
+    */
+
     protected function restoreModalSelection(): void
     {
         $existingCodes = collect($this->selectedItems)
@@ -553,9 +613,12 @@ class NewPayment extends Page implements HasForms, HasActions
         );
     }
 
-    /**
-     * Remove a selected payment item.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Remove Selected Item
+    |--------------------------------------------------------------------------
+    */
+
     public function removeItem(string $key): void
     {
         if (! isset($this->selectedItems[$key])) {
@@ -580,9 +643,12 @@ class NewPayment extends Page implements HasForms, HasActions
         );
     }
 
-    /**
-     * Clamp edited payment amounts to the outstanding balance.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Amount Paying Updated
+    |--------------------------------------------------------------------------
+    */
+
     public function updatedSelectedItems($value, $key): void
     {
         if (! str_ends_with($key, '.amount_paying')) {
@@ -617,9 +683,12 @@ class NewPayment extends Page implements HasForms, HasActions
         $this->calculateTotal();
     }
 
-    /**
-     * Recalculate total payment.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Calculate Total
+    |--------------------------------------------------------------------------
+    */
+
     public function calculateTotal(): void
     {
         $this->totalAmount = round(
@@ -631,30 +700,424 @@ class NewPayment extends Page implements HasForms, HasActions
         );
     }
 
-    /**
-     * Temporary posting preview.
-     * Actual database posting will be implemented separately.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Generate Payment Name
+    |--------------------------------------------------------------------------
+    */
+
+    protected function getPaymentName(Member $member): string
+    {
+        return trim(
+            strtoupper(
+                trim((string) $member->mem_last_name)
+                . ', '
+                . trim((string) $member->mem_first_name)
+            )
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Post Payment
+    |--------------------------------------------------------------------------
+    */
+
     public function postPayment(): void
     {
         $paymentData = $this->form->getState();
 
-        dd([
-            'member' => $this->selectedMember?->member_id_no,
+        $memberId = $paymentData['member_id_no'] ?? null;
 
-            'payment_details' => [
-                'payment_date' => $paymentData['payment_date'] ?? null,
-                'payment_type' => $paymentData['payment_type'] ?? null,
-                'check_no' => $paymentData['check_no'] ?? null,
-                'bank_name_code' => $paymentData['bank_name_code'] ?? null,
-                'bank_reference_no' => $paymentData['bank_reference_no'] ?? null,
-                'or_no' => $paymentData['or_no'] ?? null,
-                'remarks' => $paymentData['remarks'] ?? null,
-            ],
+        if (blank($memberId)) {
+            throw ValidationException::withMessages([
+                'data.member_id_no' => 'Please select a member.',
+            ]);
+        }
 
-            'items' => $this->selectedItems,
+        if (empty($this->selectedItems)) {
+            throw ValidationException::withMessages([
+                'selectedItems' => 'Please select at least one transaction item.',
+            ]);
+        }
 
-            'total' => $this->totalAmount,
-        ]);
+        $member = Member::find($memberId);
+
+        if (! $member) {
+            throw ValidationException::withMessages([
+                'data.member_id_no' => 'The selected member could not be found.',
+            ]);
+        }
+
+        $paymentType = $paymentData['payment_type'] ?? null;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Validate Payment Method
+        |--------------------------------------------------------------------------
+        */
+
+        if (! in_array(
+            $paymentType,
+            ['Cash', 'Check', 'Bank Transfer'],
+            true
+        )) {
+            throw ValidationException::withMessages([
+                'data.payment_type' => 'Please select a valid payment method.',
+            ]);
+        }
+
+        if ($paymentType === 'Check') {
+
+            if (blank($paymentData['check_no'] ?? null)) {
+                throw ValidationException::withMessages([
+                    'data.check_no' => 'Check number is required.',
+                ]);
+            }
+
+            if (blank($paymentData['bank_name_code'] ?? null)) {
+                throw ValidationException::withMessages([
+                    'data.bank_name_code' => 'Bank name is required.',
+                ]);
+            }
+        }
+
+        if ($paymentType === 'Bank Transfer') {
+
+            if (blank($paymentData['bank_name_code'] ?? null)) {
+                throw ValidationException::withMessages([
+                    'data.bank_name_code' => 'Bank name is required.',
+                ]);
+            }
+
+            if (blank($paymentData['bank_reference_no'] ?? null)) {
+                throw ValidationException::withMessages([
+                    'data.bank_reference_no' => 'Bank reference number is required.',
+                ]);
+            }
+        }
+
+        if (blank($paymentData['payment_date'] ?? null)) {
+            throw ValidationException::withMessages([
+                'data.payment_date' => 'Payment date is required.',
+            ]);
+        }
+
+        $paymentReference = null;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Database Transaction
+        |--------------------------------------------------------------------------
+        */
+
+        DB::transaction(function () use (
+            $paymentData,
+            $member,
+            &$paymentReference
+        ) {
+
+            $allocations = [];
+
+            $totalPayment = 0;
+
+            $seenItems = [];
+
+            /*
+            |--------------------------------------------------------------------------
+            | Validate Selected Transaction Items
+            |--------------------------------------------------------------------------
+            */
+
+            foreach ($this->selectedItems as $selectedItem) {
+
+                $itemCode = (string) ($selectedItem['item_code'] ?? '');
+
+                $tranCode = (string) ($selectedItem['tran_code'] ?? '');
+
+                $fiscalYear = (string) ($selectedItem['fiscal_year'] ?? '');
+
+                if (
+                    $itemCode === ''
+                    || $tranCode === ''
+                    || $fiscalYear === ''
+                ) {
+                    throw ValidationException::withMessages([
+                        'selectedItems' => 'One or more selected items have invalid information.',
+                    ]);
+                }
+
+                $uniqueKey = $fiscalYear . '|' . $tranCode . '|' . $itemCode;
+
+                if (isset($seenItems[$uniqueKey])) {
+                    throw ValidationException::withMessages([
+                        'selectedItems' => "Duplicate transaction item detected: {$itemCode}.",
+                    ]);
+                }
+
+                $seenItems[$uniqueKey] = true;
+
+                /*
+                |--------------------------------------------------------------------------
+                | Retrieve Current Transaction Definition
+                |--------------------------------------------------------------------------
+                */
+
+                $definition = TransactionTypeItem::query()
+                    ->where('item_code', $itemCode)
+                    ->where('tran_code', $tranCode)
+                    ->where('fiscal_year', $fiscalYear)
+                    ->where('charge_code', $member->psa_mem_type)
+                    ->where('stat', 1)
+                    ->lockForUpdate()
+                    ->first();
+
+                if (! $definition) {
+                    throw ValidationException::withMessages([
+                        'selectedItems' => "Transaction item {$itemCode} is no longer available.",
+                    ]);
+                }
+
+                $originalAmount = round(
+                    (float) $definition->item_amount,
+                    2
+                );
+
+                /*
+                |--------------------------------------------------------------------------
+                | Recalculate Previous Payments
+                |--------------------------------------------------------------------------
+                */
+
+                $previouslyPaid = (float) DB::table('payment_items as pi')
+                    ->join(
+                        'payments as p',
+                        'p.payment_ref_no',
+                        '=',
+                        'pi.payment_ref_no'
+                    )
+                    ->where('pi.member_id_no', $member->member_id_no)
+                    ->where('pi.fiscal_year', $fiscalYear)
+                    ->where('pi.item_code', $itemCode)
+                    ->where('pi.tran_code', $tranCode)
+                    ->where('pi.stat', 1)
+                    ->where('p.stat', 1)
+                    ->sum(DB::raw(
+                        'COALESCE(pi.amount_paid, pi.amount_due)'
+                    ));
+
+                $balance = round(
+                    max($originalAmount - $previouslyPaid, 0),
+                    2
+                );
+
+                $amountPaying = round(
+                    (float) ($selectedItem['amount_paying'] ?? 0),
+                    2
+                );
+
+                /*
+                |--------------------------------------------------------------------------
+                | Validate Amount Paying
+                |--------------------------------------------------------------------------
+                */
+
+                if ($amountPaying <= 0) {
+                    throw ValidationException::withMessages([
+                        'selectedItems' => "The payment amount for {$itemCode} must be greater than zero.",
+                    ]);
+                }
+
+                if ($amountPaying > $balance) {
+                    throw ValidationException::withMessages([
+                        'selectedItems' =>
+                            "The payment amount for {$itemCode} exceeds its current outstanding balance of ₱"
+                            . number_format($balance, 2)
+                            . '. Please refresh your payment items.',
+                    ]);
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | Prepare Payment Allocation
+                |--------------------------------------------------------------------------
+                */
+
+                $allocations[] = [
+                    'member_id_no' => $member->member_id_no,
+                    'fiscal_year' => $fiscalYear,
+                    'item_code' => $itemCode,
+                    'tran_code' => $tranCode,
+                    'mem_type' => $member->psa_mem_type,
+                    'amount_due' => $originalAmount,
+                    'amount_paid' => $amountPaying,
+                    'stat' => 1,
+                ];
+
+                $totalPayment += $amountPaying;
+            }
+
+            $totalPayment = round($totalPayment, 2);
+
+            if ($totalPayment <= 0) {
+                throw ValidationException::withMessages([
+                    'selectedItems' => 'The total payment must be greater than zero.',
+                ]);
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Generate Payment Reference
+            |--------------------------------------------------------------------------
+            */
+
+            $paymentReference = PaymentManager::generateReference($member);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Save Payment Header
+            |--------------------------------------------------------------------------
+            |
+            | Follow the existing ADAMMS payment-recording conventions.
+            |
+            */
+
+            Payment::create([
+
+                'payment_ref_no' => $paymentReference,
+
+                'member_id_no' => $member->member_id_no,
+
+                // Member information
+                'payment_name' => $this->getPaymentName($member),
+
+                'payment_add' => '',
+
+                // Payment amounts
+                'payment_total_amt' => $totalPayment,
+
+                'payment_gross_amt' => $totalPayment,
+
+                'payment_discount' => 0,
+
+                'payment_discounted_amt' => $totalPayment,
+
+                'payment_tax' => 0,
+
+                'payment_tax_amt' => 0,
+
+                // Payment details
+                'payment_type' => $paymentData['payment_type'],
+
+                'payment_date' => $paymentData['payment_date'],
+
+                // Check details
+                'check_no' => $paymentType === 'Check'
+                    ? ($paymentData['check_no'] ?? '')
+                    : '',
+
+                'check_acct_no' => '',
+
+                'check_name' => '',
+
+                // Bank details
+                'bank_name_code' => in_array(
+                    $paymentType,
+                    ['Check', 'Bank Transfer'],
+                    true
+                )
+                    ? ($paymentData['bank_name_code'] ?? '')
+                    : '',
+
+                // Electronic payment details
+                'epay_vendor_name_code' => '',
+
+                'epay_acct_no' => '',
+
+                // Credit card details
+                'credit_card_type' => '',
+
+                'credit_card_no' => '',
+
+                'credit_card_exp' => null,
+
+                // Debit card details
+                'debit_card_type' => '',
+
+                'debit_card_no' => '',
+
+                'debit_card_exp' => '',
+
+                // Receipt information
+                'or_no' => $paymentData['or_no'] ?? '',
+
+                // User information
+                'userid' => substr(
+                    (string) (
+                        auth()->user()?->username
+                        ?? auth()->id()
+                        ?? ''
+                    ),
+                    0,
+                    20
+                ),
+
+                'overideby' => '',
+
+                // Other details
+                'remarks' => $paymentData['remarks'] ?? '',
+
+                'stat' => 1,
+
+                // Bank transfer reference
+                'bank_reference_no' => $paymentType === 'Bank Transfer'
+                    ? ($paymentData['bank_reference_no'] ?? '')
+                    : '',
+
+            ]);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Save Payment Allocations
+            |--------------------------------------------------------------------------
+            */
+
+            foreach ($allocations as $allocation) {
+
+                PaymentItem::create([
+                    'payment_ref_no' => $paymentReference,
+                    ...$allocation,
+                ]);
+            }
+
+        }, 3);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Refresh After Successful Posting
+        |--------------------------------------------------------------------------
+        */
+
+        $this->selectedItems = [];
+
+        $this->selectedTransactionItems = [];
+
+        $this->totalAmount = 0;
+
+        $this->loadTransactionItems();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Success Notification
+        |--------------------------------------------------------------------------
+        */
+
+        Notification::make()
+            ->title('Payment Successfully Posted')
+            ->body("Payment Reference: {$paymentReference}")
+            ->success()
+            ->persistent()
+            ->send();
     }
+
 }

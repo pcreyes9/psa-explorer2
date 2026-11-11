@@ -214,7 +214,7 @@ class ViewMember extends ViewRecord
                     }),
 
                 Action::make('payDues')
-                    ->label('Payment')
+                    ->label('New Payment')
                     ->icon('heroicon-o-banknotes')
                     ->color('gray')
                     ->visible(

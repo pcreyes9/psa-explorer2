@@ -198,11 +198,16 @@
             font-size: 11pt;
             font-weight: bold;
 
-            line-height: 1;
-
+            line-height: 1.2;
             text-align: left;
 
-            white-space: nowrap;
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        .payee.multiline {
+            top: 85.0mm;
+            font-size: 9.5pt;
         }
 
 
@@ -237,7 +242,7 @@
         .amount-words {
             position: absolute;
 
-            top: 98.6mm;
+            top: 97.0mm;
             left: 102.0mm;
 
             width: 146mm;
@@ -318,7 +323,7 @@
              PAYEE
         ====================================================== --}}
 
-        <div class="payee">
+        <div class="payee {{ strlen($payTo) > 45 ? 'multiline' : '' }}">
             {{ $payTo }}
         </div>
 

@@ -209,7 +209,7 @@
                                         min="0"
                                         max="{{ (float) ($item['balance'] ?? $item['amount_due'] ?? 0) }}"
                                         step="0.01"
-                                        wire:model.live.debounce.300ms="selectedItems.{{ $key }}.amount_paying"
+                                        wire:model.live.debounce.1000ms="selectedItems.{{ $key }}.amount_paying"
                                         wire:change="calculateTotal"
                                         class="w-32 rounded-md border-gray-300 text-right shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-800"
                                     />

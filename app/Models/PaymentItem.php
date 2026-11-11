@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\TransactionTypeItem;
 
 class PaymentItem extends Model
 {
@@ -37,6 +38,14 @@ class PaymentItem extends Model
             Member::class,
             'member_id_no',
             'member_id_no'
+        );
+    }
+    public function transactionTypeItem(): BelongsTo
+    {
+        return $this->belongsTo(
+            TransactionTypeItem::class,
+            'item_code',
+            'item_code'
         );
     }
 }
