@@ -35,7 +35,6 @@
             );
     @endphp
 
-    {{-- GROUPED MEMF CARD --}}
     @if ($memfItems->isNotEmpty())
         <div
             @class([
@@ -74,7 +73,6 @@
                 </div> --}}
             </button>
 
-            {{-- MEMF BREAKDOWN --}}
             {{-- <div class="mt-4 border-t border-gray-200 pt-3 dark:border-gray-700">
                 <div class="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                     Membership Fee Breakdown
@@ -103,7 +101,6 @@
         </div>
     @endif
 
-    {{-- OTHER TRANSACTION ITEMS --}}
     @foreach ($otherItems as $item)
         @php
             $itemCode = $item['item_code'] ?? '';
@@ -141,7 +138,6 @@
         </button>
     @endforeach
 
-    {{-- EMPTY STATE --}}
     @if ($items->isEmpty())
         <div class="col-span-full p-6 text-center text-gray-500">
             No transaction items available.

@@ -53,7 +53,7 @@ class MembersTable
                     ->sortable(),
             ])
             ->filters([
-                //
+
             ])
             ->recordActions([
                 ViewAction::make(),

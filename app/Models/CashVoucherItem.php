@@ -16,10 +16,6 @@ class CashVoucherItem extends Model
         'amount' => 'decimal:2',
     ];
 
-    // public function cashVoucher()
-    // {
-    //     return $this->belongsTo(CashVoucher::class);
-    // }
     public function voucher()
     {
         return $this->belongsTo(

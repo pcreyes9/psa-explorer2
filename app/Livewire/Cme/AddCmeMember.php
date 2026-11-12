@@ -27,12 +27,6 @@ class AddCmeMember extends Component
         $this->programCode = $programCode;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Open / Close Modal
-    |--------------------------------------------------------------------------
-    */
-
     public function openModal(): void
     {
         $this->resetValidation();
@@ -57,12 +51,6 @@ class AddCmeMember extends Component
 
         $this->resetValidation();
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Search Members
-    |--------------------------------------------------------------------------
-    */
 
     public function searchMembers(): void
     {
@@ -102,17 +90,10 @@ class AddCmeMember extends Component
             ->get();
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Select Member
-    |--------------------------------------------------------------------------
-    */
-
     public function selectMember(string $memberId): void
     {
         $this->resetValidation();
 
-        // Query 1: Retrieve the member and verify eligibility.
         $member = DB::table('member')
             ->select([
                 'member_id_no',
@@ -136,7 +117,6 @@ class AddCmeMember extends Component
             return;
         }
 
-        // Query 2: Check duplicate registration.
         $alreadyRegistered = DB::table('cme_program_registration')
             ->where('cme_program_code', $this->programCode)
             ->where('member_id_no', $memberId)
@@ -151,7 +131,6 @@ class AddCmeMember extends Component
             return;
         }
 
-        // Store member details in Livewire instead of querying again.
         $this->selectedMemberId = $memberId;
 
         $this->selectedMemberData = [
@@ -164,22 +143,6 @@ class AddCmeMember extends Component
 
         $this->search = '';
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Generate Payment Reference Number
-    |--------------------------------------------------------------------------
-    |
-    | Format:
-    | V + YY + Program Type + 4-digit Sequence
-    |
-    | Mid-Year          = 001
-    | Annual Convention = 002
-    |
-    | Example:
-    | V260020001
-    |
-    */
 
     private function generateReferenceNumber(): string
     {
@@ -241,12 +204,6 @@ class AddCmeMember extends Component
         );
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Save Registration
-    |--------------------------------------------------------------------------
-    */
-
     public function save(): void
     {
         $this->validate([
@@ -265,7 +222,6 @@ class AddCmeMember extends Component
 
         $paymentRefNo = trim($this->paymentRefNo);
 
-        // Revalidate the selected member before inserting.
         $member = DB::table('member')
             ->where('member_id_no', $this->selectedMemberId)
             ->whereRaw(
@@ -294,7 +250,7 @@ class AddCmeMember extends Component
             $program,
             $paymentRefNo
         ) {
-            // Lock the current program record.
+
             DB::select(
                 '
                 SELECT cme_program_code
@@ -304,7 +260,6 @@ class AddCmeMember extends Component
                 [$this->programCode]
             );
 
-            // Prevent duplicate member registration.
             $duplicateMember = DB::table('cme_program_registration')
                 ->where('cme_program_code', $this->programCode)
                 ->where('member_id_no', $member->member_id_no)
@@ -317,7 +272,6 @@ class AddCmeMember extends Component
                 ]);
             }
 
-            // Prevent duplicate payment reference.
             $duplicateReference = DB::select(
                 '
                 SELECT payment_ref_no
@@ -367,7 +321,6 @@ class AddCmeMember extends Component
             ->success()
             ->send();
 
-        // Refresh the parent Filament page after successful registration.
         $this->redirect(url()->full());
     }
 

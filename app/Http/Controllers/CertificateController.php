@@ -8,8 +8,20 @@ use Illuminate\Http\Request;
 
 class CertificateController extends Controller
 {
-    public function cogs(Member $member, Request $request)
+    public function cogs(string $member, Request $request)
     {
+        $member = Member::query()
+            ->select([
+                'member_id_no',
+                'mem_first_name',
+                'mem_middle_name',
+                'mem_last_name',
+                'psa_mem_type',
+            ])
+            ->with('membershipType:Memtypecode,Memtype')
+            ->whereKey($member)
+            ->firstOrFail();
+
         $memberName = strtoupper(trim(implode(' ', array_filter([
             $member->mem_first_name,
             $member->mem_middle_name,
@@ -44,7 +56,6 @@ class CertificateController extends Controller
             )
         );
 
-        // return $pdf->stream('Certificate of Good Standing.pdf');
         return $pdf->download($member->member_id_no.' '.$member->mem_first_name.' '.$member->mem_last_name.'-COGS.pdf');
     }
 

@@ -28,7 +28,6 @@ use Filament\Forms\Components\Placeholder;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Wizard\Step;
 
-
 class CMEProgramInfolist
 {
     public static function configure(Schema $schema): Schema
@@ -38,12 +37,6 @@ class CMEProgramInfolist
 
                 Tabs::make('ProgramTabs')
                     ->tabs([
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | PROGRAM INFORMATION
-                        |--------------------------------------------------------------------------
-                        */
 
                         Tab::make('Program Information')
                             ->icon('heroicon-m-document-text')
@@ -143,12 +136,6 @@ class CMEProgramInfolist
 
                             ]),
 
-                        /*
-                        |--------------------------------------------------------------------------
-                        | RATES
-                        |--------------------------------------------------------------------------
-                        */
-
                         Tab::make('Rates')
                             ->icon('heroicon-m-banknotes')
                             ->schema([
@@ -168,13 +155,6 @@ class CMEProgramInfolist
 
                             ]),
 
-                        /*
-                        |--------------------------------------------------------------------------
-                        | REGISTRATIONS
-                        |--------------------------------------------------------------------------
-                        */
-
-                        
                         Tab::make('Registrations')
                             ->icon('heroicon-m-clipboard-document-list')
                             ->schema([
@@ -182,12 +162,6 @@ class CMEProgramInfolist
                                 Section::make('Registrations')
                                     ->description('Members registered for this CME program.')
                                     ->headerActions([
-
-                                        /*
-                                        |--------------------------------------------------------------------------
-                                        | ADD MEMBER
-                                        |--------------------------------------------------------------------------
-                                        */
 
                                         Action::make('addMember')
                                             ->label('Add Member')
@@ -331,7 +305,6 @@ class CMEProgramInfolist
                                                     $paymentRefNo
                                                 ) {
 
-                                                    // Lock CME program record.
                                                     DB::select(
                                                         '
                                                         SELECT cme_program_code
@@ -341,7 +314,6 @@ class CMEProgramInfolist
                                                         [$record->cme_program_code]
                                                     );
 
-                                                    // Retrieve eligible member.
                                                     $member = DB::table('member')
                                                         ->where('member_id_no', $memberId)
                                                         ->whereRaw(
@@ -355,7 +327,6 @@ class CMEProgramInfolist
                                                         ]);
                                                     }
 
-                                                    // Check duplicate registration.
                                                     $duplicateMember = DB::table('cme_program_registration')
                                                         ->where(
                                                             'cme_program_code',
@@ -370,7 +341,6 @@ class CMEProgramInfolist
                                                         ]);
                                                     }
 
-                                                    // Check duplicate payment reference.
                                                     $duplicateReference = DB::table('cme_program_registration')
                                                         ->where('payment_ref_no', $paymentRefNo)
                                                         ->exists();
@@ -400,7 +370,6 @@ class CMEProgramInfolist
                                                         ?? $user?->name
                                                         ?? (string) Auth::id();
 
-                                                    // Insert only non-computed columns.
                                                     DB::table('cme_program_registration')->insert([
                                                         'cme_year' => $program->cme_year,
                                                         'cme_program_code' => $program->cme_program_code,
@@ -418,12 +387,6 @@ class CMEProgramInfolist
                                                     ->send();
                                             }),
 
-                                        /*
-                                        |--------------------------------------------------------------------------
-                                        | BULK ADD MEMBERS
-                                        |--------------------------------------------------------------------------
-                                        */
-
                                         Action::make('bulkAddMembers')
                                             ->label('Bulk Add Members')
                                             ->icon('heroicon-o-user-group')
@@ -435,12 +398,6 @@ class CMEProgramInfolist
                                             ->modalWidth('4xl')
                                             ->modalSubmitActionLabel('Confirm Registration')
                                             ->steps([
-
-                                                /*
-                                                |--------------------------------------------------------------------------
-                                                | STEP 1: SELECT MEMBERS
-                                                |--------------------------------------------------------------------------
-                                                */
 
                                                 Step::make('Select Members')
                                                     ->description(
@@ -566,12 +523,6 @@ class CMEProgramInfolist
                                                     ])
                                                     ->columns(1),
 
-                                                /*
-                                                |--------------------------------------------------------------------------
-                                                | STEP 2: REVIEW REGISTRATIONS
-                                                |--------------------------------------------------------------------------
-                                                */
-
                                                 Step::make('Review Registrations')
                                                     ->description(
                                                         'Review eligible members and skipped registrations before confirming.'
@@ -586,7 +537,6 @@ class CMEProgramInfolist
                                                                 $selectedMemberIds = $get('member_ids') ?? [];
                                                                 $uploadedFile = $get('member_file');
 
-                                                                // Validate the selected input method.
                                                                 if (
                                                                     !empty($selectedMemberIds)
                                                                     && filled($uploadedFile)
@@ -601,7 +551,6 @@ class CMEProgramInfolist
                                                                     return 'No members selected yet. Go back and select members or upload an Excel/CSV file.';
                                                                 }
 
-                                                                // Get PSA IDs.
                                                                 $memberIds = $selectedMemberIds;
 
                                                                 if (filled($uploadedFile)) {
@@ -621,7 +570,6 @@ class CMEProgramInfolist
                                                                     )->read($filePath);
                                                                 }
 
-                                                                // Generate preview.
                                                                 $preview = app(
                                                                     BulkRegisterCmeMembers::class
                                                                 )->preview(
@@ -643,18 +591,11 @@ class CMEProgramInfolist
 
                                             ])
 
-                                            /*
-                                            |--------------------------------------------------------------------------
-                                            | CONFIRM REGISTRATION
-                                            |--------------------------------------------------------------------------
-                                            */
-
                                             ->action(function (array $data, CMEProgram $record): void {
 
                                                 $selectedMemberIds = $data['member_ids'] ?? [];
                                                 $uploadedFile = $data['member_file'] ?? null;
 
-                                                // Validate selection method.
                                                 if (
                                                     !empty($selectedMemberIds)
                                                     && filled($uploadedFile)
@@ -673,7 +614,6 @@ class CMEProgramInfolist
                                                     ]);
                                                 }
 
-                                                // Get PSA IDs.
                                                 $memberIds = $selectedMemberIds;
 
                                                 if (filled($uploadedFile)) {
@@ -697,7 +637,6 @@ class CMEProgramInfolist
                                                     )->read($filePath);
                                                 }
 
-                                                // Recheck and process registrations.
                                                 $result = app(
                                                     BulkRegisterCmeMembers::class
                                                 )->execute(
@@ -705,7 +644,6 @@ class CMEProgramInfolist
                                                     $memberIds
                                                 );
 
-                                                // Success notification.
                                                 Notification::make()
                                                     ->title('Bulk Registration Completed')
                                                     ->body(
@@ -718,12 +656,6 @@ class CMEProgramInfolist
                                                     ->send();
                                             }),
 
-                                        /*
-                                        |--------------------------------------------------------------------------
-                                        | EXPORT EXCEL
-                                        |--------------------------------------------------------------------------
-                                        */
-
                                         Action::make('export')
                                             ->label('Export Excel')
                                             ->icon('heroicon-o-arrow-down-tray')
@@ -735,12 +667,6 @@ class CMEProgramInfolist
 
                                     ])
 
-                                    /*
-                                    |--------------------------------------------------------------------------
-                                    | REGISTRATION SUMMARY
-                                    |--------------------------------------------------------------------------
-                                    */
-
                                     ->schema([
 
                                         View::make('filament.cme-program.registrations')
@@ -751,13 +677,6 @@ class CMEProgramInfolist
                                     ]),
 
                             ]),
-
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | ATTENDANCE
-                        |--------------------------------------------------------------------------
-                        */
 
                         Tab::make('Attendance')
                             ->icon('heroicon-m-check-badge')
@@ -774,23 +693,6 @@ class CMEProgramInfolist
 
             ]);
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | GENERATE PAYMENT REFERENCE NUMBER
-    |--------------------------------------------------------------------------
-    |
-    | Format:
-    | V + YY + Program Type + 4-digit sequence
-    |
-    | Mid-Year          = 001
-    | Annual Convention = 002
-    |
-    | Examples:
-    | V260010001
-    | V260020001
-    |
-    */
 
     private static function generatePaymentReferenceNumber(
         string $programCode
@@ -834,9 +736,6 @@ class CMEProgramInfolist
 
         $prefix = 'V' . $year . $typeCode;
 
-        /*
-         * Get the latest reference number for this year/type.
-         */
         $lastReference = DB::table('cme_program_registration')
             ->where(
                 'payment_ref_no',

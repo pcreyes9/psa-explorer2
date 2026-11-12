@@ -19,12 +19,6 @@ class ViewMember extends ViewRecord
 
     protected string $view = 'filament.members.view-member';
 
-    /*
-    |--------------------------------------------------------------------------
-    | Financial Records Properties
-    |--------------------------------------------------------------------------
-    */
-
     public bool $financialRecordsLoaded = false;
 
     public $financialPayments = [];
@@ -39,79 +33,61 @@ class ViewMember extends ViewRecord
 
     public $advancePayments = [];
 
-    /*
-    |--------------------------------------------------------------------------
-    | Load Financial Records
-    |--------------------------------------------------------------------------
-    |
-    | Financial records are loaded only when requested.
-    |
-    */
-
     public function loadFinancialRecords(): void
     {
         $memberId = $this->record->member_id_no;
         $memberType = $this->record->psa_mem_type;
 
-        /*
-        |--------------------------------------------------------------------------
-        | Membership Payments
-        |--------------------------------------------------------------------------
-        */
-
         $this->financialPayments = $this->record
             ->payments()
-            ->with('paymentItems.transactionTypeItem')
+            ->select([
+                'payment_ref_no',
+                'member_id_no',
+                'payment_date',
+                'or_no',
+                'payment_type',
+                'payment_total_amt',
+                'payment_discounted_amt',
+                'stat',
+                'remarks',
+            ])
+            ->with([
+                'paymentItems' => function ($query) {
+                    $query->select([
+                        'payment_ref_no',
+                        'member_id_no',
+                        'item_code',
+                        'fiscal_year',
+                        'tran_code',
+                        'amount_due',
+                    ]);
+                },
+                'paymentItems.transactionTypeItem' => function ($query) {
+                    $query->select([
+                        'item_code',
+                        'item_details',
+                        'fiscal_year',
+                    ]);
+                },
+            ])
             ->orderByDesc('payment_date')
             ->get();
-
-        /*
-        |--------------------------------------------------------------------------
-        | Archived Payments
-        |--------------------------------------------------------------------------
-        */
 
         $this->financialArchives = $this->record
             ->archivedPayments()
+            ->select([
+                'member_id_no',
+                'payment_date',
+                'or_no',
+                'payment_type',
+                'payment_total_amt',
+                'userid',
+                'remarks',
+            ])
             ->orderByDesc('payment_date')
             ->get();
 
-        /*
-        |--------------------------------------------------------------------------
-        | Existing Ledger Balances
-        |--------------------------------------------------------------------------
-        |
-        | Retained for compatibility with the existing application.
-        | The new membership ledger below does not use this table.
-        |
-        */
-
-        $this->financialBalances = MemberLedgerBalance::query()
-            ->where('member_id_no', $memberId)
-            ->orderByDesc('fiscal_year')
-            ->get();
-
-        /*
-        |--------------------------------------------------------------------------
-        | New Membership Ledger: FY2023–FY2028
-        |--------------------------------------------------------------------------
-        |
-        | Standard dues come from active transaction_type_item definitions.
-        | Payments come from active payment_items joined to active payments.
-        |
-        | This is a preliminary calculation based on the member's current
-        | membership type. Historical membership changes and special
-        | exemptions are not yet applied.
-        |
-        */
-
         $fiscalYears = range(2027, 2020);
-
-        /*
-        |--------------------------------------------------------------------------
-        | 1. Retrieve Annual Fee Components
-        |--------------------------------------------------------------------------
-        */
 
         $feeComponents = DB::table('transaction_type_item as t')
             ->selectRaw("
@@ -130,7 +106,7 @@ class ViewMember extends ViewRecord
                 SUM(t.item_amount) AS component_amount
             ")
             ->where('t.stat', 1)
-            ->whereBetween('t.fiscal_year', [2015, 2027])
+            ->whereBetween('t.fiscal_year', [2020, 2027])
             ->where(function ($query) {
                 $query->where('t.item_code', 'like', 'RM%')
                     ->orWhere('t.item_code', 'like', 'TM%')
@@ -158,12 +134,6 @@ class ViewMember extends ViewRecord
                 END
             ")
             ->get();
-
-        /*
-        |--------------------------------------------------------------------------
-        | 2. Consolidate Standard Annual Dues
-        |--------------------------------------------------------------------------
-        */
 
         $annualFees = [];
 
@@ -204,20 +174,6 @@ class ViewMember extends ViewRecord
             $annualFees[$year][$type]['standard_annual_dues'] += $amount;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | 3. Retrieve Actual Membership Payment Allocations
-        |--------------------------------------------------------------------------
-        |
-        | Important:
-        | - Use payment_items.amount_due, not payment header totals.
-        | - Use payment_items.fiscal_year for the allocated fiscal year.
-        | - Include RM, TM, and LM item codes.
-        | - Do not restrict payment item membership type to the member's
-        |   current type. Historical allocations must remain included.
-        |
-        */
-
         $paymentRows = DB::table('payment_items as pi')
             ->join('payments as p', function ($join) {
                 $join->on('p.payment_ref_no', '=', 'pi.payment_ref_no')
@@ -227,7 +183,7 @@ class ViewMember extends ViewRecord
             ->where('pi.tran_code', 'MEMF')
             ->where('pi.stat', 1)
             ->where('p.stat', 1)
-            ->whereBetween('pi.fiscal_year', [2015, 2027])
+            ->whereBetween('pi.fiscal_year', [2020, 2027])
             ->where(function ($query) {
                 $query->where('pi.item_code', 'like', 'RM%')
                     ->orWhere('pi.item_code', 'like', 'TM%')
@@ -270,12 +226,6 @@ class ViewMember extends ViewRecord
             ->groupBy('pi.fiscal_year')
             ->get()
             ->keyBy('fiscal_year');
-
-        /*
-        |--------------------------------------------------------------------------
-        | 4. Build the New Membership Ledger
-        |--------------------------------------------------------------------------
-        */
 
         $this->financialLedger = collect($fiscalYears)
             ->map(function ($year) use (
@@ -341,17 +291,6 @@ class ViewMember extends ViewRecord
                 ];
             });
 
-        /*
-        |--------------------------------------------------------------------------
-        | CME Payments
-        |--------------------------------------------------------------------------
-        |
-        | Match CME registrations to payments using:
-        | - member_id_no
-        | - payment_ref_no
-        |
-        */
-
         $this->cmePayments = DB::table('cme_program_registration as c')
             ->join('payments as p', function ($join) {
                 $join->on(
@@ -380,18 +319,6 @@ class ViewMember extends ViewRecord
             ->orderByDesc('p.payment_date')
             ->get();
 
-        /*
-        |--------------------------------------------------------------------------
-        | Mark Financial Records as Loaded
-        |--------------------------------------------------------------------------
-        */
-
-        /*
-        |--------------------------------------------------------------------------
-        | Advance Payments Grouped by Fiscal Year
-        |--------------------------------------------------------------------------
-        */
-
         $currentFiscalYear = (int) date('Y');
 
         $this->advancePayments = DB::table('payment_items as pi')
@@ -416,15 +343,9 @@ class ViewMember extends ViewRecord
             ->groupBy('pi.fiscal_year')
             ->orderBy('pi.fiscal_year')
             ->get();
-            
+
         $this->financialRecordsLoaded = true;
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Header Actions
-    |--------------------------------------------------------------------------
-    */
 
     protected function getHeaderActions(): array
     {
@@ -534,12 +455,6 @@ class ViewMember extends ViewRecord
         ];
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Page Title
-    |--------------------------------------------------------------------------
-    */
-
     public function getTitle(): string
     {
         return $this->record->member_id_no
@@ -555,12 +470,6 @@ class ViewMember extends ViewRecord
     {
         return '';
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Breadcrumbs
-    |--------------------------------------------------------------------------
-    */
 
     public function getBreadcrumbs(): array
     {
@@ -580,12 +489,6 @@ class ViewMember extends ViewRecord
             ),
         ];
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Navigation
-    |--------------------------------------------------------------------------
-    */
 
     public static function getNavigationItem(): ?string
     {

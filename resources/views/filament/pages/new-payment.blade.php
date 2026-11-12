@@ -2,10 +2,6 @@
 
     <div class="space-y-5">
 
-        {{-- ========================================= --}}
-        {{-- MEMBER INFORMATION                       --}}
-        {{-- ========================================= --}}
-
         @if ($this->selectedMember)
 
             <div class="flex items-center gap-4">
@@ -45,11 +41,6 @@
 
         @endif
 
-
-        {{-- ========================================= --}}
-        {{-- PAYMENT INFORMATION                       --}}
-        {{-- ========================================= --}}
-
         <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-900">
 
             <div class="mb-5">
@@ -66,20 +57,16 @@
 
             {{ $this->form }}
 
-            {{-- ACTION BUTTONS --}}
-
             <div class="mt-5 flex flex-wrap justify-end gap-2">
 
                 {{ $this->transactionItemsAction }}
 
-                {{-- Confirmation modal + disabled state live in postPaymentAction() --}}
                 {{ $this->postPaymentAction }}
 
             </div>
 
         </div>
 
-        {{-- Errors from postPayment() (e.g. overpayment, item no longer available) --}}
         @error('selectedItems')
             <p class="text-sm font-medium text-danger-600 dark:text-danger-400">
                 {{ $message }}
@@ -88,16 +75,9 @@
 
     </div>
 
-
-    {{-- ========================================= --}}
-    {{-- SELECTED TRANSACTION ITEMS                --}}
-    {{-- ========================================= --}}
-
     @if (count($this->selectedItems))
 
         <div class="mt-4 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900">
-
-            {{-- TABLE HEADER --}}
 
             <div class="border-b border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-800">
 
@@ -110,9 +90,6 @@
                 </p>
 
             </div>
-
-
-            {{-- TABLE --}}
 
             <div class="overflow-x-auto">
 
@@ -150,7 +127,6 @@
 
                     </thead>
 
-
                     <tbody>
 
                         @foreach ($this->selectedItems as $key => $item)
@@ -160,21 +136,13 @@
                                 class="border-t border-gray-200 dark:border-gray-700"
                             >
 
-                                {{-- FISCAL YEAR --}}
-
                                 <td class="p-3 font-medium whitespace-nowrap">
                                     {{ $item['fiscal_year'] }}
                                 </td>
 
-
-                                {{-- ITEM CODE --}}
-
                                 <td class="p-3 font-medium whitespace-nowrap">
                                     {{ $item['item_code'] }}
                                 </td>
-
-
-                                {{-- DESCRIPTION --}}
 
                                 <td class="p-3 min-w-48">
 
@@ -191,18 +159,11 @@
 
                                 </td>
 
-
-                                {{-- AMOUNT DUE --}}
-
                                 <td class="p-3 text-right whitespace-nowrap">
 
                                     ₱{{ number_format((float) ($item['amount_due'] ?? 0), 2) }}
 
                                 </td>
-
-
-                                {{-- AMOUNT PAYING --}}
-                                {{-- Syncs shortly after typing or using the spinner arrows. updatedSelectedItems() clamps the value and recalculates the total. --}}
 
                                 <td class="p-3 text-right">
 
@@ -223,9 +184,6 @@
                                     </div>
 
                                 </td>
-
-
-                                {{-- ACTION --}}
 
                                 <td class="p-3 text-center">
 
@@ -253,9 +211,6 @@
 
                     </tbody>
 
-
-                    {{-- TOTAL PAYMENT --}}
-
                     <tfoot>
 
                         <tr class="border-t border-gray-200 bg-blue-50 font-semibold dark:border-gray-700 dark:bg-blue-900/20">
@@ -282,10 +237,7 @@
 
         </div>
 
-
     @else
-
-        {{-- EMPTY STATE --}}
 
         <div class="mt-4 rounded-xl border border-dashed border-gray-300 bg-white p-8 text-center dark:border-gray-700 dark:bg-gray-900">
 
@@ -304,12 +256,6 @@
         </div>
 
     @endif
-
-
-    {{-- ========================================= --}}
-    {{-- WARN BEFORE LEAVING WITH SELECTED ITEMS   --}}
-    {{-- ========================================= --}}
-    {{-- Alpine listener exists only while items are selected, so it is removed automatically after posting. --}}
 
     @if (count($this->selectedItems))
 

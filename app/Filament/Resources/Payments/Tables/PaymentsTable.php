@@ -7,7 +7,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use App\Models\Payment;
 
-
 class PaymentsTable
 {
     public static function configure(Table $table): Table
@@ -43,11 +42,6 @@ class PaymentsTable
                     ->alignEnd()
                     ->sortable(),
 
-                // TextColumn::make('payment_type')
-                //     ->label('Payment Type')
-                //     ->badge()
-                //     ->sortable(),
-
                 TextColumn::make('payment_date')
                     ->label('Payment Date')
                     ->date('M d, Y')
@@ -56,11 +50,6 @@ class PaymentsTable
                 TextColumn::make('userid')
                     ->label('Processed By'),
 
-                // TextColumn::make('stat')
-                //     ->label('Status')
-                //     ->badge()
-                //     ->formatStateUsing(fn ($state) => $state ? 'Posted' : 'Cancelled'),
-
             ])
 
             ->recordAction('view')
@@ -68,7 +57,7 @@ class PaymentsTable
             ->recordActions([
 
                 Action::make('view')
-                    // ->hidden()
+
                     ->modalHeading('Payment Details')
                     ->modalWidth('4xl')
                     ->modalSubmitAction(false)

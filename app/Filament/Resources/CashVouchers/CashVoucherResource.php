@@ -44,12 +44,6 @@ class CashVoucherResource extends Resource
         return $schema
             ->components([
 
-                /*
-                |--------------------------------------------------------------------------
-                | VOUCHER INFORMATION
-                |--------------------------------------------------------------------------
-                */
-
                 Section::make('Voucher Information')
                     ->columnSpanFull()
                     ->schema([
@@ -114,36 +108,8 @@ class CashVoucherResource extends Resource
                             ->maxLength(255)
                             ->columnSpan(3),
 
-
                     ])
                     ->columns(6),
-
-                // Section::make('Signatories')
-                //     ->schema([
-
-                //         TextInput::make('approved_by')
-                //             ->label('Approved By')
-                //             ->default('FB MAYUGA, MD')
-                //             ->maxLength(255),
-
-                //         TextInput::make('checked_by')
-                //             ->label('Checked By')
-                //             ->default('CS LUNAS, MD')
-                //             ->maxLength(255),
-
-                //         TextInput::make('received_by')
-                //             ->label('Received By')
-                //             ->maxLength(255),
-
-                //     ])
-                //     ->columns(3),
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | ITEMS
-                |--------------------------------------------------------------------------
-                */
 
                 Section::make('Voucher Items')
                     ->description(
@@ -169,7 +135,6 @@ class CashVoucherResource extends Resource
                                 $set('total_amount', $total);
                             })
 
-                            // Prevent adding another item if an existing one is incomplete
                             ->addable(fn (Get $get) => collect($get('items') ?? [])
                                 ->every(fn ($item) =>
                                     filled(trim($item['description'] ?? ''))
@@ -233,43 +198,8 @@ class CashVoucherResource extends Resource
 
                     ]),
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | TOTAL
-                |--------------------------------------------------------------------------
-                */
-
-                // Section::make('Voucher Total')
-                //     ->schema([
-
-                //         TextInput::make('total_amount')
-                //             ->label('Total Amount')
-                //             ->numeric()
-                //             ->prefix('₱')
-                //             ->readOnly()
-                //             ->dehydrated(),
-
-                //     ]),
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | SIGNATORIES
-                |--------------------------------------------------------------------------
-                */
-
-
-
             ]);
     }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | TABLE
-    |--------------------------------------------------------------------------
-    */
 
     public static function table(Table $table): Table
     {
@@ -377,13 +307,6 @@ class CashVoucherResource extends Resource
                 ]),
             ]);
     }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | RELATIONS
-    |--------------------------------------------------------------------------
-    */
 
     public static function mutateFormDataBeforeCreate(array $data): array
     {

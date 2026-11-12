@@ -214,7 +214,6 @@
 
                 and is classified as <span class="inline-underline">&emsp; {{ $membershipType }} &emsp;</span>
 
-
                 of the Philippine Society of
                 Anesthesiologists, Inc. He/She is also a member of the
                 World Federation of Societies of

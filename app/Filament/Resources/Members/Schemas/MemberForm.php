@@ -33,8 +33,6 @@ class MemberForm
 
                                 TextInput::make('mem_middle_name'),
 
-                                // TextInput::make('mem_suffix'),
-
                                 DatePicker::make('mem_birth_date'),
 
                                 TextInput::make('mem_birth_place'),

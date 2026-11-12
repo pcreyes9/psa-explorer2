@@ -21,10 +21,22 @@ class CertificateOfGoodStanding extends Page
     {
         $memberId = request()->query('member');
 
-        $this->member = Member::where(
-            'member_id_no',
-            $memberId
-        )->firstOrFail();
+        $this->member = Member::query()
+            ->select([
+                'member_id_no',
+                'mem_first_name',
+                'mem_middle_name',
+                'mem_last_name',
+                'psa_mem_stat',
+                'psa_mem_type',
+                'psa_chapter_code',
+            ])
+            ->with([
+                'membershipType:Memtypecode,Memtype',
+                'chapter:psa_chapter_code,psa_chapter_desc',
+            ])
+            ->whereKey($memberId)
+            ->firstOrFail();
     }
 
     public function generate(): void

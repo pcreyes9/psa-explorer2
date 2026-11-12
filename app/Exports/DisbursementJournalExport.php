@@ -21,31 +21,16 @@ class DisbursementJournalExport implements
     WithCustomStartCell
 {
     protected string $date;
-    
 
     public function __construct(string $date)
     {
         $this->date = $date;
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | DATA STARTS AT ROW 4
-    |--------------------------------------------------------------------------
-    */
-
     public function startCell(): string
     {
         return 'A4';
     }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | DATA
-    |--------------------------------------------------------------------------
-    */
 
     public function collection()
     {
@@ -62,12 +47,6 @@ class DisbursementJournalExport implements
 
         foreach ($vouchers as $voucher) {
 
-            /*
-            |--------------------------------------------------------------------------
-            | PAYEE ROW
-            |--------------------------------------------------------------------------
-            */
-
             $rows->push([
                 $voucher->date->format('n j Y'),
                 strtoupper($voucher->pay_to),
@@ -77,13 +56,6 @@ class DisbursementJournalExport implements
                 null,
                 null,
             ]);
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | ITEM ROWS
-            |--------------------------------------------------------------------------
-            */
 
             $items = $voucher->items;
 
@@ -118,13 +90,6 @@ class DisbursementJournalExport implements
         return $rows;
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | STYLES
-    |--------------------------------------------------------------------------
-    */
-
     public function styles(Worksheet $sheet)
     {
         return [
@@ -158,13 +123,6 @@ class DisbursementJournalExport implements
         ];
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | COLUMN WIDTHS
-    |--------------------------------------------------------------------------
-    */
-
     public function columnWidths(): array
     {
         return [
@@ -178,13 +136,6 @@ class DisbursementJournalExport implements
         ];
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | EVENTS
-    |--------------------------------------------------------------------------
-    */
-
     public function registerEvents(): array
     {
         return [
@@ -193,26 +144,12 @@ class DisbursementJournalExport implements
 
                 $sheet = $event->sheet->getDelegate();
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | TITLE
-                |--------------------------------------------------------------------------
-                */
-
                 $sheet->mergeCells('A1:G1');
 
                 $sheet->setCellValue(
                     'A1',
                     'DISBURSEMENT 2026'
                 );
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | HEADER
-                |--------------------------------------------------------------------------
-                */
 
                 $sheet->setCellValue('A3', 'DATE');
                 $sheet->setCellValue('B3', 'PARTICULARS');
@@ -222,13 +159,6 @@ class DisbursementJournalExport implements
                 $sheet->setCellValue('F3', 'Check replacement');
                 $sheet->setCellValue('G3', 'AMOUNT');
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | GENERAL FONT
-                |--------------------------------------------------------------------------
-                */
-
                 $highestRow = $sheet->getHighestRow();
 
                 $sheet
@@ -237,13 +167,6 @@ class DisbursementJournalExport implements
                     ->setName('Calibri')
                     ->setSize(12);
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | HEADER BORDERS
-                |--------------------------------------------------------------------------
-                */
-
                 $sheet
                     ->getStyle('A3:G3')
                     ->getBorders()
@@ -251,13 +174,6 @@ class DisbursementJournalExport implements
                     ->setBorderStyle(
                         Border::BORDER_THIN
                     );
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | HEADER ALIGNMENT
-                |--------------------------------------------------------------------------
-                */
 
                 $sheet
                     ->getStyle('A3:G3')
@@ -268,13 +184,6 @@ class DisbursementJournalExport implements
                     ->setVertical(
                         Alignment::VERTICAL_CENTER
                     );
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | AMOUNT FORMAT
-                |--------------------------------------------------------------------------
-                */
 
                 if ($highestRow >= 4) {
 
@@ -290,13 +199,6 @@ class DisbursementJournalExport implements
                             Alignment::HORIZONTAL_RIGHT
                         );
 
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | VOUCHER / CHECK ALIGNMENT
-                    |--------------------------------------------------------------------------
-                    */
-
                     $sheet
                         ->getStyle("C4:D{$highestRow}")
                         ->getAlignment()
@@ -304,13 +206,6 @@ class DisbursementJournalExport implements
                             Alignment::HORIZONTAL_RIGHT
                         );
                 }
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | ROW HEIGHT
-                |--------------------------------------------------------------------------
-                */
 
                 for ($row = 1; $row <= $highestRow; $row++) {
 
@@ -327,21 +222,7 @@ class DisbursementJournalExport implements
                     ->getRowDimension(3)
                     ->setRowHeight(20);
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | FREEZE HEADER
-                |--------------------------------------------------------------------------
-                */
-
                 $sheet->freezePane('A4');
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | PAGE SETUP
-                |--------------------------------------------------------------------------
-                */
 
                 $sheet
                     ->getPageSetup()
@@ -353,13 +234,6 @@ class DisbursementJournalExport implements
                     ->getPageSetup()
                     ->setFitToWidth(1)
                     ->setFitToHeight(0);
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | PAGE MARGINS
-                |--------------------------------------------------------------------------
-                */
 
                 $sheet
                     ->getPageMargins()

@@ -41,13 +41,11 @@ class AdminPanelProvider extends PanelProvider
                 'Administration',
             ])
 
-            // Display the configured database name in the top navigation bar.
             ->renderHook(
                 PanelsRenderHook::TOPBAR_END,
                 fn () => view('filament.components.database-name')
             )
 
-            // Global loading components.
             ->renderHook(
                 PanelsRenderHook::BODY_END,
                 fn () => view('components.global-loader')

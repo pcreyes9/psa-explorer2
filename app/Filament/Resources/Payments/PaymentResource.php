@@ -35,7 +35,7 @@ class PaymentResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+
         ];
     }
 
@@ -59,16 +59,8 @@ class PaymentResource extends Resource
         return [
             'index' => ListPayments::route('/'),
             'create' => CreatePayment::route('/create'),
-            // 'edit' => EditPayment::route('/{record}/edit'),
+
         ];
     }
 
-    // public static function getNavigationLabel(): string
-    // {
-    //     return 'Payment History';
-    // }
-    // public static function getNavigationGroup(): ?string
-    // {
-    //     return 'Payments';
-    // }
 }

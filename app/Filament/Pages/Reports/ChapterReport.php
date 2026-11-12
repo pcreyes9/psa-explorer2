@@ -37,17 +37,11 @@ class ChapterReport extends Page
         $this->asOfDate = now()->toDateString();
     }
 
-    /**
-     * Refresh the report when the as-of date changes.
-     */
     public function updatedAsOfDate(): void
     {
         $this->resetPageData();
     }
 
-    /**
-     * Reset report data until the validated calculation is connected.
-     */
     protected function resetPageData(): void
     {
         $this->summary = [
@@ -61,7 +55,7 @@ class ChapterReport extends Page
 
     public function generateReport(): void
     {
-        
+
         $this->validate([
             'asOfDate' => ['required', 'date', 'before_or_equal:today'],
         ]);

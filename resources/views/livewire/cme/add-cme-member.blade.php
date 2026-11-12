@@ -1,6 +1,5 @@
-
 <div>
-    {{-- Add Member Button --}}
+
     <div class="flex justify-end">
         <x-filament::button
             wire:click="openModal"
@@ -10,24 +9,22 @@
         </x-filament::button>
     </div>
 
-    {{-- Modal --}}
     @if ($showModal)
         <div
             class="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6"
             wire:key="add-member-modal-{{ $programCode }}"
         >
-            {{-- Backdrop --}}
+
             <div
                 class="absolute inset-0 bg-gray-950/60 backdrop-blur-sm"
                 wire:click="closeModal"
             ></div>
 
-            {{-- Modal Container --}}
             <div
                 class="relative z-10 flex w-full max-w-lg max-h-[90vh] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-gray-950/10 dark:bg-gray-900 dark:ring-white/10"
                 wire:click.stop
             >
-                {{-- Header --}}
+
                 <div class="flex items-start justify-between border-b border-gray-200 px-6 py-5 dark:border-gray-700">
                     <div>
                         <h2 class="text-lg font-semibold text-gray-950 dark:text-white">
@@ -49,12 +46,10 @@
                     </button>
                 </div>
 
-                {{-- Modal Body --}}
                 <div class="flex-1 space-y-5 overflow-y-auto px-6 py-6">
 
                     @if (!$selectedMemberId)
 
-                        {{-- Member Search --}}
                         <div>
                             <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Search PSA Member
@@ -85,7 +80,6 @@
                             </p>
                         </div>
 
-                        {{-- Search Results --}}
                         @if (strlen(trim($search)) >= 2)
                             <div class="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700">
 
@@ -143,7 +137,6 @@
 
                     @else
 
-                        {{-- Selected Member --}}
                         @if ($selectedMemberData)
                             <div class="rounded-xl border border-primary-200 bg-primary-50/70 p-4 dark:border-primary-500/30 dark:bg-primary-500/10">
                                 <div class="flex items-start justify-between gap-4">
@@ -182,7 +175,6 @@
                             </div>
                         @endif
 
-                        {{-- Payment Reference Number --}}
                         <div>
                             <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Payment Reference Number
@@ -210,7 +202,6 @@
 
                 </div>
 
-                {{-- Footer --}}
                 <div class="flex flex-col-reverse gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4 sm:flex-row sm:justify-end dark:border-gray-700 dark:bg-gray-900">
                     <x-filament::button
                         color="gray"

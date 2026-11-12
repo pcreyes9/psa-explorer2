@@ -1,7 +1,6 @@
 <x-filament::section>
     <div class="flex items-start gap-10">
 
-        {{-- Profile Photo --}}
         <div class="shrink-0">
             <img
                 src="{{ $record->photo_url }}"
@@ -9,7 +8,6 @@
                 class="h-45 w-45 rounded-full border-4 border-gray-300 object-cover object-[50%_20%] shadow-sm"        >
         </div>
 
-        {{-- Member Details --}}
         <div class="flex-1 pt-2">
 
             <h2 class="text-3xl font-bold tracking-tight">
@@ -20,7 +18,6 @@
                 PSA ID #{{ $record->member_id_no }}
             </p>
 
-            {{-- Membership Badges --}}
             <div class="mt-5 flex flex-wrap gap-2">
 
                 <x-filament::badge color="success">
@@ -41,7 +38,6 @@
 
             </div>
 
-            {{-- Quick Information --}}
             <div class="mt-8 grid grid-cols-4 gap-x-16 gap-y-5">
 
                 <div>

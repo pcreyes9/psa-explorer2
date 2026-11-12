@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,8 +12,6 @@
 
     <div class="brand-bar"></div>
 
-    {{-- PSA LETTERHEAD --}}
-    
     <table class="letterhead">
         <tr>
             <td width="15%" class="logo-cell">
@@ -44,8 +41,6 @@
         </tr>
     </table>
 
-
-    {{-- DOCUMENT TITLE --}}
     <div class="document-heading">
         <h1>STATEMENT OF ACCOUNT</h1>
         <p>
@@ -55,9 +50,8 @@
         </p>
     </div>
 
-    {{-- MEMBER DETAILS --}}
     <table class="member-card">
-        {{-- ROW 1: MEMBER NAME AND ADDRESS --}}
+
         <tr>
             <td width="40%">
                 <span class="field-label">Member Name</span>
@@ -78,7 +72,6 @@
             </td>
         </tr>
 
-        {{-- ROW 2: OTHER MEMBER DETAILS --}}
         <tr>
             <td width="20%">
                 <span class="field-label">Email Address</span>
@@ -110,7 +103,6 @@
         </tr>
     </table>
 
-    {{-- DUES TABLE --}}
     <div class="section-heading">
         Outstanding Membership Dues
     </div>
@@ -173,7 +165,6 @@
         </table>
     @endif
 
-    {{-- FOOTER --}}
     <div class="footer">
         <div class="footer-rule"></div>
 

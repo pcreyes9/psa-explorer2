@@ -38,8 +38,7 @@ class CheckVoucher extends Page
 
     public function printVoucher()
     {
-        // Add your voucher PDF generation here.
-        //  dd($this->items);
+
          $items = collect($this->items)
             ->map(function ($item) {
                 return [

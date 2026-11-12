@@ -112,9 +112,6 @@
     }"
     @keydown.escape.window="closePaymentModal()"
 >
-    {{-- ========================================================= --}}
-    {{-- MEMBERSHIP DUES LEDGER                                   --}}
-    {{-- ========================================================= --}}
 
     <div class="overflow-x-auto">
 
@@ -277,10 +274,6 @@
 
             </table>
 
-            {{-- ================================================= --}}
-            {{-- ADVANCE PAYMENT                                   --}}
-            {{-- ================================================= --}}
-
             <div class="mt-8">
 
                 <h3 class="mb-3 text-lg font-bold text-red-600">
@@ -363,10 +356,6 @@
 
     </div>
 
-    {{-- ========================================================= --}}
-    {{-- MEMBERSHIP PAYMENT DETAILS MODAL                         --}}
-    {{-- ========================================================= --}}
-
     <div
         x-cloak
         x-show="showPaymentModal"
@@ -376,10 +365,8 @@
         @click.self="closePaymentModal()"
     >
 
-        {{-- Backdrop --}}
         <div class="absolute inset-0 bg-gray-950/60"></div>
 
-        {{-- Modal --}}
         <div
             x-show="showPaymentModal"
             x-transition
@@ -389,7 +376,6 @@
             @click.stop
         >
 
-            {{-- Modal Header --}}
             <div class="flex items-center justify-between border-b
                         border-gray-200 px-6 py-4 dark:border-gray-700">
 
@@ -425,7 +411,6 @@
 
             </div>
 
-            {{-- Summary Cards --}}
             <div class="grid grid-cols-1 gap-3 border-b border-gray-200
                         p-6 sm:grid-cols-3 dark:border-gray-700">
 
@@ -475,7 +460,6 @@
 
             </div>
 
-            {{-- Individual Payment Transactions --}}
             <div class="flex-1 overflow-y-auto p-6">
 
                 <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -661,7 +645,6 @@
 
             </div>
 
-            {{-- Modal Footer --}}
             <div class="flex justify-end border-t border-gray-200
                         px-6 py-4 dark:border-gray-700">
 
@@ -678,9 +661,6 @@
 
     </div>
 
-    {{-- ========================================================= --}}
-    {{-- INDIVIDUAL PAYMENT TRANSACTION DETAILS MODAL              --}}
-    {{-- ========================================================= --}}
     <div
         x-cloak
         x-show="selectedPayment !== null"
@@ -696,7 +676,7 @@
                    overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-gray-900"
             @click.stop
         >
-            {{-- Header --}}
+
             <div class="flex items-center justify-between border-b border-gray-200
                         px-6 py-4 dark:border-gray-700">
                 <h2 class="text-lg font-bold text-gray-900 dark:text-white">
@@ -714,7 +694,6 @@
                 </button>
             </div>
 
-            {{-- Transaction information --}}
             <div class="flex-1 space-y-6 overflow-y-auto p-6">
                 <div class="grid grid-cols-1 gap-5 text-sm sm:grid-cols-2">
                     <div>
@@ -744,7 +723,6 @@
 
                 <hr class="border-gray-200 dark:border-gray-700">
 
-                {{-- Itemized payment breakdown --}}
                 <div>
                     <h3 class="mb-3 text-base font-bold text-gray-900 dark:text-white">
                         Payment Breakdown
@@ -799,7 +777,6 @@
                 </div>
             </div>
 
-            {{-- Footer --}}
             <div class="flex justify-end border-t border-gray-200 bg-gray-50
                         px-6 py-4 dark:border-gray-700 dark:bg-gray-900">
                 <x-filament::button

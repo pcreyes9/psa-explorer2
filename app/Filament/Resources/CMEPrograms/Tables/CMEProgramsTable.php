@@ -28,10 +28,6 @@ class CMEProgramsTable
                     ->label('Year')
                     ->sortable(),
 
-                // TextColumn::make('cme_program_type')
-                //     ->label('Program Type')
-                //     ->searchable(),
-
                 TextColumn::make('cme_title')
                     ->label('Program Title')
                     ->searchable()
@@ -46,10 +42,6 @@ class CMEProgramsTable
                     ->label('End Date')
                     ->date()
                     ->sortable(),
-
-                // IconColumn::make('stat')
-                //     ->label('Active')
-                //     ->boolean(),
 
             ])
             ->actions([

@@ -26,12 +26,6 @@ class CMERegistrationSheet implements
     {
         $rows = collect();
 
-        /*
-        |--------------------------------------------------------------------------
-        | RM / TM / LM
-        |--------------------------------------------------------------------------
-        */
-
         $memberRegistrations = DB::table('cme_program_registration as r')
             ->join(
                 'member as m',
@@ -79,12 +73,6 @@ class CMERegistrationSheet implements
                 'payment_ref_no'    => $registration->payment_ref_no ?: '-',
             ]);
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | NM
-        |--------------------------------------------------------------------------
-        */
 
         $nmRegistrations = DB::table('cme_program_registrationNM')
             ->where(
@@ -139,21 +127,9 @@ class CMERegistrationSheet implements
             ]);
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Sort by Registration Date - Newest First
-        |--------------------------------------------------------------------------
-        */
-
         $rows = $rows
             ->sortByDesc('registration_date')
             ->values();
-
-        /*
-        |--------------------------------------------------------------------------
-        | Prepare Excel Rows
-        |--------------------------------------------------------------------------
-        */
 
         return $rows->map(
             function ($row, $index) {

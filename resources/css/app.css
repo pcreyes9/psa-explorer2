@@ -8,12 +8,6 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
 }
 
-/*
-|--------------------------------------------------------------------------
-| PSA Explorer Loading Screen
-|--------------------------------------------------------------------------
-*/
-
 .logo-float {
     animation: logoFloat 2.5s ease-in-out infinite;
 }

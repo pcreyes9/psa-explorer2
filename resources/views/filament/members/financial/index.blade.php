@@ -3,15 +3,10 @@
         Financial Records
     </x-slot>
 
-    <div x-data="{ tab: 'summary' }">
-
-        {{-- ========================================================= --}}
-        {{-- TAB NAVIGATION --}}
-        {{-- ========================================================= --}}
+    <div>
 
         <div class="flex gap-6 overflow-x-auto border-b border-gray-200 dark:border-gray-700">
 
-            {{-- Membership Dues --}}
             <button
                 type="button"
                 @click="tab = 'summary'"
@@ -24,7 +19,6 @@
                 Membership Dues
             </button>
 
-            {{-- CME Payments --}}
             <button
                 type="button"
                 @click="tab = 'cme-payments'"
@@ -37,7 +31,6 @@
                 CME Payments
             </button>
 
-            {{-- Payment History --}}
             <button
                 type="button"
                 @click="tab = 'payments'"
@@ -50,7 +43,6 @@
                 Payment History
             </button>
 
-            {{-- Archive History --}}
             <button
                 type="button"
                 @click="tab = 'archive'"
@@ -65,11 +57,6 @@
 
         </div>
 
-
-        {{-- ========================================================= --}}
-        {{-- MEMBERSHIP DUES --}}
-        {{-- ========================================================= --}}
-
         <div
             x-show="tab === 'summary'"
             x-cloak
@@ -82,12 +69,7 @@
             ])
         </div>
 
-
-        {{-- ========================================================= --}}
-        {{-- CME PAYMENTS --}}
-        {{-- ========================================================= --}}
-
-        {{-- <div
+        <div
             x-show="tab === 'cme-payments'"
             x-cloak
             class="mt-6"
@@ -96,12 +78,7 @@
                 'record' => $record,
                 'cmePayments' => $cmePayments,
             ])
-        </div> --}}
-
-
-        {{-- ========================================================= --}}
-        {{-- PAYMENT HISTORY --}}
-        {{-- ========================================================= --}}
+        </div>
 
         <div
             x-show="tab === 'payments'"
@@ -114,17 +91,12 @@
             ])
         </div>
 
-
-        {{-- ========================================================= --}}
-        {{-- ARCHIVE HISTORY --}}
-        {{-- ========================================================= --}}
-
         <div
             x-show="tab === 'archive'"
             x-cloak
             class="mt-6"
         >
-            {{-- Temporary diagnostic --}}
+
             <div class="mb-4 rounded-lg bg-yellow-50 p-3 text-sm text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300">
                 Archive records received: {{ $archives->count() }}
             </div>

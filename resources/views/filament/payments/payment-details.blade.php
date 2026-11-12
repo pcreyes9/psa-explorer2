@@ -1,6 +1,5 @@
 <div class="space-y-6">
 
-    {{-- Payment & Member Information --}}
     <div class="grid grid-cols-2 md:grid-cols-2 gap-6">
 
         <x-filament::section heading="Payment Information">
@@ -56,7 +55,6 @@
 
     </div>
 
-    {{-- Payment Breakdown --}}
     <x-filament::section heading="Payment Breakdown">
 
         <div class="overflow-auto max-h-80 rounded-lg border">

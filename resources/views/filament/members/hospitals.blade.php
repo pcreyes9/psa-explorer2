@@ -45,14 +45,12 @@
 
         </thead>
 
-
         <tbody>
 
             @forelse ($hospitals as $hospital)
 
                 <tr class="border-t hover:bg-gray-50 dark:hover:bg-gray-800 transition">
 
-                    {{-- Hospital --}}
                     <td class="p-3">
 
                         <div class="font-semibold">
@@ -63,48 +61,36 @@
 
                     </td>
 
-
-                    {{-- Designation --}}
                     <td class="p-3">
 
                         {{ $hospital->hosp_designation ?: '-' }}
 
                     </td>
 
-
-                    {{-- Address --}}
                     <td class="p-3">
 
                         {{ $hospital->hosp_address ?: '-' }}
 
                     </td>
 
-
-                    {{-- Days --}}
                     <td class="p-3 whitespace-nowrap">
 
                         {{ $hospital->hosp_days ?: '-' }}
 
                     </td>
 
-
-                    {{-- Hours --}}
                     <td class="p-3 whitespace-nowrap">
 
                         {{ $hospital->hosp_hours ?: '-' }}
 
                     </td>
 
-
-                    {{-- Telephone --}}
                     <td class="p-3 whitespace-nowrap">
 
                         {{ $hospital->hosp_tel_no ?: '-' }}
 
                     </td>
 
-
-                    {{-- Primary --}}
                     <td class="p-3 text-center">
 
                         @if ($hospital->hosp_primary)

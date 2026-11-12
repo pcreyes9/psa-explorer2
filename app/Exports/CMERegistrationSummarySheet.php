@@ -21,11 +21,6 @@ class CMERegistrationSummarySheet implements
 
     public function array(): array
     {
-        /*
-        |--------------------------------------------------------------------------
-        | RM / TM / LM
-        |--------------------------------------------------------------------------
-        */
 
         $memberCounts = DB::table('cme_program_registration as r')
             ->join(
@@ -52,13 +47,6 @@ class CMERegistrationSummarySheet implements
         $tm = (int) ($memberCounts['TM'] ?? 0);
         $lm = (int) ($memberCounts['LM'] ?? 0);
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | NM
-        |--------------------------------------------------------------------------
-        */
-
         $nm = DB::table('cme_program_registrationNM')
             ->where(
                 'cme_program_code',
@@ -66,9 +54,7 @@ class CMERegistrationSummarySheet implements
             )
             ->count();
 
-
         $total = $rm + $tm + $lm + $nm;
-
 
         return [
             ['CME REGISTRATION SUMMARY'],

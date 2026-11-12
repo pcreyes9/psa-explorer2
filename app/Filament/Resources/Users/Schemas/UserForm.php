@@ -54,12 +54,10 @@ class UserForm
                                     return false;
                                 }
 
-                                // Cannot edit your own roles
                                 if (auth()->id() === $record->id) {
                                     return true;
                                 }
 
-                                // Only Super Admin can modify a Super Admin's roles
                                 if (
                                     $record->hasRole('Super Admin') &&
                                     ! auth()->user()?->hasRole('Super Admin')

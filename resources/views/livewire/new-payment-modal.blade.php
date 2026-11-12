@@ -1,4 +1,3 @@
-
 <div
     class="pm"
     x-data="{
@@ -29,7 +28,7 @@
 
         openPicker() {
             this.checked = [];
-            this.pickerOpen = ! this.pickerOpen;
+            this.pickerOpen = true;
         },
 
         toggleKeys(selector) {
@@ -41,13 +40,13 @@
                 && keys.every((key) => this.checked.includes(key));
 
             this.checked = allTicked
-                ? this.checked.filter((key) => ! keys.includes(key))
+                ? this.checked.filter((key) => !keys.includes(key))
                 : [...new Set([...this.checked, ...keys])];
         },
 
         toggleGroup(keys) {
             const availableKeys = keys.filter(
-                (key) => ! this.isAdded(key)
+                (key) => !this.isAdded(key)
             );
 
             if (availableKeys.length === 0) return;
@@ -57,13 +56,16 @@
             );
 
             this.checked = allTicked
-                ? this.checked.filter((key) => ! availableKeys.includes(key))
+                ? this.checked.filter((key) => !availableKeys.includes(key))
                 : [...new Set([...this.checked, ...availableKeys])];
         },
 
         addChecked() {
             this.$wire.selected = [
-                ...new Set([...this.$wire.selected, ...this.checked])
+                ...new Set([
+                    ...this.$wire.selected,
+                    ...this.checked
+                ])
             ];
 
             this.checked = [];
@@ -172,17 +174,69 @@
             background: color-mix(in srgb, currentColor 5%, transparent);
         }
 
-        .pm-picker {
-            margin: 1rem;
-            border: 1px solid color-mix(in srgb, #3b82f6 45%, transparent);
-            border-radius: .75rem;
-            overflow: hidden;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, .12);
+        /* Separate transaction items modal */
+
+        .pm-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background: rgba(0, 0, 0, .55);
+            backdrop-filter: blur(2px);
         }
 
-        .pm-picker-scroll {
-            max-height: 18rem;
-            overflow: auto;
+        .pm-modal {
+            display: flex;
+            flex-direction: column;
+            width: min(100%, 950px);
+            max-height: 90vh;
+            overflow: hidden;
+            border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+            border-radius: 1rem;
+            background: var(--fi-modal-window-bg, white);
+            color: inherit;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, .25);
+        }
+
+        .pm-modal-header,
+        .pm-modal-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: .75rem;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+        }
+
+        .pm-modal-footer {
+            justify-content: flex-end;
+            border-top: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+            border-bottom: 0;
+        }
+
+        .pm-modal-content {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+        }
+
+        .pm-modal-title {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        @media (max-width: 640px) {
+            .pm-modal-backdrop {
+                padding: .5rem;
+            }
+
+            .pm-modal {
+                max-height: 95vh;
+            }
         }
 
         .pm-btns {
@@ -339,30 +393,6 @@
             white-space: nowrap;
         }
 
-        .pm-added {
-            display: flex;
-            flex-direction: column;
-            gap: .35rem;
-            padding: .85rem;
-            border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
-            border-radius: .75rem;
-            background: color-mix(in srgb, currentColor 3%, transparent);
-        }
-
-        .pm-amount-full {
-            width: 100%;
-        }
-
-        .pm-total {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: .75rem 1rem;
-            font-weight: 600;
-            border-top: 1px solid color-mix(in srgb, currentColor 18%, transparent);
-            background: color-mix(in srgb, #3b82f6 10%, transparent);
-        }
-
         .pm-footer {
             display: flex;
             flex-wrap: wrap;
@@ -384,42 +414,8 @@
         }
     </style>
 
-
-    {{-- ========================================= --}}
-    {{-- PAYMENT INFORMATION                       --}}
-    {{-- ========================================= --}}
-
     <div>
         <div class="pm-grid">
-
-            {{-- Fiscal Year --}}
-
-            <div>
-                <label class="pm-label" for="pm-fiscal-year">
-                    Fiscal Year
-                </label>
-
-                <x-filament::input.wrapper>
-                    <x-filament::input.select
-                        id="pm-fiscal-year"
-                        wire:model.live="fiscalYear"
-                        x-on:change="checked = []; pickerOpen = false"
-                    >
-                        @foreach ($this->fiscalYears as $year)
-                            <option value="{{ $year }}">
-                                {{ $year }}
-                            </option>
-                        @endforeach
-                    </x-filament::input.select>
-                </x-filament::input.wrapper>
-
-                @error('fiscalYear')
-                    <p class="pm-error">{{ $message }}</p>
-                @enderror
-            </div>
-
-
-            {{-- Payment Date --}}
 
             <div>
                 <label class="pm-label" for="pm-date">
@@ -438,9 +434,6 @@
                     <p class="pm-error">{{ $message }}</p>
                 @enderror
             </div>
-
-
-            {{-- Payment Method --}}
 
             <div>
                 <label class="pm-label" for="pm-type">
@@ -463,9 +456,6 @@
                 @enderror
             </div>
 
-
-            {{-- Official Receipt Number --}}
-
             <div>
                 <label class="pm-label" for="pm-or">
                     Official Receipt Number
@@ -485,9 +475,6 @@
                 @enderror
             </div>
 
-
-            {{-- Check Number --}}
-
             <div x-show="$wire.paymentType === 'Check'" x-cloak>
                 <label class="pm-label" for="pm-check">
                     Check Number
@@ -506,9 +493,6 @@
                     <p class="pm-error">{{ $message }}</p>
                 @enderror
             </div>
-
-
-            {{-- Bank Name --}}
 
             <div
                 x-show="['Check', 'Bank Transfer'].includes($wire.paymentType)"
@@ -532,9 +516,6 @@
                 @enderror
             </div>
 
-
-            {{-- Bank Transfer Reference Number --}}
-
             <div
                 x-show="$wire.paymentType === 'Bank Transfer'"
                 x-cloak
@@ -556,9 +537,6 @@
                     <p class="pm-error">{{ $message }}</p>
                 @enderror
             </div>
-
-
-            {{-- Remarks --}}
 
             <div class="pm-span">
                 <label class="pm-label" for="pm-remarks">
@@ -582,11 +560,6 @@
         </div>
     </div>
 
-
-    {{-- ========================================= --}}
-    {{-- TRANSACTION ITEMS CARD                    --}}
-    {{-- ========================================= --}}
-
     <div class="pm-card">
 
         <div class="pm-card-head">
@@ -595,57 +568,239 @@
                 <strong>Transaction Items</strong>
 
                 <div class="pm-muted pm-small">
-                    Add the items being paid, then enter the amount collected.
+                    Add transaction items to this payment, then enter the amount collected.
                 </div>
             </div>
 
             <x-filament::button
-                color="gray"
+                color="primary"
                 icon="heroicon-o-plus"
-                x-bind:disabled="{{ count($availableItems) ? 'false' : 'true' }}"
                 x-on:click="openPicker()"
             >
-                Transaction Items
+                Select Transaction Items
             </x-filament::button>
 
         </div>
 
-
-        {{-- ========================================= --}}
-        {{-- ITEM PICKER                               --}}
-        {{-- ========================================= --}}
+        <div
+            style="padding: 2rem; text-align: center;"
+            class="pm-muted"
+            x-show="$wire.selected.length === 0"
+        >
+            No transaction items added yet.
+        </div>
 
         <div
-            class="pm-picker"
-            x-show="pickerOpen"
+            class="pm-scroll"
+            x-show="$wire.selected.length > 0"
             x-cloak
-            x-transition.opacity
         >
 
-            <div class="pm-card-head">
+            <table class="pm-table">
 
-                <strong>Select items to add</strong>
+                <thead>
+                    <tr>
+                        <th>Year</th>
+                        <th>Item Code</th>
+                        <th>Description</th>
+                        <th class="pm-right">Amount Due</th>
+                        <th class="pm-right">Amount Paying</th>
+                        <th class="pm-center">Action</th>
+                    </tr>
+                </thead>
 
-                <div class="pm-btns">
+                <tbody>
+
+                    @foreach ($transactionItems as $item)
+
+                        @php
+                            $key = $item['_key'];
+
+                            $amountDue = (float) (
+                                $item['original_amount']
+                                ?? $item['item_amount']
+                                ?? 0
+                            );
+
+                            $balance = (float) (
+                                $item['balance'] ?? $amountDue
+                            );
+                        @endphp
+
+                        @continue($balance <= 0)
+
+                        <tr
+                            wire:key="pm-added-{{ $key }}"
+                            x-show="isAdded('{{ $key }}')"
+                            x-cloak
+                        >
+
+                            <td class="pm-nowrap">
+                                <strong>
+                                    {{ $item['fiscal_year'] ?? $fiscalYear }}
+                                </strong>
+                            </td>
+
+                            <td class="pm-nowrap">
+                                <strong>
+                                    {{ $item['item_code'] ?? '' }}
+                                </strong>
+                            </td>
+
+                            <td>
+                                {{ $item['item_details'] ?? '' }}
+
+                                @if (($item['previously_paid'] ?? 0) > 0)
+                                    <div class="pm-muted pm-small">
+                                        Previously paid:
+                                        ₱{{ number_format((float) $item['previously_paid'], 2) }}
+                                    </div>
+                                @endif
+                            </td>
+
+                            <td class="pm-right pm-nowrap">
+                                ₱{{ number_format($amountDue, 2) }}
+                            </td>
+
+                            <td class="pm-right">
+
+                                <input
+                                    type="number"
+                                    class="pm-amount"
+                                    min="0"
+                                    max="{{ $balance }}"
+                                    step="0.01"
+                                    wire:model="amounts.{{ $key }}"
+                                    x-on:change="clamp($el, {{ $balance }})"
+                                >
+
+                                <div
+                                    class="pm-muted pm-small pm-nowrap"
+                                    style="margin-top: .25rem;"
+                                >
+                                    Balance:
+                                    ₱{{ number_format($balance, 2) }}
+                                </div>
+
+                            </td>
+
+                            <td class="pm-center">
+                                <button
+                                    type="button"
+                                    class="pm-link"
+                                    x-on:click="removeItem('{{ $key }}')"
+                                >
+                                    Remove
+                                </button>
+                            </td>
+
+                        </tr>
+
+                    @endforeach
+
+                </tbody>
+
+                <tfoot>
+                    <tr>
+                        <td colspan="4" class="pm-right">
+                            Total Payment
+                        </td>
+
+                        <td
+                            class="pm-right pm-nowrap"
+                            style="font-size: 1.1rem;"
+                        >
+                            <span x-text="money(total)">₱0.00</span>
+                        </td>
+
+                        <td></td>
+                    </tr>
+                </tfoot>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <div
+        class="pm-modal-backdrop"
+        x-show="pickerOpen"
+        x-cloak
+        x-transition.opacity
+        x-on:click.self="pickerOpen = false"
+        x-on:keydown.escape.window="pickerOpen = false"
+    >
+
+        <div
+            class="pm-modal"
+            x-transition
+            x-on:click.stop
+        >
+
+            <div class="pm-modal-header">
+
+                <div>
+                    <div class="pm-modal-title">
+                        Select Transaction Items
+                    </div>
+
+                    <div class="pm-muted pm-small">
+                        Choose the items you want to include in this payment.
+                    </div>
+                </div>
+
+                <button
+                    type="button"
+                    class="pm-link"
+                    x-on:click="pickerOpen = false"
+                    aria-label="Close transaction items"
+                >
+                    <x-filament::icon
+                        icon="heroicon-o-x-mark"
+                        class="w-5 h-5"
+                    />
+                </button>
+
+            </div>
+
+            <div class="pm-modal-content">
+
+                <div class="pm-card-head">
+
+                    <div style="min-width: 150px;">
+
+                        <label class="pm-label" for="pm-picker-year">
+                            Fiscal Year
+                        </label>
+
+                        <x-filament::input.wrapper>
+                            <x-filament::input.select
+                                id="pm-picker-year"
+                                wire:model.live="fiscalYear"
+                                x-on:change="checked = []"
+                            >
+                                @foreach ($this->fiscalYears as $year)
+                                    <option value="{{ $year }}">
+                                        {{ $year }}
+                                    </option>
+                                @endforeach
+                            </x-filament::input.select>
+                        </x-filament::input.wrapper>
+
+                    </div>
+
                     <x-filament::button
                         size="sm"
                         color="gray"
                         x-on:click="toggleKeys('input[data-pick]:not(:disabled)')"
                     >
-                        Select / clear all
+                        Select / Clear All
                     </x-filament::button>
+
                 </div>
 
-            </div>
-
-
-            <div class="pm-picker-scroll" x-ref="picker">
-
-                <div class="pm-cards">
-
-                    {{-- ========================================= --}}
-                    {{-- CONSOLIDATED MEMF CARD                    --}}
-                    {{-- ========================================= --}}
+                <div class="pm-cards" x-ref="picker">
 
                     @php
                         $memfItems = collect($availableItems)
@@ -702,7 +857,7 @@
                                 </div>
 
                                 <div class="pm-item-desc">
-                                    Membership fees – select or clear all MEMF items for this fiscal year.
+                                    Membership Fees
                                 </div>
 
                                 <dl class="pm-dl">
@@ -721,7 +876,7 @@
                                     class="pm-small pm-muted"
                                     style="margin-top: .4rem;"
                                 >
-                                    Click to select all membership fee items.
+                                    Click to select all MEMF items for this fiscal year.
                                 </div>
 
                             </div>
@@ -729,11 +884,6 @@
                         </button>
 
                     @endif
-
-
-                    {{-- ========================================= --}}
-                    {{-- OTHER TRANSACTION ITEMS                   --}}
-                    {{-- ========================================= --}}
 
                     @foreach ($availableItems as $item)
 
@@ -760,11 +910,11 @@
                         @continue($isMemf)
 
                         <label
-                            wire:key="pm-pick-{{ $key }}"
+                            wire:key="pm-picker-{{ $key }}"
                             class="pm-item"
                             x-bind:class="{
                                 'pm-item-on': checked.includes('{{ $key }}') || isAdded('{{ $key }}'),
-                                'pm-item-off': {{ $paid ? 'true' : 'false' }} || isAdded('{{ $key }}'),
+                                'pm-item-off': {{ $paid ? 'true' : 'false' }} || isAdded('{{ $key }}')
                             }"
                         >
 
@@ -853,21 +1003,32 @@
 
                     @endforeach
 
+                    @if (empty($availableItems))
+
+                        <div
+                            class="pm-muted"
+                            style="grid-column: 1 / -1; padding: 2rem; text-align: center;"
+                        >
+                            No transaction items are available for this fiscal year.
+                        </div>
+
+                    @endif
+
                 </div>
 
             </div>
 
+            <div class="pm-modal-footer">
 
-            {{-- PICKER ACTIONS --}}
+                <div style="margin-right: auto;">
 
-            <div
-                class="pm-card-head"
-                style="
-                    border-top: 1px solid color-mix(in srgb, currentColor 18%, transparent);
-                    border-bottom: 0;
-                    justify-content: flex-end;
-                "
-            >
+                    <strong x-text="checked.length"></strong>
+
+                    <span class="pm-muted pm-small">
+                        item(s) selected
+                    </span>
+
+                </div>
 
                 <x-filament::button
                     color="gray"
@@ -881,184 +1042,18 @@
                     x-bind:disabled="checked.length === 0"
                     x-on:click="addChecked()"
                 >
-                    Add selected (<span x-text="checked.length"></span>)
+                    Add Selected
                 </x-filament::button>
 
             </div>
 
         </div>
 
-
-        {{-- ========================================= --}}
-        {{-- ADDED ITEMS                               --}}
-        {{-- ========================================= --}}
-
-        <div
-            style="padding: 2rem; text-align: center;"
-            class="pm-muted"
-            x-show="$wire.selected.length === 0"
-        >
-            No transaction items added yet.
-        </div>
-
-
-        <div
-            class="pm-scroll"
-            x-show="$wire.selected.length > 0"
-            x-cloak
-        >
-
-            <table class="pm-table">
-
-                <thead>
-                    <tr>
-                        <th>Year</th>
-                        <th>Item Code</th>
-                        <th>Description</th>
-                        <th class="pm-right">Amount Due</th>
-                        <th class="pm-right">Amount Paying</th>
-                        <th class="pm-center">Action</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-
-                    @foreach ($transactionItems as $item)
-
-                        @php
-                            $key = $item['_key'];
-
-                            $amountDue = (float) (
-                                $item['original_amount']
-                                ?? $item['item_amount']
-                                ?? 0
-                            );
-
-                            $balance = (float) (
-                                $item['balance'] ?? $amountDue
-                            );
-                        @endphp
-
-                        @continue($balance <= 0)
-
-                        <tr
-                            wire:key="pm-added-{{ $key }}"
-                            x-show="isAdded('{{ $key }}')"
-                            x-cloak
-                        >
-
-                            <td class="pm-nowrap">
-                                <strong>
-                                    {{ $item['fiscal_year'] ?? $fiscalYear }}
-                                </strong>
-                            </td>
-
-                            <td class="pm-nowrap">
-                                <strong>
-                                    {{ $item['item_code'] ?? '' }}
-                                </strong>
-                            </td>
-
-                            <td>
-
-                                {{ $item['item_details'] ?? '' }}
-
-                                @if (($item['previously_paid'] ?? 0) > 0)
-
-                                    <div class="pm-muted pm-small">
-                                        Previously paid:
-                                        ₱{{ number_format((float) $item['previously_paid'], 2) }}
-                                    </div>
-
-                                @endif
-
-                            </td>
-
-                            <td class="pm-right pm-nowrap">
-                                ₱{{ number_format($amountDue, 2) }}
-                            </td>
-
-                            <td class="pm-right">
-
-                                <input
-                                    type="number"
-                                    class="pm-amount"
-                                    min="0"
-                                    max="{{ $balance }}"
-                                    step="0.01"
-                                    wire:model="amounts.{{ $key }}"
-                                    x-on:change="clamp($el, {{ $balance }})"
-                                >
-
-                                <div
-                                    class="pm-muted pm-small pm-nowrap"
-                                    style="margin-top: .25rem;"
-                                >
-                                    Balance:
-                                    ₱{{ number_format($balance, 2) }}
-                                </div>
-
-                            </td>
-
-                            <td class="pm-center">
-
-                                <button
-                                    type="button"
-                                    class="pm-link"
-                                    x-on:click="removeItem('{{ $key }}')"
-                                >
-                                    Remove
-                                </button>
-
-                            </td>
-
-                        </tr>
-
-                    @endforeach
-
-                </tbody>
-
-
-                {{-- TOTAL PAYMENT --}}
-
-                <tfoot>
-
-                    <tr>
-
-                        <td colspan="4" class="pm-right">
-                            Total Payment
-                        </td>
-
-                        <td
-                            class="pm-right pm-nowrap"
-                            style="font-size: 1.1rem;"
-                        >
-                            <span x-text="money(total)">
-                                ₱0.00
-                            </span>
-                        </td>
-
-                        <td></td>
-
-                    </tr>
-
-                </tfoot>
-
-            </table>
-
-        </div>
-
     </div>
-
 
     @error('selected')
         <p class="pm-error">{{ $message }}</p>
     @enderror
-
-
-    {{-- ========================================= --}}
-    {{-- POST / CONFIRM                            --}}
-    {{-- ========================================= --}}
 
     <div
         class="pm-footer"
@@ -1076,9 +1071,6 @@
 
     </div>
 
-
-    {{-- CONFIRMATION --}}
-
     <div
         class="pm-confirm"
         x-show="confirming"
@@ -1086,14 +1078,12 @@
     >
 
         <div>
-
             Post
             <strong x-text="money(total)"></strong>
             for
             <strong>{{ $memberName }}</strong>?
 
             This cannot be undone.
-
         </div>
 
         <div class="pm-btns">

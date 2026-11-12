@@ -31,7 +31,6 @@
         }
     </style>
 
-
     @if ($payments === null)
 
         <div class="p-8 text-center text-gray-500">
@@ -78,7 +77,6 @@
 
                 </thead>
 
-
                 <tbody>
 
                     @forelse ($payments as $payment)
@@ -102,21 +100,17 @@
 
                             </td>
 
-
                             <td class="p-3">
                                 {{ $payment->payment_ref_no }}
                             </td>
-
 
                             <td class="p-3">
                                 {{ $payment->or_no }}
                             </td>
 
-
                             <td class="p-3">
                                 {{ $payment->payment_type }}
                             </td>
-
 
                             <td class="p-3 text-right font-semibold">
 
@@ -126,7 +120,6 @@
                                 ) }}
 
                             </td>
-
 
                             <td class="p-3">
                                 {{ $payment->remarks }}
@@ -157,11 +150,6 @@
 
         </div>
 
-
-        {{-- ========================================================= --}}
-        {{-- PAYMENT DETAILS MODAL --}}
-        {{-- ========================================================= --}}
-
         <div
             x-show="open"
             x-cloak
@@ -186,8 +174,6 @@
                        overflow-hidden"
             >
 
-                {{-- HEADER --}}
-
                 <div
                     class="px-6 py-4
                            border-b
@@ -208,9 +194,6 @@
                     </button>
 
                 </div>
-
-
-                {{-- CONTENT --}}
 
                 <div
                     class="flex-1
@@ -234,7 +217,6 @@
 
                         </div>
 
-
                         <div>
 
                             <div class="text-gray-500">
@@ -248,7 +230,6 @@
 
                         </div>
 
-
                         <div>
 
                             <div class="text-gray-500">
@@ -261,7 +242,6 @@
                             ></div>
 
                         </div>
-
 
                         <div>
 
@@ -278,14 +258,11 @@
 
                     </div>
 
-
                     <hr class="my-6">
-
 
                     <h3 class="font-bold text-lg mb-3">
                         Payment Breakdown
                     </h3>
-
 
                     <div
                         class="max-h-80
@@ -319,7 +296,6 @@
 
                             </thead>
 
-
                             <tbody>
 
                                 <template
@@ -345,7 +321,6 @@
 
                                         </td>
 
-
                                         <td
                                             class="p-3 text-center"
                                         >
@@ -359,7 +334,6 @@
                                             ></span>
 
                                         </td>
-
 
                                         <td
                                             class="p-3 text-right"
@@ -387,7 +361,6 @@
                                 </template>
 
                             </tbody>
-
 
                             <tfoot>
 
@@ -428,9 +401,6 @@
 
                     </div>
 
-
-                    {{-- REMARKS --}}
-
                     <div class="mt-6">
 
                         <div class="font-semibold">
@@ -447,9 +417,6 @@
                     </div>
 
                 </div>
-
-
-                {{-- FOOTER --}}
 
                 <div
                     class="px-6 py-4

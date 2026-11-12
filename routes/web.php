@@ -33,10 +33,6 @@ Route::get('/debug-php', function () {
     ];
 });
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
-
 Route::get('/', function () {
     return redirect('/admin');
 });

@@ -10,7 +10,6 @@
 
 <div class="border rounded-xl overflow-hidden">
 
-    {{-- Scrollable table --}}
     <div class="max-h-[500px] overflow-y-auto overflow-x-auto">
 
         <table class="w-full text-sm">
@@ -65,7 +64,6 @@
                             ) }}'"
                         >
 
-                            {{-- Date --}}
                             <td class="p-3 whitespace-nowrap">
 
                                 @if ($cme->cme_startdate)
@@ -86,27 +84,22 @@
 
                             </td>
 
-                            {{-- CME Program --}}
                             <td class="p-3 font-semibold">
                                 {{ $cme->cme_title ?: '-' }}
                             </td>
 
-                            {{-- Topic --}}
                             <td class="p-3">
                                 {{ $cme->cme_topic ?: '-' }}
                             </td>
 
-                            {{-- Type --}}
                             <td class="p-3">
                                 {{ $cme->cme_program_type ?: '-' }}
                             </td>
 
-                            {{-- Payment Reference --}}
                             <td class="p-3 whitespace-nowrap">
                                 {{ $registration->payment_ref_no ?: '-' }}
                             </td>
 
-                            {{-- Venue --}}
                             <td class="p-3">
                                 {{ $cme->cme_venue ?: '-' }}
                             </td>

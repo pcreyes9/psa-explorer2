@@ -1,17 +1,17 @@
 <x-filament-panels::page>
 
-    {{-- Member Profile Header --}}
     @include('filament.members.profile-header', [
         'record' => $this->record,
     ])
 
-    {{-- Member Information --}}
     <div class="mt-2">
         {{ $this->infolist }}
     </div>
 
-    {{-- Financial Records --}}
-    <div class="mt-6">
+    <div
+        class="mt-6"
+        x-data="{ tab: 'summary' }"
+    >
 
         @if (! $this->financialRecordsLoaded)
 
@@ -59,7 +59,6 @@
 
         @else
 
-            {{-- Financial Records Tabs --}}
             @include('filament.members.financial.index', [
                 'record' => $this->record,
                 'payments' => $this->financialPayments,

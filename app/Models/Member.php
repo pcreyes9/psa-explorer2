@@ -12,7 +12,6 @@ use App\Models\MemberLedgerBalance;
 use App\Models\CMEProgram;
 use App\Models\MemberHospital;
 
-
 class Member extends Model
 {
     protected $table = 'member';
@@ -37,12 +36,6 @@ class Member extends Model
             . '?t=' . time();
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Lookup Relationships
-    |--------------------------------------------------------------------------
-    */
-
     public function chapter()
     {
         return $this->belongsTo(
@@ -60,12 +53,6 @@ class Member extends Model
             'Memtypecode'
         );
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Financial Relationships
-    |--------------------------------------------------------------------------
-    */
 
     public function payments()
     {
@@ -149,6 +136,5 @@ class Member extends Model
             'member_id_no'
         );
     }
-
 
 }

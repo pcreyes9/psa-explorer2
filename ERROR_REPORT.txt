@@ -1,0 +1,56 @@
+PROJECT ERROR REPORT
+====================
+
+Checks performed
+----------------
+- Composer validation: PASSED
+- PHP syntax checks: PASSED
+- Laravel route boot: PASSED
+- Blade view compilation: PASSED
+- Vite production build: PASSED
+- Laravel tests: 1 passed, 1 failed
+
+Errors found
+------------
+
+1. Failing feature test
+
+File: tests/Feature/ExampleTest.php:17
+
+The test expects GET / to return HTTP 200. The application route in
+routes/web.php:40 redirects / to /admin, so the actual response is HTTP 302.
+This appears to be a stale Laravel scaffold test.
+
+2. Runtime database error
+
+File: app/Support/PaymentManager.php:180
+
+SQL Server reports:
+  Invalid column name 'amount_paid'
+
+The application queried payment_items.amount_paid, but the active database was
+missing that column when the error was logged. The column has now been created
+manually by the project owner.
+
+Fix retained for future environments:
+database/migrations/2026_11_12_000000_add_amount_paid_to_payment_items_table.php
+
+The migration adds nullable DECIMAL(15,2) amount_paid and safely skips the add
+when the column already exists. It has not been run automatically.
+
+3. Historical application log errors
+
+The Laravel log also contains these previous errors:
+- Missing database object: cm_program_registrationNM
+- SQL Server SSL self-signed certificate verification failure
+- Livewire property $postPaymentAction not found on App\\Filament\\Pages\\NewPayment
+
+The current source no longer contains references to $postPaymentAction, so that
+entry may represent an already-resolved issue.
+
+Summary
+-------
+
+The project builds and boots successfully, but the test suite is not fully green.
+The most important active runtime issue is the missing payment_items.amount_paid
+column in the SQL Server database.

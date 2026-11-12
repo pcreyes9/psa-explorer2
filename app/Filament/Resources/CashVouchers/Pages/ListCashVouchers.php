@@ -20,22 +20,9 @@ class ListCashVouchers extends ListRecords
     {
         return [
 
-            /*
-            |--------------------------------------------------------------------------
-            | CREATE VOUCHER
-            |--------------------------------------------------------------------------
-            */
-
             CreateAction::make()
                 ->label('Create Cash Voucher')
                 ->icon('heroicon-o-plus'),
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | EXPORT DISBURSEMENT
-            |--------------------------------------------------------------------------
-            */
 
             Action::make('exportDisbursement')
                 ->label('Export Disbursement')

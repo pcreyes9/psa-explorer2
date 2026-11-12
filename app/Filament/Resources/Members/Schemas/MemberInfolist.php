@@ -221,32 +221,6 @@ class MemberInfolist
 
                             ]),
 
-                        // Tab::make('Membership Dues')
-                        //     ->icon('heroicon-m-banknotes')
-                        //     ->schema([
-                        //         View::make('filament.members.financial.tabs.summary')
-                        //             ->viewData(fn ($record) => [
-                        //                 'record' => $record,
-                        //             ]),
-                        //     ]),
-
-                        // Tab::make('Payments')
-                        //     ->icon('heroicon-m-credit-card')
-                        //     ->schema([
-                        //         View::make('filament.members.financial.tabs.payments')
-                        //             ->viewData(fn ($record) => [
-                        //             'record' => $record,
-                        //         ]),
-                        //     ]),
-
-                        // Tab::make('Archive History')
-                        //     ->icon('heroicon-m-archive-box')
-                        //     ->schema([
-                        //         View::make('filament.members.financial.tabs.archive')
-                        //             ->viewData(fn ($record) => [
-                        //             'record' => $record,
-                        //         ]),
-                        //     ]),
                     ])
                     ->columnSpanFull(),
             ]);

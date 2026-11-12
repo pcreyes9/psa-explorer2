@@ -11,7 +11,6 @@ class CashVoucherController extends Controller
     {
         $cashVoucher->load('items');
 
-        // dd(auth()->id());
         $cashVoucher->update([
             'printed_at' => now(),
             'printed_by' => auth()->id(),
@@ -59,7 +58,6 @@ class CashVoucherController extends Controller
         );
     }
 
-
     public function checkPdf(CashVoucher $cashVoucher)
     {
         $cashVoucher->load('items');
@@ -88,12 +86,6 @@ class CashVoucherController extends Controller
             ]
         );
 
-        /*
-        |--------------------------------------------------------------------------
-        | Change this if your check uses a custom paper size
-        |--------------------------------------------------------------------------
-        */
-
         $pdf->setPaper('letter', 'landscape');
 
         return response(
@@ -115,7 +107,6 @@ class CashVoucherController extends Controller
             ($amount - $whole) * 100
         );
 
-        // Handle rounding that produces 100 centavos
         if ($decimal === 100) {
             $whole++;
             $decimal = 0;

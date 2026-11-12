@@ -1,4 +1,3 @@
-
 @php
     use Illuminate\Support\Facades\DB;
     use Carbon\Carbon;
@@ -33,7 +32,6 @@
     $tm = (int) ($memberCounts['TM'] ?? 0);
     $lm = (int) ($memberCounts['LM'] ?? 0);
 
-
     /*
     |--------------------------------------------------------------------------
     | REGISTRATION SUMMARY: NM
@@ -44,7 +42,6 @@
         ->where('cme_program_code', $record->cme_program_code)
         ->count();
 
-
     /*
     |--------------------------------------------------------------------------
     | TOTAL REGISTRATIONS
@@ -52,7 +49,6 @@
     */
 
     $total = $rm + $tm + $lm + $nm;
-
 
     /*
     |--------------------------------------------------------------------------
@@ -105,7 +101,6 @@
             ];
         });
 
-
     /*
     |--------------------------------------------------------------------------
     | GET NM REGISTRATIONS
@@ -144,7 +139,6 @@
             ];
         });
 
-
     /*
     |--------------------------------------------------------------------------
     | COMBINE REGISTRATIONS
@@ -158,23 +152,16 @@
 
 @endphp
 
-
 <style>
     [x-cloak] {
         display: none !important;
     }
 </style>
 
-
 <div class="space-y-4">
-
-    {{-- ================================================================
-         REGISTRATION SUMMARY CARDS
-    ================================================================= --}}
 
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
 
-        {{-- REGULAR MEMBERS --}}
         <div class="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-900">
 
             <div class="flex items-center justify-between">
@@ -201,8 +188,6 @@
 
         </div>
 
-
-        {{-- TRAINEE MEMBERS --}}
         <div class="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-900">
 
             <div class="flex items-center justify-between">
@@ -229,8 +214,6 @@
 
         </div>
 
-
-        {{-- LIFE MEMBERS --}}
         <div class="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-900">
 
             <div class="flex items-center justify-between">
@@ -257,8 +240,6 @@
 
         </div>
 
-
-        {{-- NON-MEMBERS --}}
         <div class="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-900">
 
             <div class="flex items-center justify-between">
@@ -287,11 +268,6 @@
 
     </div>
 
-
-    {{-- ================================================================
-         TOTAL REGISTRATIONS
-    ================================================================= --}}
-
     <div class="rounded-xl border border-gray-200 bg-gray-50 p-5 dark:border-gray-700 dark:bg-gray-800">
 
         <div class="flex items-center justify-between">
@@ -314,11 +290,6 @@
 
     </div>
 
-
-    {{-- ================================================================
-         SEARCH REGISTRATIONS
-    ================================================================= --}}
-
     <div
         x-data="{
             search: '',
@@ -340,7 +311,6 @@
         class="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900"
     >
 
-        {{-- SEARCH HEADER --}}
         <div class="border-b border-gray-200 p-5 dark:border-gray-700">
 
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -355,8 +325,6 @@
                     </p>
                 </div>
 
-
-                {{-- SEARCH INPUT --}}
                 <div class="w-full sm:max-w-sm">
 
                     <div class="relative">
@@ -391,16 +359,10 @@
 
         </div>
 
-
-        {{-- ============================================================
-             RESULTS TABLE
-        ============================================================= --}}
-
         <div class="overflow-x-auto">
 
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
 
-                {{-- TABLE HEADER --}}
                 <thead class="bg-gray-50 dark:bg-gray-800">
 
                     <tr>
@@ -433,8 +395,6 @@
 
                 </thead>
 
-
-                {{-- TABLE BODY --}}
                 <tbody
                     x-ref="rows"
                     class="divide-y divide-gray-100 dark:divide-gray-800"
@@ -452,25 +412,18 @@
                             class="hover:bg-gray-50 dark:hover:bg-gray-800/60"
                         >
 
-                            {{-- NUMBER --}}
                             <td class="whitespace-nowrap px-5 py-3 text-sm text-gray-500">
                                 {{ $index + 1 }}
                             </td>
 
-
-                            {{-- PSA ID --}}
                             <td class="whitespace-nowrap px-5 py-3 text-sm font-medium text-gray-900 dark:text-white">
                                 {{ $registration['member_id_no'] }}
                             </td>
 
-
-                            {{-- MEMBER NAME --}}
                             <td class="whitespace-nowrap px-5 py-3 text-sm text-gray-700 dark:text-gray-300">
                                 {{ $registration['member_name'] }}
                             </td>
 
-
-                            {{-- MEMBERSHIP TYPE --}}
                             <td class="whitespace-nowrap px-5 py-3">
 
                                 @php
@@ -489,8 +442,6 @@
 
                             </td>
 
-
-                            {{-- REGISTRATION DATE --}}
                             <td class="whitespace-nowrap px-5 py-3 text-sm text-gray-500 dark:text-gray-400">
 
                                 {{ $registration['registration_date']
@@ -499,8 +450,6 @@
 
                             </td>
 
-
-                            {{-- PAYMENT REFERENCE --}}
                             <td class="whitespace-nowrap px-5 py-3 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 {{ $registration['payment_ref_no'] ?: '-' }}
                             </td>
@@ -512,11 +461,6 @@
                 </tbody>
 
             </table>
-
-
-            {{-- ========================================================
-                 INITIAL SEARCH MESSAGE
-            ========================================================= --}}
 
             <div
                 x-show="!search.trim()"
@@ -534,11 +478,6 @@
                 </p>
 
             </div>
-
-
-            {{-- ========================================================
-                 NO SEARCH RESULTS
-            ========================================================= --}}
 
             <div
                 x-show="search.trim() && filteredRows.length === 0"
@@ -559,11 +498,6 @@
             </div>
 
         </div>
-
-
-        {{-- ============================================================
-             SEARCH RESULTS FOOTER
-        ============================================================= --}}
 
         <div
             x-show="search.trim() && filteredRows.length > 0"

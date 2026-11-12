@@ -57,7 +57,7 @@ class AnnualDuesChart extends ChartWidget
                     'position' => 'bottom',
 
                     'labels' => [
-                        // 'usePointStyle' => true,
+
                         'pointStyle' => 'square',
                         'padding' => 20,
                         'font' => [

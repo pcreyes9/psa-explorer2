@@ -19,12 +19,6 @@ class ViewMember extends ViewRecord
 
     protected string $view = 'filament.members.view-member';
 
-    /*
-    |--------------------------------------------------------------------------
-    | Financial Records Properties
-    |--------------------------------------------------------------------------
-    */
-
     public bool $financialRecordsLoaded = false;
 
     public $financialPayments = [];
@@ -35,24 +29,9 @@ class ViewMember extends ViewRecord
 
     public $cmePayments = [];
 
-    /*
-    |--------------------------------------------------------------------------
-    | Load Financial Records
-    |--------------------------------------------------------------------------
-    |
-    | Financial records are loaded only when requested.
-    |
-    */
-
     public function loadFinancialRecords(): void
     {
         $memberId = $this->record->member_id_no;
-
-        /*
-        |--------------------------------------------------------------------------
-        | Membership Payments
-        |--------------------------------------------------------------------------
-        */
 
         $this->financialPayments = $this->record
             ->payments()
@@ -60,42 +39,15 @@ class ViewMember extends ViewRecord
             ->orderByDesc('payment_date')
             ->get();
 
-        /*
-        |--------------------------------------------------------------------------
-        | Archived Payments
-        |--------------------------------------------------------------------------
-        */
-
         $this->financialArchives = $this->record
             ->archivedPayments()
             ->orderByDesc('payment_date')
             ->get();
 
-        /*
-        |--------------------------------------------------------------------------
-        | Ledger Balances
-        |--------------------------------------------------------------------------
-        |
-        | Query directly because member_ledger_bal does not have a normal
-        | Eloquent primary key.
-        |
-        */
-
         $this->financialBalances = MemberLedgerBalance::query()
             ->where('member_id_no', $memberId)
             ->orderByDesc('fiscal_year')
             ->get();
-
-        /*
-        |--------------------------------------------------------------------------
-        | CME Payments
-        |--------------------------------------------------------------------------
-        |
-        | Match CME registrations to payments using both:
-        | - member_id_no
-        | - payment_ref_no
-        |
-        */
 
         $this->cmePayments = DB::table('cme_program_registration as c')
             ->join('payments as p', function ($join) {
@@ -125,21 +77,9 @@ class ViewMember extends ViewRecord
             ->orderByDesc('p.payment_date')
             ->get();
 
-        /*
-        |--------------------------------------------------------------------------
-        | Mark Financial Records as Loaded
-        |--------------------------------------------------------------------------
-        */
-
         $this->financialRecordsLoaded = true;
-        
-    }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Header Actions
-    |--------------------------------------------------------------------------
-    */
+    }
 
     protected function getHeaderActions(): array
     {
@@ -249,12 +189,6 @@ class ViewMember extends ViewRecord
         ];
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Page Title
-    |--------------------------------------------------------------------------
-    */
-
     public function getTitle(): string
     {
         return $this->record->member_id_no
@@ -270,12 +204,6 @@ class ViewMember extends ViewRecord
     {
         return '';
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Breadcrumbs
-    |--------------------------------------------------------------------------
-    */
 
     public function getBreadcrumbs(): array
     {
@@ -295,12 +223,6 @@ class ViewMember extends ViewRecord
             ),
         ];
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Navigation
-    |--------------------------------------------------------------------------
-    */
 
     public static function getNavigationItem(): ?string
     {

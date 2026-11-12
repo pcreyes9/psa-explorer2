@@ -16,19 +16,9 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
-/**
- * Payment form shown inside the "New Payment" modal of the member page.
- * The member is fixed (passed in from the page), so there is no member search.
- */
 class NewPaymentModal extends Component
 {
     public const PAYMENT_TYPES = ['Cash', 'Check', 'Bank Transfer'];
-
-    /*
-    |--------------------------------------------------------------------------
-    | State
-    |--------------------------------------------------------------------------
-    */
 
     #[Locked]
     public string $memberId = '';
@@ -52,31 +42,28 @@ class NewPaymentModal extends Component
 
     public string $remarks = '';
 
-    /** All transaction items loaded during this payment session. */
     #[Locked]
     public array $transactionItems = [];
 
-    /** Items available in the currently selected fiscal year for the picker. */
     #[Locked]
     public array $availableItems = [];
 
-    /** Keys of the items added to this payment. */
     public array $selected = [];
 
-    /** Amount paying per item key. */
     public array $amounts = [];
-
-    /*
-    |--------------------------------------------------------------------------
-    | Lifecycle
-    |--------------------------------------------------------------------------
-    */
 
     public function mount(string|int $memberId): void
     {
         $this->authorizePayment();
 
-        $member = Member::query()->findOrFail($memberId);
+        $member = Member::query()
+            ->select([
+                'member_id_no',
+                'mem_last_name',
+                'mem_first_name',
+                'psa_mem_type',
+            ])
+            ->findOrFail($memberId);
 
         $this->memberId = (string) $member->member_id_no;
 
@@ -121,19 +108,19 @@ class NewPaymentModal extends Component
     {
         $this->authorizePayment();
 
-        // Refresh available items without clearing existing selections.
         $this->loadTransactionItems();
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Items
-    |--------------------------------------------------------------------------
-    */
-
     protected function loadTransactionItems(?Member $member = null): void
     {
-        $member ??= Member::query()->find($this->memberId);
+        $member ??= Member::query()
+            ->select([
+                'member_id_no',
+                'mem_last_name',
+                'mem_first_name',
+                'psa_mem_type',
+            ])
+            ->find($this->memberId);
 
         if (! $member || blank($this->fiscalYear)) {
             $this->availableItems = [];
@@ -153,16 +140,13 @@ class NewPaymentModal extends Component
             ])
             ->all();
 
-        // Only the picker changes when the fiscal year changes.
         $this->availableItems = $currentItems;
 
-        // Preserve items loaded from previously selected fiscal years.
         $allItems = collect($this->transactionItems)->keyBy('_key');
 
         foreach ($currentItems as $item) {
             $key = $item['_key'];
 
-            // Refresh item information without overwriting the entered amount.
             $allItems->put($key, $item);
 
             if (! array_key_exists($key, $this->amounts)) {
@@ -209,7 +193,6 @@ class NewPaymentModal extends Component
                 ]) ?: (string) $index
             );
 
-        // Include fiscal year to prevent collisions between different years.
         return preg_replace(
             '/[^A-Za-z0-9_\-]/',
             '_',
@@ -217,10 +200,6 @@ class NewPaymentModal extends Component
         );
     }
 
-    /**
-     * Builds payment lines from the selected item keys.
-     * Item details come from the server-side list, not the browser.
-     */
     protected function buildSelection(): array
     {
         $items = collect($this->transactionItems)->keyBy('_key');
@@ -250,12 +229,6 @@ class NewPaymentModal extends Component
         return $lines;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Post Payment
-    |--------------------------------------------------------------------------
-    */
-
     public function postPayment(): void
     {
         $this->authorizePayment();
@@ -275,7 +248,6 @@ class NewPaymentModal extends Component
             return;
         }
 
-        // Clear posted selections and reload the current fiscal year's items.
         $this->selected = [];
         $this->amounts = [];
         $this->transactionItems = [];
@@ -290,7 +262,6 @@ class NewPaymentModal extends Component
             ->persistent()
             ->send();
 
-        // Notify the member page to close the modal / refresh.
         $this->dispatch(
             'payment-posted',
             reference: $reference,
@@ -348,7 +319,6 @@ class NewPaymentModal extends Component
         );
     }
 
-    /** Validates and saves the payment. Returns the payment reference. */
     protected function processPayment(): string
     {
         $this->resetErrorBag();
@@ -370,8 +340,13 @@ class NewPaymentModal extends Component
             $paymentType
         ): string {
 
-            // Lock the member row to prevent simultaneous overpayments.
             $member = Member::query()
+                ->select([
+                    'member_id_no',
+                    'mem_last_name',
+                    'mem_first_name',
+                    'psa_mem_type',
+                ])
                 ->where('member_id_no', $this->memberId)
                 ->lockForUpdate()
                 ->first();
@@ -413,7 +388,6 @@ class NewPaymentModal extends Component
 
                 $seenItems[$uniqueKey] = true;
 
-                // Re-read the transaction definition from the database.
                 $definition = TransactionTypeItem::query()
                     ->where('item_code', $itemCode)
                     ->where('tran_code', $tranCode)
@@ -496,12 +470,6 @@ class NewPaymentModal extends Component
 
             $paymentReference = PaymentManager::generateReference($member);
 
-            /*
-            |--------------------------------------------------------------------------
-            | Save Payment Header
-            |--------------------------------------------------------------------------
-            */
-
             Payment::create([
                 'payment_ref_no' => $paymentReference,
                 'member_id_no' => $member->member_id_no,
@@ -565,12 +533,6 @@ class NewPaymentModal extends Component
                     ? $this->bankReferenceNo
                     : '',
             ]);
-
-            /*
-            |--------------------------------------------------------------------------
-            | Save Payment Allocations
-            |--------------------------------------------------------------------------
-            */
 
             foreach ($allocations as $allocation) {
                 PaymentItem::create([

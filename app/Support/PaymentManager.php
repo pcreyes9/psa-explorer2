@@ -11,11 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 class PaymentManager
 {
-    /**
-     * Generate a payment reference number.
-     *
-     * Existing reference format is retained.
-     */
+
     public static function generateReference(Member $member): string
     {
         $prefix = match ($member->psa_mem_type) {
@@ -51,13 +47,6 @@ class PaymentManager
         );
     }
 
-    /**
-     * LEGACY METHOD.
-     *
-     * Retained for existing features that still depend on member_ledger.
-     *
-     * Do not use this method for new Payment Posting calculations.
-     */
     public static function getMemberBalances(Member $member): array
     {
         $items = TransactionTypeItem::query()
@@ -108,9 +97,6 @@ class PaymentManager
         return $balances;
     }
 
-    /**
-     * Retrieve available transaction items for a member.
-     */
     public static function getAvailableItems(Member $member): Collection
     {
         return TransactionTypeItem::query()
@@ -121,28 +107,19 @@ class PaymentManager
             ->get();
     }
 
-    /**
-     * Retrieve transaction items and calculate outstanding balances.
-     *
-     * OPTIMIZED:
-     * Instead of querying payment history separately for every item,
-     * retrieve all payment allocations in one grouped SQL query.
-     *
-     * New Payment Posting calculations use:
-     * - payments
-     * - payment_items
-     *
-     * They do not use member_ledger or member_ledger_bal.
-     */
     public static function getTransactionItems(
         Member $member,
         int $fiscalYear
     ): Collection {
 
-        /*
-         * 1. Retrieve active transaction item definitions.
-         */
         $items = TransactionTypeItem::query()
+            ->select([
+                'tran_code',
+                'fiscal_year',
+                'item_code',
+                'item_details',
+                'item_amount',
+            ])
             ->where('charge_code', $member->psa_mem_type)
             ->where('fiscal_year', (string) $fiscalYear)
             ->where('stat', 1)
@@ -154,15 +131,6 @@ class PaymentManager
             return collect();
         }
 
-        /*
-         * 2. Retrieve all active payment allocations in ONE query.
-         *
-         * Historical records:
-         * amount_paid is NULL, so amount_due is used as fallback.
-         *
-         * New records:
-         * amount_paid contains the actual collected amount.
-         */
         $payments = DB::table('payment_items as pi')
             ->join(
                 'payments as p',
@@ -191,12 +159,6 @@ class PaymentManager
             )
             ->get();
 
-        /*
-         * 3. Convert payment allocations into a lookup collection.
-         *
-         * This avoids repeatedly searching the payment collection
-         * while processing transaction items.
-         */
         $paidAmounts = [];
 
         foreach ($payments as $payment) {
@@ -209,9 +171,6 @@ class PaymentManager
             $paidAmounts[$key] = (float) $payment->total_paid;
         }
 
-        /*
-         * 4. Calculate balances for each transaction item.
-         */
         return $items->map(function ($item) use (
             $paidAmounts,
             $fiscalYear
@@ -239,10 +198,6 @@ class PaymentManager
                 default => 'Unpaid',
             };
 
-            /*
-             * Preserve the original model fields because
-             * the existing modal uses item_amount and item_details.
-             */
             return array_merge(
                 $item->toArray(),
                 [
@@ -257,9 +212,6 @@ class PaymentManager
         });
     }
 
-    /**
-     * Generate a consistent lookup key for transaction items.
-     */
     protected static function makeItemKey(
         ?string $itemCode,
         ?string $tranCode,

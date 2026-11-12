@@ -7,7 +7,6 @@ use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Actions\Action;
 
-
 class EditCashVoucher extends EditRecord
 {
     protected static string $resource = CashVoucherResource::class;

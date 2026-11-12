@@ -1,7 +1,5 @@
-
 <div class="space-y-5">
 
-    {{-- SUMMARY --}}
     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
 
         <div class="rounded-xl bg-success-50 dark:bg-success-400/10 p-4">
@@ -42,7 +40,6 @@
 
     </div>
 
-    {{-- ELIGIBLE MEMBERS --}}
     <div class="space-y-2">
 
         <div class="flex items-center justify-between">
@@ -107,7 +104,6 @@
 
     </div>
 
-    {{-- ALREADY REGISTERED --}}
     @if (count($preview['already_registered']) > 0)
 
         <details class="rounded-lg border border-warning-200 dark:border-warning-800 p-3">
@@ -159,7 +155,6 @@
 
     @endif
 
-    {{-- INVALID PSA IDS --}}
     @if (count($preview['invalid']) > 0)
 
         <details class="rounded-lg border border-danger-200 dark:border-danger-800 p-3">
@@ -185,7 +180,6 @@
 
     @endif
 
-    {{-- DUPLICATE INPUT --}}
     @if ($preview['summary']['duplicate_input'] > 0)
 
         <div class="text-sm text-gray-500">
@@ -195,7 +189,6 @@
 
     @endif
 
-    {{-- CONFIRMATION MESSAGE --}}
     @if ($preview['summary']['eligible'] > 0)
 
         <div class="rounded-lg border border-success-200 dark:border-success-800 p-3 text-sm">

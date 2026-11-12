@@ -28,7 +28,6 @@
                 }"
             >
 
-                {{-- Export Button --}}
                 <button
                     type="button"
                     @click="showExportModal = true"
@@ -55,7 +54,6 @@
                         bg-black/50 p-4"
                 >
 
-                    {{-- Modal --}}
                     <div
                         @click.outside="showExportModal = false"
                         x-transition
@@ -64,7 +62,6 @@
                             dark:bg-gray-900"
                     >
 
-                        {{-- Header --}}
                         <div class="border-b border-gray-200 px-6 py-5
                                     dark:border-gray-800">
 
@@ -96,8 +93,6 @@
 
                         </div>
 
-
-                        {{-- Body --}}
                         <div class="space-y-5 px-6 py-6">
 
                             <div>
@@ -134,8 +129,6 @@
 
                         </div>
 
-
-                        {{-- Footer --}}
                         <div
                             class="flex justify-end gap-3
                                 border-t border-gray-200
@@ -144,7 +137,6 @@
                                 dark:bg-gray-800/50"
                         >
 
-                            {{-- Cancel --}}
                             <button
                                 type="button"
                                 @click="showExportModal = false"
@@ -159,8 +151,6 @@
                                 Cancel
                             </button>
 
-
-                            {{-- Export --}}
                             <button
                                 type="button"
                                 wire:click="exportDisbursementVoucher"
@@ -250,7 +240,6 @@
                 </div>
 
             </div>
-
 
             <div class="grid gap-5 p-6 md:grid-cols-2">
                 <div class="grid gap-5 md:grid-cols-2">
@@ -460,7 +449,6 @@
 
             </div>
 
-
             <div class="p-6">
                 <div class="grid gap-4 lg:grid-cols-[1fr_260px_auto_auto_auto]">
                     <div>
@@ -601,7 +589,6 @@
                                 </tr>
 
                             </thead>
-
 
                             <tbody class="divide-y divide-gray-100
                                          dark:divide-gray-800">
@@ -764,7 +751,6 @@
 
             </div>
 
-
             <div class="grid gap-5 p-6 md:grid-cols-3">
                 <div>
 
@@ -874,7 +860,6 @@
                 </button>
 
             </div>
-
 
             {{-- <button
                 type="button"

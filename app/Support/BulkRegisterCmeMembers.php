@@ -9,26 +9,11 @@ use Illuminate\Validation\ValidationException;
 
 class BulkRegisterCmeMembers
 {
-    /**
-     * Bulk register eligible members into a CME program.
-     *
-     * Eligible membership types:
-     * RM - Regular Member
-     * TM - Trainee Member
-     * LM - Life Member
-     *
-     * Existing registrations and duplicate PSA IDs are skipped.
-     */
+
     public function execute(
         CMEProgram $program,
         array $memberIds
     ): array {
-
-        /*
-        |--------------------------------------------------------------------------
-        | Normalize PSA IDs
-        |--------------------------------------------------------------------------
-        */
 
         $memberIds = collect($memberIds)
             ->map(fn ($id) => trim((string) $id))
@@ -44,8 +29,6 @@ class BulkRegisterCmeMembers
 
         return DB::transaction(function () use ($program, $memberIds) {
 
-            // Lock the CME program record to coordinate
-            // individual and bulk registration operations.
             DB::select(
                 '
                 SELECT cme_program_code
@@ -54,12 +37,6 @@ class BulkRegisterCmeMembers
                 ',
                 [$program->cme_program_code]
             );
-
-            /*
-            |--------------------------------------------------------------------------
-            | Retrieve Eligible Members
-            |--------------------------------------------------------------------------
-            */
 
             $members = DB::table('member')
                 ->whereIn('member_id_no', $memberIds)
@@ -77,21 +54,9 @@ class BulkRegisterCmeMembers
 
             $eligibleIds = $members->keys();
 
-            /*
-            |--------------------------------------------------------------------------
-            | Count Invalid or Ineligible Members
-            |--------------------------------------------------------------------------
-            */
-
             $invalidCount = $memberIds
                 ->diff($eligibleIds)
                 ->count();
-
-            /*
-            |--------------------------------------------------------------------------
-            | Check Existing Registrations
-            |--------------------------------------------------------------------------
-            */
 
             $existingIds = DB::table('cme_program_registration')
                 ->where(
@@ -110,12 +75,6 @@ class BulkRegisterCmeMembers
                 true
             );
 
-            /*
-            |--------------------------------------------------------------------------
-            | Remove Existing Registrations
-            |--------------------------------------------------------------------------
-            */
-
             $newMembers = $members->reject(
                 fn ($member, $id) => isset($existingLookup[$id])
             );
@@ -131,22 +90,6 @@ class BulkRegisterCmeMembers
                 ];
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Generate Payment Reference Prefix
-            |--------------------------------------------------------------------------
-            |
-            | Example:
-            |
-            | CME2026001 = V26001
-            | CME2026002 = V26002
-            |
-            | Final reference:
-            | V260010001
-            | V260020001
-            |
-            */
-
             $year = substr(
                 (string) $program->cme_year,
                 -2
@@ -158,12 +101,6 @@ class BulkRegisterCmeMembers
             );
 
             $prefix = 'V' . $year . $programType;
-
-            /*
-            |--------------------------------------------------------------------------
-            | Retrieve Last Payment Reference
-            |--------------------------------------------------------------------------
-            */
 
             $lastReference = DB::table('cme_program_registration')
                 ->where(
@@ -184,12 +121,6 @@ class BulkRegisterCmeMembers
 
             $nextSequence = $lastSequence + 1;
 
-            /*
-            |--------------------------------------------------------------------------
-            | Validate Reference Sequence
-            |--------------------------------------------------------------------------
-            */
-
             if (
                 $nextSequence + $newMembers->count() - 1 > 9999
             ) {
@@ -197,12 +128,6 @@ class BulkRegisterCmeMembers
                     'member_ids' => 'The payment reference sequence has reached its maximum of 9999.',
                 ]);
             }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Registration Information
-            |--------------------------------------------------------------------------
-            */
 
             $user = Auth::user();
 
@@ -217,12 +142,6 @@ class BulkRegisterCmeMembers
             );
 
             $registrationDate = now()->toDateString();
-
-            /*
-            |--------------------------------------------------------------------------
-            | Prepare Registration Records
-            |--------------------------------------------------------------------------
-            */
 
             $insertRows = [];
 
@@ -247,32 +166,11 @@ class BulkRegisterCmeMembers
                 $nextSequence++;
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Insert Registrations
-            |--------------------------------------------------------------------------
-            |
-            | Do not insert computed columns:
-            |
-            | mem_last_name
-            | mem_first_name
-            | mem_middle_name
-            | cme_cert_no
-            | cme_units
-            |
-            */
-
             foreach (array_chunk($insertRows, 500) as $chunk) {
 
                 DB::table('cme_program_registration')
                     ->insert($chunk);
             }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Return Processing Summary
-            |--------------------------------------------------------------------------
-            */
 
             return [
                 'processed' => count($insertRows),
@@ -281,18 +179,12 @@ class BulkRegisterCmeMembers
             ];
         }, 3);
     }
-    
-    /**
-     * Preview members before bulk registration.
-     *
-     * This method does not insert or modify any records.
-     */
+
     public function preview(
         CMEProgram $program,
         array $memberIds
     ): array {
 
-        // Normalize PSA IDs.
         $originalCount = count($memberIds);
 
         $memberIds = collect($memberIds)
@@ -309,7 +201,6 @@ class BulkRegisterCmeMembers
             ]);
         }
 
-        // Retrieve eligible RM, TM, and LM members.
         $members = DB::table('member')
             ->whereIn('member_id_no', $memberIds)
             ->whereIn('psa_mem_type', ['RM', 'TM', 'LM'])
@@ -329,7 +220,6 @@ class BulkRegisterCmeMembers
                 )
             );
 
-        // Find existing registrations.
         $existingIds = [];
 
         if ($members->isNotEmpty()) {
@@ -349,21 +239,18 @@ class BulkRegisterCmeMembers
 
         $existingLookup = array_fill_keys($existingIds, true);
 
-        // Members eligible for new registration.
         $eligibleMembers = $members
             ->reject(
                 fn ($member, $id) => isset($existingLookup[$id])
             )
             ->values();
 
-        // Members already registered.
         $alreadyRegistered = $members
             ->filter(
                 fn ($member, $id) => isset($existingLookup[$id])
             )
             ->values();
 
-        // Invalid or ineligible PSA IDs.
         $invalidIds = $memberIds
             ->diff($members->keys())
             ->values()

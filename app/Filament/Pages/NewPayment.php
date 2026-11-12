@@ -53,12 +53,6 @@ class NewPayment extends Page implements HasForms, HasActions
 
     public bool $openItemsModal = false;
 
-    /*
-    |--------------------------------------------------------------------------
-    | Navigation
-    |--------------------------------------------------------------------------
-    */
-
     public static function shouldRegisterNavigation(): bool
     {
         return auth()->user()?->can('payment_create') ?? false;
@@ -68,12 +62,6 @@ class NewPayment extends Page implements HasForms, HasActions
     {
         return '';
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Mount
-    |--------------------------------------------------------------------------
-    */
 
     public function mount(): void
     {
@@ -97,22 +85,10 @@ class NewPayment extends Page implements HasForms, HasActions
         }
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Main Payment Form
-    |--------------------------------------------------------------------------
-    */
-
     public function form(Schema $schema): Schema
     {
         return $schema
             ->components([
-
-                /*
-                |--------------------------------------------------------------------------
-                | Member and Fiscal Year
-                |--------------------------------------------------------------------------
-                */
 
                 Grid::make(4)
                     ->schema([
@@ -207,12 +183,6 @@ class NewPayment extends Page implements HasForms, HasActions
                             ->columnSpan(1),
 
                     ]),
-
-                /*
-                |--------------------------------------------------------------------------
-                | Payment Details
-                |--------------------------------------------------------------------------
-                */
 
                 Grid::make(3)
                     ->schema([
@@ -310,12 +280,6 @@ class NewPayment extends Page implements HasForms, HasActions
             ->statePath('data');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Transaction Item Selection Modal
-    |--------------------------------------------------------------------------
-    */
-
     public function transactionItemsAction(): Action
     {
         return Action::make('transactionItems')
@@ -409,12 +373,6 @@ class NewPayment extends Page implements HasForms, HasActions
             ->disabled(empty($this->transactionItems));
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Load Transaction Items
-    |--------------------------------------------------------------------------
-    */
-
     public function loadTransactionItems(): void
     {
         $memberId = $this->data['member_id_no'] ?? null;
@@ -442,12 +400,6 @@ class NewPayment extends Page implements HasForms, HasActions
         )->toArray();
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Reset Transaction Selection
-    |--------------------------------------------------------------------------
-    */
-
     protected function resetTransactionSelection(): void
     {
         $this->transactionItems = [];
@@ -461,24 +413,12 @@ class NewPayment extends Page implements HasForms, HasActions
         $this->selectedMember = null;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | MEMF Detection
-    |--------------------------------------------------------------------------
-    */
-
     protected function isMemfItem(array $item): bool
     {
         return strtoupper(
             trim((string) ($item['tran_code'] ?? ''))
         ) === 'MEMF';
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Selected Item Key
-    |--------------------------------------------------------------------------
-    */
 
     protected function getSelectedItemKey(
         array $item,
@@ -506,12 +446,6 @@ class NewPayment extends Page implements HasForms, HasActions
             ]) ?: (string) $index
         );
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Toggle All MEMF Items
-    |--------------------------------------------------------------------------
-    */
 
     public function toggleMemfItems(): void
     {
@@ -557,12 +491,6 @@ class NewPayment extends Page implements HasForms, HasActions
         );
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Toggle Individual Transaction Item
-    |--------------------------------------------------------------------------
-    */
-
     public function toggleTransactionItem(string $itemCode): void
     {
         if (in_array($itemCode, $this->selectedTransactionItems)) {
@@ -583,12 +511,6 @@ class NewPayment extends Page implements HasForms, HasActions
             array_unique($this->selectedTransactionItems)
         );
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Restore Modal Selection
-    |--------------------------------------------------------------------------
-    */
 
     protected function restoreModalSelection(): void
     {
@@ -613,12 +535,6 @@ class NewPayment extends Page implements HasForms, HasActions
         );
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Remove Selected Item
-    |--------------------------------------------------------------------------
-    */
-
     public function removeItem(string $key): void
     {
         if (! isset($this->selectedItems[$key])) {
@@ -642,12 +558,6 @@ class NewPayment extends Page implements HasForms, HasActions
             2
         );
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Amount Paying Updated
-    |--------------------------------------------------------------------------
-    */
 
     public function updatedSelectedItems($value, $key): void
     {
@@ -683,12 +593,6 @@ class NewPayment extends Page implements HasForms, HasActions
         $this->calculateTotal();
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Calculate Total
-    |--------------------------------------------------------------------------
-    */
-
     public function calculateTotal(): void
     {
         $this->totalAmount = round(
@@ -700,12 +604,6 @@ class NewPayment extends Page implements HasForms, HasActions
         );
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Generate Payment Name
-    |--------------------------------------------------------------------------
-    */
-
     protected function getPaymentName(Member $member): string
     {
         return trim(
@@ -716,12 +614,6 @@ class NewPayment extends Page implements HasForms, HasActions
             )
         );
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Post Payment
-    |--------------------------------------------------------------------------
-    */
 
     public function postPayment(): void
     {
@@ -750,12 +642,6 @@ class NewPayment extends Page implements HasForms, HasActions
         }
 
         $paymentType = $paymentData['payment_type'] ?? null;
-
-        /*
-        |--------------------------------------------------------------------------
-        | Validate Payment Method
-        |--------------------------------------------------------------------------
-        */
 
         if (! in_array(
             $paymentType,
@@ -805,12 +691,6 @@ class NewPayment extends Page implements HasForms, HasActions
 
         $paymentReference = null;
 
-        /*
-        |--------------------------------------------------------------------------
-        | Database Transaction
-        |--------------------------------------------------------------------------
-        */
-
         DB::transaction(function () use (
             $paymentData,
             $member,
@@ -822,12 +702,6 @@ class NewPayment extends Page implements HasForms, HasActions
             $totalPayment = 0;
 
             $seenItems = [];
-
-            /*
-            |--------------------------------------------------------------------------
-            | Validate Selected Transaction Items
-            |--------------------------------------------------------------------------
-            */
 
             foreach ($this->selectedItems as $selectedItem) {
 
@@ -857,12 +731,6 @@ class NewPayment extends Page implements HasForms, HasActions
 
                 $seenItems[$uniqueKey] = true;
 
-                /*
-                |--------------------------------------------------------------------------
-                | Retrieve Current Transaction Definition
-                |--------------------------------------------------------------------------
-                */
-
                 $definition = TransactionTypeItem::query()
                     ->where('item_code', $itemCode)
                     ->where('tran_code', $tranCode)
@@ -882,12 +750,6 @@ class NewPayment extends Page implements HasForms, HasActions
                     (float) $definition->item_amount,
                     2
                 );
-
-                /*
-                |--------------------------------------------------------------------------
-                | Recalculate Previous Payments
-                |--------------------------------------------------------------------------
-                */
 
                 $previouslyPaid = (float) DB::table('payment_items as pi')
                     ->join(
@@ -916,12 +778,6 @@ class NewPayment extends Page implements HasForms, HasActions
                     2
                 );
 
-                /*
-                |--------------------------------------------------------------------------
-                | Validate Amount Paying
-                |--------------------------------------------------------------------------
-                */
-
                 if ($amountPaying <= 0) {
                     throw ValidationException::withMessages([
                         'selectedItems' => "The payment amount for {$itemCode} must be greater than zero.",
@@ -936,12 +792,6 @@ class NewPayment extends Page implements HasForms, HasActions
                             . '. Please refresh your payment items.',
                     ]);
                 }
-
-                /*
-                |--------------------------------------------------------------------------
-                | Prepare Payment Allocation
-                |--------------------------------------------------------------------------
-                */
 
                 $allocations[] = [
                     'member_id_no' => $member->member_id_no,
@@ -965,22 +815,7 @@ class NewPayment extends Page implements HasForms, HasActions
                 ]);
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Generate Payment Reference
-            |--------------------------------------------------------------------------
-            */
-
             $paymentReference = PaymentManager::generateReference($member);
-
-            /*
-            |--------------------------------------------------------------------------
-            | Save Payment Header
-            |--------------------------------------------------------------------------
-            |
-            | Follow the existing ADAMMS payment-recording conventions.
-            |
-            */
 
             Payment::create([
 
@@ -988,12 +823,10 @@ class NewPayment extends Page implements HasForms, HasActions
 
                 'member_id_no' => $member->member_id_no,
 
-                // Member information
                 'payment_name' => $this->getPaymentName($member),
 
                 'payment_add' => '',
 
-                // Payment amounts
                 'payment_total_amt' => $totalPayment,
 
                 'payment_gross_amt' => $totalPayment,
@@ -1006,12 +839,10 @@ class NewPayment extends Page implements HasForms, HasActions
 
                 'payment_tax_amt' => 0,
 
-                // Payment details
                 'payment_type' => $paymentData['payment_type'],
 
                 'payment_date' => $paymentData['payment_date'],
 
-                // Check details
                 'check_no' => $paymentType === 'Check'
                     ? ($paymentData['check_no'] ?? '')
                     : '',
@@ -1020,7 +851,6 @@ class NewPayment extends Page implements HasForms, HasActions
 
                 'check_name' => '',
 
-                // Bank details
                 'bank_name_code' => in_array(
                     $paymentType,
                     ['Check', 'Bank Transfer'],
@@ -1029,29 +859,24 @@ class NewPayment extends Page implements HasForms, HasActions
                     ? ($paymentData['bank_name_code'] ?? '')
                     : '',
 
-                // Electronic payment details
                 'epay_vendor_name_code' => '',
 
                 'epay_acct_no' => '',
 
-                // Credit card details
                 'credit_card_type' => '',
 
                 'credit_card_no' => '',
 
                 'credit_card_exp' => null,
 
-                // Debit card details
                 'debit_card_type' => '',
 
                 'debit_card_no' => '',
 
                 'debit_card_exp' => '',
 
-                // Receipt information
                 'or_no' => $paymentData['or_no'] ?? '',
 
-                // User information
                 'userid' => substr(
                     (string) (
                         auth()->user()?->username
@@ -1064,23 +889,15 @@ class NewPayment extends Page implements HasForms, HasActions
 
                 'overideby' => '',
 
-                // Other details
                 'remarks' => $paymentData['remarks'] ?? '',
 
                 'stat' => 1,
 
-                // Bank transfer reference
                 'bank_reference_no' => $paymentType === 'Bank Transfer'
                     ? ($paymentData['bank_reference_no'] ?? '')
                     : '',
 
             ]);
-
-            /*
-            |--------------------------------------------------------------------------
-            | Save Payment Allocations
-            |--------------------------------------------------------------------------
-            */
 
             foreach ($allocations as $allocation) {
 
@@ -1092,12 +909,6 @@ class NewPayment extends Page implements HasForms, HasActions
 
         }, 3);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Refresh After Successful Posting
-        |--------------------------------------------------------------------------
-        */
-
         $this->selectedItems = [];
 
         $this->selectedTransactionItems = [];
@@ -1105,12 +916,6 @@ class NewPayment extends Page implements HasForms, HasActions
         $this->totalAmount = 0;
 
         $this->loadTransactionItems();
-
-        /*
-        |--------------------------------------------------------------------------
-        | Success Notification
-        |--------------------------------------------------------------------------
-        */
 
         Notification::make()
             ->title('Payment Successfully Posted')

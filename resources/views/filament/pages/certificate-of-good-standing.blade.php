@@ -2,12 +2,10 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        {{-- Member Information --}}
         <x-filament::section heading="Member Information">
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
-                {{-- Member ID --}}
                 <div>
                     <div class="text-sm text-gray-500 dark:text-gray-400">
                         Member ID
@@ -18,7 +16,6 @@
                     </div>
                 </div>
 
-                {{-- Member Name --}}
                 <div>
                     <div class="text-sm text-gray-500 dark:text-gray-400">
                         Member Name
@@ -31,7 +28,6 @@
                     </div>
                 </div>
 
-                {{-- Membership Status --}}
                 <div>
                     <div class="text-sm text-gray-500 dark:text-gray-400">
                         Membership Status
@@ -42,7 +38,6 @@
                     </div>
                 </div>
 
-                {{-- Membership Type --}}
                 <div>
                     <div class="text-sm text-gray-500 dark:text-gray-400">
                         Membership Type
@@ -53,7 +48,6 @@
                     </div>
                 </div>
 
-                {{-- Chapter --}}
                 <div class="col-span-1 sm:col-span-2">
                     <div class="text-sm text-gray-500 dark:text-gray-400">
                         Chapter
@@ -68,11 +62,8 @@
 
         </x-filament::section>
 
-
-        {{-- Certificate Details --}}
         <x-filament::section heading="Certificate Details">
 
-            {{-- Purpose --}}
             <div>
 
                 <label
@@ -134,22 +125,12 @@
 
             </div>
 
-
-            {{-- Custom Purpose --}}
             @if ($purpose === 'custom')
 
                 <div class="mt-5">
-
-                    {{-- <label
-                        for="customPurpose"
-                        class="block text-sm font-medium mb-2"
-                    >
-                        Custom Purpose
-                    </label> --}}
-
                     <textarea
                         id="customPurpose"
-                        wire:model.live="customPurpose"
+                        wire:model="customPurpose"
                         rows="4"
                         maxlength="500"
                         placeholder="Enter the purpose of the certificate..."
@@ -170,8 +151,6 @@
 
             @endif
 
-
-            {{-- Generate Button --}}
             <div class="mt-6">
 
                 <x-filament::button

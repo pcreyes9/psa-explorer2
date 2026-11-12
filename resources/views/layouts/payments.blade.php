@@ -7,7 +7,6 @@
 
     <title>{{ $title ?? config('app.name') }}</title>
 
-    {{-- Self-contained styles: no Vite / Tailwind build needed. --}}
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         [x-cloak] { display: none !important; }
@@ -107,7 +106,6 @@
         {{ $slot }}
     </main>
 
-    {{-- Toast notifications: any Livewire component can dispatch('toast', ...) --}}
     <div
         class="toasts"
         x-data="{

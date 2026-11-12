@@ -19,7 +19,7 @@ class PaymentReferenceGenerator
             default => 'X',
         };
 
-        $datePart = now()->format('my'); // 0626
+        $datePart = now()->format('my');
 
         $latest = Payment::query()
             ->where('payment_ref_no', 'like', "{$prefix}{$datePart}%")

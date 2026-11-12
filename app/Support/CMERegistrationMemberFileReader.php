@@ -7,14 +7,7 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class CMERegistrationMemberFileReader
 {
-    /**
-     * Read PSA IDs from an Excel or CSV file.
-     *
-     * Accepted column headings:
-     * - PSA ID
-     * - PSA_ID
-     * - member_id_no
-     */
+
     public function read(string $filePath): array
     {
         try {
@@ -41,12 +34,6 @@ class CMERegistrationMemberFileReader
                     'The uploaded file is empty.'
                 );
             }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Identify PSA ID Column
-            |--------------------------------------------------------------------------
-            */
 
             $headers = array_map(
                 fn ($value) => strtolower(
@@ -77,12 +64,6 @@ class CMERegistrationMemberFileReader
                 );
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Extract PSA IDs
-            |--------------------------------------------------------------------------
-            */
-
             $memberIds = [];
 
             foreach (array_slice($rows, 1) as $row) {
@@ -101,12 +82,6 @@ class CMERegistrationMemberFileReader
 
                 $memberIds[] = $memberId;
             }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Remove Duplicate PSA IDs
-            |--------------------------------------------------------------------------
-            */
 
             $memberIds = array_values(
                 array_unique($memberIds)

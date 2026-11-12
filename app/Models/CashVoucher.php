@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\CashVoucherItem;
 use App\Models\User;
 
-
 class CashVoucher extends Model
 {
     protected $fillable = [
