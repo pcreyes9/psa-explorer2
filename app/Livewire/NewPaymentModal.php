@@ -52,14 +52,18 @@ class NewPaymentModal extends Component
 
     public string $remarks = '';
 
-    /** Items available for this member and fiscal year (read-only for the browser). */
+    /** All transaction items loaded during this payment session. */
     #[Locked]
     public array $transactionItems = [];
 
-    /** Keys of the items added to this payment (changed in the browser, synced with the next request). */
+    /** Items available in the currently selected fiscal year for the picker. */
+    #[Locked]
+    public array $availableItems = [];
+
+    /** Keys of the items added to this payment. */
     public array $selected = [];
 
-    /** Amount paying per item key (changed in the browser, synced with the next request). */
+    /** Amount paying per item key. */
     public array $amounts = [];
 
     /*
@@ -76,7 +80,9 @@ class NewPaymentModal extends Component
 
         $this->memberId = (string) $member->member_id_no;
 
-        $this->memberName = trim("{$member->mem_last_name}, {$member->mem_first_name}");
+        $this->memberName = trim(
+            "{$member->mem_last_name}, {$member->mem_first_name}"
+        );
 
         $this->fiscalYear = (string) date('Y');
 
@@ -115,6 +121,7 @@ class NewPaymentModal extends Component
     {
         $this->authorizePayment();
 
+        // Refresh available items without clearing existing selections.
         $this->loadTransactionItems();
     }
 
@@ -128,12 +135,8 @@ class NewPaymentModal extends Component
     {
         $member ??= Member::query()->find($this->memberId);
 
-        $this->selected = [];
-
-        $this->amounts = [];
-
         if (! $member || blank($this->fiscalYear)) {
-            $this->transactionItems = [];
+            $this->availableItems = [];
 
             return;
         }
@@ -143,17 +146,31 @@ class NewPaymentModal extends Component
             (int) $this->fiscalYear
         )->toArray();
 
-        $this->transactionItems = collect($items)
+        $currentItems = collect($items)
             ->values()
             ->map(fn (array $item, int $index) => $item + [
                 '_key' => $this->getItemKey($item, $index),
             ])
             ->all();
 
-        // Pre-fill each amount with the outstanding balance.
-        foreach ($this->transactionItems as $item) {
-            $this->amounts[$item['_key']] = $this->balanceOf($item);
+        // Only the picker changes when the fiscal year changes.
+        $this->availableItems = $currentItems;
+
+        // Preserve items loaded from previously selected fiscal years.
+        $allItems = collect($this->transactionItems)->keyBy('_key');
+
+        foreach ($currentItems as $item) {
+            $key = $item['_key'];
+
+            // Refresh item information without overwriting the entered amount.
+            $allItems->put($key, $item);
+
+            if (! array_key_exists($key, $this->amounts)) {
+                $this->amounts[$key] = $this->balanceOf($item);
+            }
         }
+
+        $this->transactionItems = $allItems->values()->all();
     }
 
     protected function balanceOf(array $item): float
@@ -169,6 +186,10 @@ class NewPaymentModal extends Component
 
     protected function getItemKey(array $item, int $index): string
     {
+        $fiscalYear = (string) (
+            $item['fiscal_year'] ?? $this->fiscalYear
+        );
+
         $itemCode = (string) ($item['item_code'] ?? 'ITEM');
 
         $identity = $item['id']
@@ -181,21 +202,24 @@ class NewPaymentModal extends Component
             : $itemCode . '_' . md5(
                 json_encode([
                     $item['tran_code'] ?? null,
-                    $item['fiscal_year'] ?? null,
+                    $fiscalYear,
                     $item['item_details'] ?? null,
                     $item['item_amount'] ?? null,
                     $index,
                 ]) ?: (string) $index
             );
 
-        // Keys are used in wire:model paths, so keep them free of dots etc.
-        return preg_replace('/[^A-Za-z0-9_\-]/', '_', $key);
+        // Include fiscal year to prevent collisions between different years.
+        return preg_replace(
+            '/[^A-Za-z0-9_\-]/',
+            '_',
+            $fiscalYear . '_' . $key
+        );
     }
 
     /**
-     * Builds the payment lines from the added item keys. Item details come from the
-     * server-side list, never from the browser; only the amounts are user input
-     * (and those are re-checked against the database when posting).
+     * Builds payment lines from the selected item keys.
+     * Item details come from the server-side list, not the browser.
      */
     protected function buildSelection(): array
     {
@@ -204,7 +228,6 @@ class NewPaymentModal extends Component
         $lines = [];
 
         foreach (array_unique(array_map('strval', $this->selected)) as $key) {
-
             $item = $items->get($key);
 
             if (! $item) {
@@ -214,8 +237,13 @@ class NewPaymentModal extends Component
             $lines[] = [
                 'item_code' => (string) ($item['item_code'] ?? ''),
                 'tran_code' => (string) ($item['tran_code'] ?? ''),
-                'fiscal_year' => (string) ($item['fiscal_year'] ?? $this->fiscalYear),
-                'amount_paying' => round((float) ($this->amounts[$key] ?? 0), 2),
+                'fiscal_year' => (string) (
+                    $item['fiscal_year'] ?? $this->fiscalYear
+                ),
+                'amount_paying' => round(
+                    (float) ($this->amounts[$key] ?? 0),
+                    2
+                ),
             ];
         }
 
@@ -247,7 +275,12 @@ class NewPaymentModal extends Component
             return;
         }
 
-        // Refresh balances and clear the ticked items.
+        // Clear posted selections and reload the current fiscal year's items.
+        $this->selected = [];
+        $this->amounts = [];
+        $this->transactionItems = [];
+        $this->availableItems = [];
+
         $this->loadTransactionItems();
 
         Notification::make()
@@ -257,8 +290,12 @@ class NewPaymentModal extends Component
             ->persistent()
             ->send();
 
-        // The member page can listen for this to close the modal / refresh.
-        $this->dispatch('payment-posted', reference: $reference, memberId: $this->memberId);
+        // Notify the member page to close the modal / refresh.
+        $this->dispatch(
+            'payment-posted',
+            reference: $reference,
+            memberId: $this->memberId
+        );
     }
 
     protected function rules(): array
@@ -266,11 +303,26 @@ class NewPaymentModal extends Component
         return [
             'fiscalYear' => ['required'],
             'paymentDate' => ['required', 'date'],
-            'paymentType' => ['required', Rule::in(self::PAYMENT_TYPES)],
+            'paymentType' => [
+                'required',
+                Rule::in(self::PAYMENT_TYPES),
+            ],
             'orNo' => ['nullable', 'max:18'],
-            'checkNo' => ['nullable', 'required_if:paymentType,Check', 'max:18'],
-            'bankNameCode' => ['nullable', 'required_if:paymentType,Check,Bank Transfer', 'max:50'],
-            'bankReferenceNo' => ['nullable', 'required_if:paymentType,Bank Transfer', 'max:50'],
+            'checkNo' => [
+                'nullable',
+                'required_if:paymentType,Check',
+                'max:18',
+            ],
+            'bankNameCode' => [
+                'nullable',
+                'required_if:paymentType,Check,Bank Transfer',
+                'max:50',
+            ],
+            'bankReferenceNo' => [
+                'nullable',
+                'required_if:paymentType,Bank Transfer',
+                'max:50',
+            ],
             'remarks' => ['nullable', 'max:50'],
         ];
     }
@@ -313,10 +365,12 @@ class NewPaymentModal extends Component
 
         $paymentType = $this->paymentType;
 
-        return DB::transaction(function () use ($lines, $paymentType): string {
+        return DB::transaction(function () use (
+            $lines,
+            $paymentType
+        ): string {
 
-            // Lock the member row first so two cashiers cannot post payments
-            // for the same member at once and overpay an item.
+            // Lock the member row to prevent simultaneous overpayments.
             $member = Member::query()
                 ->where('member_id_no', $this->memberId)
                 ->lockForUpdate()
@@ -335,14 +389,15 @@ class NewPaymentModal extends Component
             $seenItems = [];
 
             foreach ($lines as $line) {
-
                 $itemCode = $line['item_code'];
-
                 $tranCode = $line['tran_code'];
-
                 $fiscalYear = $line['fiscal_year'];
 
-                if ($itemCode === '' || $tranCode === '' || $fiscalYear === '') {
+                if (
+                    $itemCode === ''
+                    || $tranCode === ''
+                    || $fiscalYear === ''
+                ) {
                     throw ValidationException::withMessages([
                         'selected' => 'One or more selected items have invalid information.',
                     ]);
@@ -358,8 +413,7 @@ class NewPaymentModal extends Component
 
                 $seenItems[$uniqueKey] = true;
 
-                // Always re-read the definition and previous payments from the
-                // database; never trust amounts sent by the browser.
+                // Re-read the transaction definition from the database.
                 $definition = TransactionTypeItem::query()
                     ->where('item_code', $itemCode)
                     ->where('tran_code', $tranCode)
@@ -374,19 +428,32 @@ class NewPaymentModal extends Component
                     ]);
                 }
 
-                $originalAmount = round((float) $definition->item_amount, 2);
+                $originalAmount = round(
+                    (float) $definition->item_amount,
+                    2
+                );
 
                 $previouslyPaid = (float) DB::table('payment_items as pi')
-                    ->join('payments as p', 'p.payment_ref_no', '=', 'pi.payment_ref_no')
+                    ->join(
+                        'payments as p',
+                        'p.payment_ref_no',
+                        '=',
+                        'pi.payment_ref_no'
+                    )
                     ->where('pi.member_id_no', $member->member_id_no)
                     ->where('pi.fiscal_year', $fiscalYear)
                     ->where('pi.item_code', $itemCode)
                     ->where('pi.tran_code', $tranCode)
                     ->where('pi.stat', 1)
                     ->where('p.stat', 1)
-                    ->sum(DB::raw('COALESCE(pi.amount_paid, pi.amount_due)'));
+                    ->sum(DB::raw(
+                        'COALESCE(pi.amount_paid, pi.amount_due)'
+                    ));
 
-                $balance = round(max($originalAmount - $previouslyPaid, 0), 2);
+                $balance = round(
+                    max($originalAmount - $previouslyPaid, 0),
+                    2
+                );
 
                 $amountPaying = $line['amount_paying'];
 
@@ -429,80 +496,83 @@ class NewPaymentModal extends Component
 
             $paymentReference = PaymentManager::generateReference($member);
 
+            /*
+            |--------------------------------------------------------------------------
+            | Save Payment Header
+            |--------------------------------------------------------------------------
+            */
+
             Payment::create([
-
                 'payment_ref_no' => $paymentReference,
-
                 'member_id_no' => $member->member_id_no,
 
                 'payment_name' => $this->getPaymentName($member),
-
                 'payment_add' => '',
 
                 'payment_total_amt' => $totalPayment,
-
                 'payment_gross_amt' => $totalPayment,
-
                 'payment_discount' => 0,
-
                 'payment_discounted_amt' => $totalPayment,
-
                 'payment_tax' => 0,
-
                 'payment_tax_amt' => 0,
 
                 'payment_type' => $paymentType,
-
                 'payment_date' => $this->paymentDate,
 
-                'check_no' => $paymentType === 'Check' ? $this->checkNo : '',
+                'check_no' => $paymentType === 'Check'
+                    ? $this->checkNo
+                    : '',
 
                 'check_acct_no' => '',
-
                 'check_name' => '',
 
-                'bank_name_code' => in_array($paymentType, ['Check', 'Bank Transfer'], true)
+                'bank_name_code' => in_array(
+                    $paymentType,
+                    ['Check', 'Bank Transfer'],
+                    true
+                )
                     ? $this->bankNameCode
                     : '',
 
                 'epay_vendor_name_code' => '',
-
                 'epay_acct_no' => '',
 
                 'credit_card_type' => '',
-
                 'credit_card_no' => '',
-
                 'credit_card_exp' => null,
 
                 'debit_card_type' => '',
-
                 'debit_card_no' => '',
-
                 'debit_card_exp' => '',
 
                 'or_no' => $this->orNo,
 
                 'userid' => substr(
-                    (string) (auth()->user()?->username ?? auth()->id() ?? ''),
+                    (string) (
+                        auth()->user()?->username
+                        ?? auth()->id()
+                        ?? ''
+                    ),
                     0,
                     20
                 ),
 
                 'overideby' => '',
-
                 'remarks' => $this->remarks,
-
                 'stat' => 1,
 
                 'bank_reference_no' => $paymentType === 'Bank Transfer'
                     ? $this->bankReferenceNo
                     : '',
-
             ]);
 
-            foreach ($allocations as $allocation) {
+            /*
+            |--------------------------------------------------------------------------
+            | Save Payment Allocations
+            |--------------------------------------------------------------------------
+            */
 
+            foreach ($allocations as $allocation) {
                 PaymentItem::create([
                     'payment_ref_no' => $paymentReference,
                     ...$allocation,
