@@ -502,15 +502,15 @@ class ViewMember extends ViewRecord
                     ->label('New Payment')
                     ->icon('heroicon-o-banknotes')
                     ->color('gray')
-                    ->visible(
-                        fn () => auth()->user()?->can('members_edit')
-                    )
-                    ->url(
-                        fn () => url(
-                            '/admin/new-payment?member=' .
-                            $this->record->member_id_no
-                        )
-                    ),
+                    ->visible(fn () => auth()->user()?->can('payment_create'))
+                    ->modalHeading(fn () => 'New Payment: ' . $this->record->mem_last_name . ', ' . $this->record->mem_first_name)
+                    ->modalWidth('6xl')
+                    ->modalContent(fn () => view('filament.payments.new-payment-modal', [
+                        'memberId' => $this->record->member_id_no,
+                    ]))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Close')
+                    ->closeModalByClickingAway(false),
 
                 Action::make('soa')
                     ->label('Statement of Account')

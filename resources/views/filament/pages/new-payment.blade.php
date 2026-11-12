@@ -72,18 +72,19 @@
 
                 {{ $this->transactionItemsAction }}
 
-                <x-filament::button
-                    color="success"
-                    icon="heroicon-o-check-circle"
-                    wire:click="postPayment"
-                    :disabled="count($this->selectedItems) === 0"
-                >
-                    Post Payment
-                </x-filament::button>
+                {{-- Confirmation modal + disabled state live in postPaymentAction() --}}
+                {{ $this->postPaymentAction }}
 
             </div>
 
         </div>
+
+        {{-- Errors from postPayment() (e.g. overpayment, item no longer available) --}}
+        @error('selectedItems')
+            <p class="text-sm font-medium text-danger-600 dark:text-danger-400">
+                {{ $message }}
+            </p>
+        @enderror
 
     </div>
 
@@ -201,6 +202,7 @@
 
 
                                 {{-- AMOUNT PAYING --}}
+                                {{-- Syncs shortly after typing or using the spinner arrows. updatedSelectedItems() clamps the value and recalculates the total. --}}
 
                                 <td class="p-3 text-right">
 
@@ -209,8 +211,7 @@
                                         min="0"
                                         max="{{ (float) ($item['balance'] ?? $item['amount_due'] ?? 0) }}"
                                         step="0.01"
-                                        wire:model.live.debounce.1000ms="selectedItems.{{ $key }}.amount_paying"
-                                        wire:change="calculateTotal"
+                                        wire:model.live.debounce.500ms="selectedItems.{{ $key }}.amount_paying"
                                         class="w-32 rounded-md border-gray-300 text-right shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-800"
                                     />
 
@@ -308,27 +309,14 @@
     {{-- ========================================= --}}
     {{-- WARN BEFORE LEAVING WITH SELECTED ITEMS   --}}
     {{-- ========================================= --}}
+    {{-- Alpine listener exists only while items are selected, so it is removed automatically after posting. --}}
 
     @if (count($this->selectedItems))
 
-        <script>
-            document.addEventListener('livewire:init', () => {
-
-                if (window.paymentUnloadWarningInitialized) {
-                    return;
-                }
-
-                window.paymentUnloadWarningInitialized = true;
-
-                window.addEventListener('beforeunload', function (event) {
-
-                    event.preventDefault();
-                    event.returnValue = '';
-
-                });
-
-            });
-        </script>
+        <div
+            x-data
+            x-on:beforeunload.window="$event.preventDefault(); $event.returnValue = ''"
+        ></div>
 
     @endif
 
