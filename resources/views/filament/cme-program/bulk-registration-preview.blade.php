@@ -63,6 +63,9 @@
                             <th class="px-4 py-3 text-left">PSA ID</th>
                             <th class="px-4 py-3 text-left">Member Name</th>
                             <th class="px-4 py-3 text-center">Type</th>
+                            @if ($preview['uses_supplied_references'])
+                                <th class="px-4 py-3 text-left">Payment Ref. No.</th>
+                            @endif
                         </tr>
                     </thead>
 
@@ -84,6 +87,11 @@
                                         {{ $member['membership_type'] }}
                                     </span>
                                 </td>
+                                @if ($preview['uses_supplied_references'])
+                                    <td class="px-4 py-3">
+                                        {{ $member['payment_ref_no'] }}
+                                    </td>
+                                @endif
                             </tr>
 
                         @endforeach
@@ -199,7 +207,11 @@
 
             <p class="mt-1 text-gray-600 dark:text-gray-300">
                 Only eligible members who are not yet registered will be processed.
-                Payment reference numbers will be generated automatically.
+                @if ($preview['uses_supplied_references'])
+                    Payment reference numbers from the uploaded file will be saved as provided.
+                @else
+                    Payment reference numbers will be generated automatically.
+                @endif
             </p>
         </div>
 

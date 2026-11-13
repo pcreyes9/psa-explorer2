@@ -12,7 +12,8 @@ class BulkRegisterCmeMembers
 
     public function execute(
         CMEProgram $program,
-        array $memberIds
+        array $memberIds,
+        array $paymentReferences = []
     ): array {
 
         $memberIds = collect($memberIds)
@@ -27,7 +28,11 @@ class BulkRegisterCmeMembers
             ]);
         }
 
-        return DB::transaction(function () use ($program, $memberIds) {
+        return DB::transaction(function () use (
+            $program,
+            $memberIds,
+            $paymentReferences
+        ) {
 
             DB::select(
                 '
@@ -90,6 +95,11 @@ class BulkRegisterCmeMembers
                 ];
             }
 
+            $referencesByMember = $this->getSuppliedPaymentReferences(
+                $newMembers,
+                $paymentReferences
+            );
+
             $year = substr(
                 (string) $program->cme_year,
                 -2
@@ -102,31 +112,35 @@ class BulkRegisterCmeMembers
 
             $prefix = 'V' . $year . $programType;
 
-            $lastReference = DB::table('cme_program_registration')
-                ->where(
-                    'payment_ref_no',
-                    'LIKE',
-                    $prefix . '%'
-                )
-                ->orderByDesc('payment_ref_no')
-                ->lockForUpdate()
-                ->value('payment_ref_no');
+            $nextSequence = null;
 
-            $lastSequence = $lastReference
-                ? (int) substr(
-                    $lastReference,
-                    strlen($prefix)
-                )
-                : 0;
+            if ($referencesByMember === []) {
+                $lastReference = DB::table('cme_program_registration')
+                    ->where(
+                        'payment_ref_no',
+                        'LIKE',
+                        $prefix . '%'
+                    )
+                    ->orderByDesc('payment_ref_no')
+                    ->lockForUpdate()
+                    ->value('payment_ref_no');
 
-            $nextSequence = $lastSequence + 1;
+                $lastSequence = $lastReference
+                    ? (int) substr(
+                        $lastReference,
+                        strlen($prefix)
+                    )
+                    : 0;
 
-            if (
-                $nextSequence + $newMembers->count() - 1 > 9999
-            ) {
-                throw ValidationException::withMessages([
-                    'member_ids' => 'The payment reference sequence has reached its maximum of 9999.',
-                ]);
+                $nextSequence = $lastSequence + 1;
+
+                if (
+                    $nextSequence + $newMembers->count() - 1 > 9999
+                ) {
+                    throw ValidationException::withMessages([
+                        'member_ids' => 'The payment reference sequence has reached its maximum of 9999.',
+                    ]);
+                }
             }
 
             $user = Auth::user();
@@ -147,12 +161,13 @@ class BulkRegisterCmeMembers
 
             foreach ($newMembers as $memberId => $member) {
 
-                $paymentReference = $prefix . str_pad(
-                    (string) $nextSequence,
-                    4,
-                    '0',
-                    STR_PAD_LEFT
-                );
+                $paymentReference = $referencesByMember[$memberId]
+                    ?? $prefix . str_pad(
+                        (string) $nextSequence,
+                        4,
+                        '0',
+                        STR_PAD_LEFT
+                    );
 
                 $insertRows[] = [
                     'cme_year' => $program->cme_year,
@@ -163,7 +178,9 @@ class BulkRegisterCmeMembers
                     'registeredby' => $registeredBy,
                 ];
 
-                $nextSequence++;
+                if ($referencesByMember === []) {
+                    $nextSequence++;
+                }
             }
 
             foreach (array_chunk($insertRows, 500) as $chunk) {
@@ -180,9 +197,71 @@ class BulkRegisterCmeMembers
         }, 3);
     }
 
+    private function getSuppliedPaymentReferences(
+        $members,
+        array $paymentReferences
+    ): array {
+        if ($paymentReferences === []) {
+            return [];
+        }
+
+        $referencesByMember = [];
+
+        foreach ($members as $member) {
+            $memberId = trim((string) $member->member_id_no);
+            $reference = trim(
+                (string) ($paymentReferences[$memberId] ?? '')
+            );
+
+            if ($reference === '') {
+                throw ValidationException::withMessages([
+                    'member_file' => "A payment reference number is required for PSA ID {$memberId}.",
+                ]);
+            }
+
+            if (strlen($reference) > 20) {
+                throw ValidationException::withMessages([
+                    'member_file' => "The payment reference number for PSA ID {$memberId} cannot exceed 20 characters.",
+                ]);
+            }
+
+            $referencesByMember[$memberId] = $reference;
+        }
+
+        $normalizedReferences = array_map(
+            'strtolower',
+            array_values($referencesByMember)
+        );
+
+        if (
+            count(array_unique($normalizedReferences))
+            !== count($normalizedReferences)
+        ) {
+            throw ValidationException::withMessages([
+                'member_file' => 'Each member must have a unique payment reference number.',
+            ]);
+        }
+
+        $referenceExists = DB::table('cme_program_registration')
+            ->whereIn(
+                'payment_ref_no',
+                array_values($referencesByMember)
+            )
+            ->exists();
+
+        if ($referenceExists) {
+            throw ValidationException::withMessages([
+                'member_file' => 'One or more payment reference numbers already exist. Please use unique numbers.',
+            ]);
+        }
+
+        return $referencesByMember;
+    }
+
     public function preview(
         CMEProgram $program,
-        array $memberIds
+        array $memberIds,
+        array $paymentReferences = []
     ): array {
 
         $originalCount = count($memberIds);
@@ -250,6 +329,10 @@ class BulkRegisterCmeMembers
                 fn ($member, $id) => isset($existingLookup[$id])
             )
             ->values();
+        $referencesByMember = $this->getSuppliedPaymentReferences(
+            $eligibleMembers,
+            $paymentReferences
+        );
 
         $invalidIds = $memberIds
             ->diff($members->keys())
@@ -258,9 +341,8 @@ class BulkRegisterCmeMembers
 
         return [
             'total_submitted' => $originalCount,
-
             'duplicate_input_count' => $duplicateInputCount,
-
+            'uses_supplied_references' => $paymentReferences !== [],
             'eligible' => $eligibleMembers
                 ->map(fn ($member) => [
                     'member_id_no' => $member->member_id_no,
@@ -270,6 +352,9 @@ class BulkRegisterCmeMembers
                         ($member->mem_middle_name ?? '')
                     ),
                     'membership_type' => $member->psa_mem_type,
+                    'payment_ref_no' => $referencesByMember[
+                        trim((string) $member->member_id_no)
+                    ] ?? null,
                 ])
                 ->all(),
 
@@ -284,9 +369,7 @@ class BulkRegisterCmeMembers
                     'membership_type' => $member->psa_mem_type,
                 ])
                 ->all(),
-
             'invalid' => $invalidIds,
-
             'summary' => [
                 'eligible' => $eligibleMembers->count(),
                 'already_registered' => $alreadyRegistered->count(),

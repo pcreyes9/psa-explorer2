@@ -37,55 +37,88 @@ class CMERegistrationMemberFileReader
 
             $headers = array_map(
                 fn ($value) => strtolower(
-                    trim((string) $value)
+                    preg_replace(
+                        '/^\xEF\xBB\xBF/',
+                        '',
+                        trim((string) $value)
+                    ) ?? ''
                 ),
                 $rows[0]
             );
 
-            $acceptedHeaders = [
-                'psa id',
-                'psa_id',
-                'member_id_no',
-            ];
-
-            $columnIndex = null;
+            $memberColumn = null;
+            $paymentReferenceColumn = null;
 
             foreach ($headers as $index => $header) {
 
-                if (in_array($header, $acceptedHeaders, true)) {
-                    $columnIndex = $index;
-                    break;
+                if (in_array($header, [
+                    'psa id',
+                    'psa_id',
+                    'member_id_no',
+                ], true)) {
+                    $memberColumn = $index;
+                }
+
+                if (in_array($header, [
+                    'payment reference number',
+                    'payment_ref_no',
+                    'payment ref no',
+                    'payment ref no.',
+                    'payment ref. no.',
+                ], true)) {
+                    $paymentReferenceColumn = $index;
                 }
             }
 
-            if ($columnIndex === null) {
+            if ($memberColumn === null) {
                 throw new \RuntimeException(
                     'The uploaded file must contain a PSA ID column.'
                 );
             }
 
+            if ($paymentReferenceColumn === null) {
+                throw new \RuntimeException(
+                    'The uploaded file must contain a Payment Reference Number column.'
+                );
+            }
+
             $memberIds = [];
+            $paymentReferences = [];
 
-            foreach (array_slice($rows, 1) as $row) {
+            foreach (array_slice($rows, 1) as $rowIndex => $row) {
 
-                $value = $row[$columnIndex] ?? null;
-
-                if ($value === null) {
-                    continue;
-                }
-
-                $memberId = trim((string) $value);
+                $memberId = trim(
+                    (string) ($row[$memberColumn] ?? '')
+                );
 
                 if ($memberId === '') {
                     continue;
                 }
 
-                $memberIds[] = $memberId;
-            }
+                $paymentReference = trim(
+                    (string) ($row[$paymentReferenceColumn] ?? '')
+                );
 
-            $memberIds = array_values(
-                array_unique($memberIds)
-            );
+                if ($paymentReference === '') {
+                    throw new \RuntimeException(
+                        'Payment reference number is required on spreadsheet row '
+                        . ($rowIndex + 2)
+                        . '.'
+                    );
+                }
+
+                if (
+                    isset($paymentReferences[$memberId])
+                    && $paymentReferences[$memberId] !== $paymentReference
+                ) {
+                    throw new \RuntimeException(
+                        "PSA ID {$memberId} has conflicting payment reference numbers in the uploaded file."
+                    );
+                }
+
+                $memberIds[] = $memberId;
+                $paymentReferences[$memberId] = $paymentReference;
+            }
 
             if (empty($memberIds)) {
                 throw new \RuntimeException(
@@ -93,8 +126,10 @@ class CMERegistrationMemberFileReader
                 );
             }
 
-            return $memberIds;
-
+            return [
+                'member_ids' => $memberIds,
+                'payment_references' => $paymentReferences,
+            ];
         } catch (ValidationException $exception) {
 
             throw $exception;

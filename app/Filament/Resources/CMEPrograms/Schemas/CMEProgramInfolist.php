@@ -401,7 +401,7 @@ class CMEProgramInfolist
 
                                                 Step::make('Select Members')
                                                     ->description(
-                                                        'Search for members or upload a file containing PSA IDs.'
+                                                        'Search for members or upload a file with PSA ID and Payment Reference Number columns.'
                                                     )
                                                     ->icon('heroicon-o-users')
                                                     ->schema([
@@ -517,7 +517,7 @@ class CMEProgramInfolist
                                                             ])
                                                             ->maxSize(10240)
                                                             ->helperText(
-                                                                'Upload a file containing a PSA ID column. Use either manual selection or file upload, not both.'
+                                                                'For uploads, include PSA ID and Payment Reference Number columns. Each reference must be unique and no longer than 20 characters. Use either manual selection or file upload, not both.'
                                                             ),
 
                                                     ])
@@ -552,6 +552,7 @@ class CMEProgramInfolist
                                                                 }
 
                                                                 $memberIds = $selectedMemberIds;
+                                                                $paymentReferences = [];
 
                                                                 if (filled($uploadedFile)) {
 
@@ -565,16 +566,20 @@ class CMEProgramInfolist
                                                                         return 'The temporary uploaded file could not be found. Please upload it again.';
                                                                     }
 
-                                                                    $memberIds = app(
+                                                                    $fileData = app(
                                                                         CMERegistrationMemberFileReader::class
                                                                     )->read($filePath);
+
+                                                                    $memberIds = $fileData['member_ids'];
+                                                                    $paymentReferences = $fileData['payment_references'];
                                                                 }
 
                                                                 $preview = app(
                                                                     BulkRegisterCmeMembers::class
                                                                 )->preview(
                                                                     $record,
-                                                                    $memberIds
+                                                                    $memberIds,
+                                                                    $paymentReferences
                                                                 );
 
                                                                 return view(
@@ -615,6 +620,7 @@ class CMEProgramInfolist
                                                 }
 
                                                 $memberIds = $selectedMemberIds;
+                                                $paymentReferences = [];
 
                                                 if (filled($uploadedFile)) {
 
@@ -632,16 +638,20 @@ class CMEProgramInfolist
                                                         ]);
                                                     }
 
-                                                    $memberIds = app(
+                                                    $fileData = app(
                                                         CMERegistrationMemberFileReader::class
                                                     )->read($filePath);
+
+                                                    $memberIds = $fileData['member_ids'];
+                                                    $paymentReferences = $fileData['payment_references'];
                                                 }
 
                                                 $result = app(
                                                     BulkRegisterCmeMembers::class
                                                 )->execute(
                                                     $record,
-                                                    $memberIds
+                                                    $memberIds,
+                                                    $paymentReferences
                                                 );
 
                                                 Notification::make()
@@ -653,6 +663,151 @@ class CMEProgramInfolist
                                                     )
                                                     ->success()
                                                     ->persistent()
+                                                    ->send();
+                                            }),
+
+                                        Action::make('removeDelegate')
+                                            ->label('Remove Delegate')
+                                            ->icon('heroicon-o-user-minus')
+                                            ->color('danger')
+                                            ->visible(fn (CMEProgram $record): bool => DB::table('cme_program_registrationNM')
+                                                ->where('cme_program_code', $record->cme_program_code)
+                                                ->exists()
+                                                || DB::table('cme_program_registration')
+                                                    ->where('cme_program_code', $record->cme_program_code)
+                                                    ->exists())
+                                            ->modalHeading('Remove Delegate from CME Program')
+                                            ->modalDescription(
+                                                'This removes the registration from this CME program. It does not delete any separate payment record.'
+                                            )
+                                            ->modalSubmitActionLabel('Remove Delegate')
+                                            ->form([
+                                                Select::make('registration_key')
+                                                    ->label('Select Delegate')
+                                                    ->required()
+                                                    ->searchable()
+                                                    ->options(function (CMEProgram $record): array {
+                                                        $nonMembers = DB::table('cme_program_registrationNM')
+                                                            ->where('cme_program_code', $record->cme_program_code)
+                                                            ->select([
+                                                                'nm_id_no',
+                                                                'nm_last_name',
+                                                                'nm_first_name',
+                                                                'nm_middle_name',
+                                                                'payment_ref_no',
+                                                            ])
+                                                            ->orderBy('nm_last_name')
+                                                            ->orderBy('nm_first_name')
+                                                            ->get()
+                                                            ->mapWithKeys(function ($delegate): array {
+                                                                $id = trim((string) $delegate->nm_id_no);
+                                                                $name = trim(
+                                                                    ($delegate->nm_last_name ?? '') . ', ' .
+                                                                    ($delegate->nm_first_name ?? '') . ' ' .
+                                                                    ($delegate->nm_middle_name ?? '')
+                                                                );
+                                                                $reference = trim((string) ($delegate->payment_ref_no ?? ''));
+
+                                                                return [
+                                                                    "NM|{$id}" => trim(
+                                                                        "Non-member: {$name} ({$id})" .
+                                                                        ($reference !== '' ? " — {$reference}" : '')
+                                                                    ),
+                                                                ];
+                                                            });
+
+                                                        $members = DB::table('cme_program_registration as r')
+                                                            ->join(
+                                                                'member as m',
+                                                                'm.member_id_no',
+                                                                '=',
+                                                                'r.member_id_no'
+                                                            )
+                                                            ->where('r.cme_program_code', $record->cme_program_code)
+                                                            ->select([
+                                                                'r.member_id_no',
+                                                                'r.payment_ref_no',
+                                                                'm.mem_last_name',
+                                                                'm.mem_first_name',
+                                                                'm.mem_middle_name',
+                                                                'm.psa_mem_type',
+                                                            ])
+                                                            ->orderBy('m.mem_last_name')
+                                                            ->orderBy('m.mem_first_name')
+                                                            ->get()
+                                                            ->mapWithKeys(function ($delegate): array {
+                                                                $id = trim((string) $delegate->member_id_no);
+                                                                $name = trim(
+                                                                    ($delegate->mem_last_name ?? '') . ', ' .
+                                                                    ($delegate->mem_first_name ?? '') . ' ' .
+                                                                    ($delegate->mem_middle_name ?? '')
+                                                                );
+                                                                $reference = trim((string) ($delegate->payment_ref_no ?? ''));
+                                                                $type = strtoupper(trim((string) $delegate->psa_mem_type));
+
+                                                                return [
+                                                                    "MEMBER|{$id}" => trim(
+                                                                        "{$type}: {$name} ({$id})" .
+                                                                        ($reference !== '' ? " — {$reference}" : '')
+                                                                    ),
+                                                                ];
+                                                            });
+
+                                                        return $nonMembers
+                                                            ->merge($members)
+                                                            ->all();
+                                                    }),
+                                            ])
+                                            ->action(function (array $data, CMEProgram $record): void {
+                                                [$type, $id] = array_pad(
+                                                    explode('|', (string) ($data['registration_key'] ?? ''), 2),
+                                                    2,
+                                                    ''
+                                                );
+
+                                                [$table, $idColumn] = match ($type) {
+                                                    'NM' => ['cme_program_registrationNM', 'nm_id_no'],
+                                                    'MEMBER' => ['cme_program_registration', 'member_id_no'],
+                                                    default => throw ValidationException::withMessages([
+                                                        'registration_key' => 'Select a valid delegate registration.',
+                                                    ]),
+                                                };
+
+                                                if ($id === '') {
+                                                    throw ValidationException::withMessages([
+                                                        'registration_key' => 'Select a valid delegate registration.',
+                                                    ]);
+                                                }
+
+                                                DB::transaction(function () use (
+                                                    $table,
+                                                    $idColumn,
+                                                    $id,
+                                                    $record
+                                                ): void {
+                                                    $query = DB::table($table)
+                                                        ->where('cme_program_code', $record->cme_program_code)
+                                                        ->where($idColumn, $id);
+
+                                                    $matchingRows = (clone $query)
+                                                        ->lockForUpdate()
+                                                        ->count();
+
+                                                    if ($matchingRows !== 1) {
+                                                        throw ValidationException::withMessages([
+                                                            'registration_key' => $matchingRows === 0
+                                                                ? 'This delegate is no longer registered in this CME program.'
+                                                                : 'Multiple registrations match this delegate. No registrations were removed.',
+                                                        ]);
+                                                    }
+
+                                                    $query->delete();
+                                                });
+
+                                                Notification::make()
+                                                    ->title('Delegate Removed')
+                                                    ->body('The delegate registration was removed from this CME program.')
+                                                    ->success()
                                                     ->send();
                                             }),
 

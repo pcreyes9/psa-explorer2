@@ -53,6 +53,10 @@ class MemberSearch extends Page implements HasTable
                     ->label('Member ID')
                     ->sortable(),
 
+                TextColumn::make('psa_mem_type')
+                    ->label('Membership Type')
+                    ->sortable(),
+
                 TextColumn::make('mem_last_name')
                     ->label('Last Name')
                     ->sortable(),
@@ -85,8 +89,8 @@ class MemberSearch extends Page implements HasTable
                 'mem_last_name',
                 'mem_first_name',
                 'psa_chapter_code',
+                'psa_mem_type',
             ]);
-
         if (blank($search)) {
             return $query->whereRaw('1 = 0');
         }

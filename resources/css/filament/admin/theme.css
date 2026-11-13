@@ -1,9 +1,7 @@
 @import '../../../../vendor/filament/filament/resources/css/theme.css';
 
-@source '../../../../app/Filament *';
-@source '../../../../resources/views *';
-@source '../../../../resources *.blade.php';
-@source '../../../../resources *.php';
+@source '../../../../app/Filament/**/*.php';
+@source '../../../../resources/views/**/*.blade.php';
 
 .fi-in-entry-label {
     @apply font-bold;

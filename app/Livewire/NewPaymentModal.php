@@ -48,6 +48,9 @@ class NewPaymentModal extends Component
     #[Locked]
     public array $availableItems = [];
 
+    #[Locked]
+    public bool $itemsLoaded = false;
+
     public array $selected = [];
 
     public array $amounts = [];
@@ -74,8 +77,18 @@ class NewPaymentModal extends Component
         $this->fiscalYear = (string) date('Y');
 
         $this->paymentDate = now()->toDateString();
+    }
 
-        $this->loadTransactionItems($member);
+    public function initializeItems(): void
+    {
+        $this->authorizePayment();
+
+        if ($this->itemsLoaded) {
+            return;
+        }
+
+        $this->loadTransactionItems();
+        $this->itemsLoaded = true;
     }
 
     public function render()
@@ -357,10 +370,67 @@ class NewPaymentModal extends Component
                 ]);
             }
 
+            $itemKey = static fn ($itemCode, $tranCode, $fiscalYear): string =>
+                $fiscalYear . '|' . $tranCode . '|' . $itemCode;
+
+            $itemCodes = array_values(array_unique(array_column($lines, 'item_code')));
+            $tranCodes = array_values(array_unique(array_column($lines, 'tran_code')));
+            $fiscalYears = array_values(array_unique(array_column($lines, 'fiscal_year')));
+
+            $definitions = TransactionTypeItem::query()
+                ->select([
+                    'item_code',
+                    'tran_code',
+                    'fiscal_year',
+                    'item_amount',
+                ])
+                ->whereIn('item_code', $itemCodes)
+                ->whereIn('tran_code', $tranCodes)
+                ->whereIn('fiscal_year', $fiscalYears)
+                ->where('charge_code', $member->psa_mem_type)
+                ->where('stat', 1)
+                ->get()
+                ->keyBy(fn ($item): string => $itemKey(
+                    $item->item_code,
+                    $item->tran_code,
+                    $item->fiscal_year
+                ));
+
+            $paidAmounts = DB::table('payment_items as pi')
+                ->join(
+                    'payments as p',
+                    'p.payment_ref_no',
+                    '=',
+                    'pi.payment_ref_no'
+                )
+                ->select([
+                    'pi.item_code',
+                    'pi.tran_code',
+                    'pi.fiscal_year',
+                ])
+                ->selectRaw(
+                    'SUM(COALESCE(pi.amount_paid, pi.amount_due)) AS total_paid'
+                )
+                ->where('pi.member_id_no', $member->member_id_no)
+                ->whereIn('pi.item_code', $itemCodes)
+                ->whereIn('pi.tran_code', $tranCodes)
+                ->whereIn('pi.fiscal_year', $fiscalYears)
+                ->where('pi.stat', 1)
+                ->where('p.stat', 1)
+                ->groupBy(
+                    'pi.item_code',
+                    'pi.tran_code',
+                    'pi.fiscal_year'
+                )
+                ->get()
+                ->keyBy(fn ($item): string => $itemKey(
+                    $item->item_code,
+                    $item->tran_code,
+                    $item->fiscal_year
+                ));
+
             $allocations = [];
-
             $totalPayment = 0;
-
             $seenItems = [];
 
             foreach ($lines as $line) {
@@ -378,7 +448,7 @@ class NewPaymentModal extends Component
                     ]);
                 }
 
-                $uniqueKey = $fiscalYear . '|' . $tranCode . '|' . $itemCode;
+                $uniqueKey = $itemKey($itemCode, $tranCode, $fiscalYear);
 
                 if (isset($seenItems[$uniqueKey])) {
                     throw ValidationException::withMessages([
@@ -388,13 +458,7 @@ class NewPaymentModal extends Component
 
                 $seenItems[$uniqueKey] = true;
 
-                $definition = TransactionTypeItem::query()
-                    ->where('item_code', $itemCode)
-                    ->where('tran_code', $tranCode)
-                    ->where('fiscal_year', $fiscalYear)
-                    ->where('charge_code', $member->psa_mem_type)
-                    ->where('stat', 1)
-                    ->first();
+                $definition = $definitions->get($uniqueKey);
 
                 if (! $definition) {
                     throw ValidationException::withMessages([
@@ -407,22 +471,9 @@ class NewPaymentModal extends Component
                     2
                 );
 
-                $previouslyPaid = (float) DB::table('payment_items as pi')
-                    ->join(
-                        'payments as p',
-                        'p.payment_ref_no',
-                        '=',
-                        'pi.payment_ref_no'
-                    )
-                    ->where('pi.member_id_no', $member->member_id_no)
-                    ->where('pi.fiscal_year', $fiscalYear)
-                    ->where('pi.item_code', $itemCode)
-                    ->where('pi.tran_code', $tranCode)
-                    ->where('pi.stat', 1)
-                    ->where('p.stat', 1)
-                    ->sum(DB::raw(
-                        'COALESCE(pi.amount_paid, pi.amount_due)'
-                    ));
+                $previouslyPaid = (float) (
+                    $paidAmounts->get($uniqueKey)?->total_paid ?? 0
+                );
 
                 $balance = round(
                     max($originalAmount - $previouslyPaid, 0),

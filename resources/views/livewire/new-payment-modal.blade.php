@@ -1,4 +1,5 @@
 <div
+    wire:init="initializeItems"
     class="pm"
     x-data="{
         confirming: false,
@@ -575,6 +576,7 @@
             <x-filament::button
                 color="primary"
                 icon="heroicon-o-plus"
+                :disabled="! $itemsLoaded"
                 x-on:click="openPicker()"
             >
                 Select Transaction Items
@@ -587,7 +589,11 @@
             class="pm-muted"
             x-show="$wire.selected.length === 0"
         >
-            No transaction items added yet.
+            @if ($itemsLoaded)
+                No transaction items added yet.
+            @else
+                Loading transaction items...
+            @endif
         </div>
 
         <div
