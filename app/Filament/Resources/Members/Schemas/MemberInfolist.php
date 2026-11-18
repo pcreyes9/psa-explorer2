@@ -19,6 +19,66 @@ class MemberInfolist
                 Tabs::make('MemberTabs')
                     ->tabs([
 
+                        Tab::make('Overview')
+                            ->icon('heroicon-m-home')
+                            ->schema([
+                                Section::make('Member Overview')
+                                    ->description('Key membership and professional details.')
+                                    ->columns(3)
+                                    ->schema([
+                                        TextEntry::make('member_id_no')
+                                            ->label('PSA ID'),
+
+                                        TextEntry::make('psa_mem_stat')
+                                            ->label('Membership Status')
+                                            ->badge(),
+
+                                        TextEntry::make('membershipType.Memtype')
+                                            ->label('Membership Type')
+                                            ->placeholder('-'),
+
+                                        TextEntry::make('chapter.psa_chapter_desc')
+                                            ->label('Chapter')
+                                            ->placeholder('-'),
+
+                                        TextEntry::make('datejoin')
+                                            ->label('Date Joined')
+                                            ->date(),
+
+                                        TextEntry::make('mem_age')
+                                            ->label('Age')
+                                            ->placeholder('-'),
+                                    ]),
+
+                                Section::make('Professional Snapshot')
+                                    ->columns(3)
+                                    ->schema([
+                                        TextEntry::make('mem_prc_no')
+                                            ->label('PRC Number')
+                                            ->placeholder('-'),
+
+                                        TextEntry::make('mem_prc_exp_date')
+                                            ->label('PRC Expiry')
+                                            ->date(),
+
+                                        TextEntry::make('mem_pma_id_no')
+                                            ->label('PMA ID')
+                                            ->placeholder('-'),
+
+                                        TextEntry::make('mem_fellow_no')
+                                            ->label('Fellow Number')
+                                            ->placeholder('-'),
+
+                                        TextEntry::make('mem_practice_pref')
+                                            ->label('Practice Preference')
+                                            ->placeholder('-'),
+
+                                        TextEntry::make('mem_sr_no')
+                                            ->label('SR Number')
+                                            ->placeholder('-'),
+                                    ]),
+                            ]),
+
                         Tab::make('Personal')
                             ->icon('heroicon-m-user')
                             ->schema([
@@ -222,6 +282,7 @@ class MemberInfolist
                             ]),
 
                     ])
+                    ->persistTabInQueryString('member-tab')
                     ->columnSpanFull(),
             ]);
     }

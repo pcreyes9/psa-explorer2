@@ -4,12 +4,12 @@
         'record' => $this->record,
     ])
 
-    <div class="mt-2">
+    <div class="member-profile-details mt-6">
         {{ $this->infolist }}
     </div>
 
     <div
-        class="mt-6"
+        class="member-financial-records mt-8"
         x-data="{ tab: 'summary' }"
     >
 
@@ -66,6 +66,8 @@
                 'archives' => $this->financialArchives,
                 'balances' => $this->financialBalances,
                 'cmePayments' => $this->cmePayments,
+                'incompletePayments' => $this->incompletePayments,
+                'advancePayments' => $this->advancePayments,
             ])
 
         @endif

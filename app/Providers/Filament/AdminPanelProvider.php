@@ -83,6 +83,7 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 \App\Filament\Widgets\DashboardStats::class,
                 \App\Filament\Widgets\AnnualDuesChart::class,
+                \App\Filament\Widgets\RecentPayments::class,
             ])
 
             ->middleware([

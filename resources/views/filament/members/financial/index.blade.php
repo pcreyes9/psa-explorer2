@@ -21,6 +21,18 @@
 
             <button
                 type="button"
+                @click="tab = 'incomplete-payments'"
+                :class="tab === 'incomplete-payments'
+                    ? 'border-b-2 border-primary-600 text-primary-600 dark:text-primary-400'
+                    : 'border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'"
+                class="flex items-center gap-2 whitespace-nowrap px-1 pb-3 text-sm font-medium transition"
+            >
+                <x-heroicon-m-exclamation-triangle class="h-5 w-5" />
+                Incomplete Payments
+            </button>
+
+            <button
+                type="button"
                 @click="tab = 'cme-payments'"
                 :class="tab === 'cme-payments'
                     ? 'border-b-2 border-primary-600 text-primary-600 dark:text-primary-400'
@@ -66,6 +78,17 @@
                 'record' => $record,
                 'balances' => $balances,
                 'membershipPayments' => $membershipPayments,
+                'advancePayments' => $advancePayments,
+            ])
+        </div>
+
+        <div
+            x-show="tab === 'incomplete-payments'"
+            x-cloak
+            class="mt-6"
+        >
+            @include('filament.members.financial.tabs.incomplete-payments', [
+                'incompletePayments' => $incompletePayments,
             ])
         </div>
 

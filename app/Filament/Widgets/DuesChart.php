@@ -2,27 +2,36 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\Payment;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Facades\DB;
 use App\Models\PaymentItem;
 
 class AnnualDuesChart extends ChartWidget
 {
-    protected ?string $heading = 'Monthly Membership Dues Collection';
+    protected ?string $heading = 'Monthly Membership Dues';
+
+    protected ?string $description = 'Membership dues collected this year, excluding the current month';
+
+    protected ?string $maxHeight = '320px';
+
+    protected string $color = 'primary';
 
     protected int|string|array $columnSpan = 'half';
 
     protected function getData(): array
     {
+        $today = now();
+        $startOfYear = $today->copy()->startOfYear();
+        $startOfCurrentMonth = $today->copy()->startOfMonth();
+
         $data = PaymentItem::query()
             ->join('payments as p', 'payment_items.payment_ref_no', '=', 'p.payment_ref_no')
             ->selectRaw("
                 MONTH(p.payment_date) as month,
                 SUM(payment_items.amount_due) as total
             ")
-            ->whereYear('p.payment_date', now()->year)
-            ->whereMonth('p.payment_date', '<', now()->month)
+            ->where('p.payment_date', '>=', $startOfYear)
+            ->where('p.payment_date', '<', $startOfCurrentMonth)
             ->where('payment_items.tran_code', 'MEMF')
             ->groupBy(DB::raw('MONTH(p.payment_date)'))
             ->orderBy(DB::raw('MONTH(p.payment_date)'))
@@ -31,8 +40,13 @@ class AnnualDuesChart extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'Membership Dues',
+                    'label' => 'Membership dues',
                     'data' => $data->pluck('total')->toArray(),
+                    'backgroundColor' => 'rgba(37, 99, 235, 0.72)',
+                    'borderColor' => 'rgb(37, 99, 235)',
+                    'borderWidth' => 1,
+                    'borderRadius' => 8,
+                    'borderSkipped' => false,
                 ],
             ],
             'labels' => $data->pluck('month')

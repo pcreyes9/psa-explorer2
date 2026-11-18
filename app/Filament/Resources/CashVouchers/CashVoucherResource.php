@@ -99,6 +99,21 @@ class CashVoucherResource extends Resource
 
                         TextInput::make('pay_to')
                             ->label('Pay To')
+                            ->datalist(fn (): array => CashVoucher::query()
+                                ->whereNotNull('pay_to')
+                                ->orderByDesc('date')
+                                ->orderByDesc('id')
+                                ->limit(50)
+                                ->pluck('pay_to')
+                                ->map(fn ($payTo) => trim((string) $payTo))
+                                ->filter()
+                                ->unique()
+                                ->values()
+                                ->all())
+                            ->extraInputAttributes([
+                                'x-init' => '$el.removeAttribute("list")',
+                                'x-on:input' => '$event.target.toggleAttribute("list", Boolean($event.target.value.trim()))',
+                            ])
                             ->required()
                             ->maxLength(255)
                             ->columnSpan(3),

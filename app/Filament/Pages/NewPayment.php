@@ -55,7 +55,7 @@ class NewPayment extends Page implements HasForms, HasActions
 
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()?->can('payment_create') ?? false;
+        return false;
     }
 
     public function getHeading(): string
@@ -371,6 +371,21 @@ class NewPayment extends Page implements HasForms, HasActions
                 $this->calculateTotal();
             })
             ->disabled(empty($this->transactionItems));
+    }
+
+    public function postPaymentAction(): Action
+    {
+        return Action::make('postPayment')
+            ->label('Post Payment')
+            ->icon(Heroicon::OutlinedCheckCircle)
+            ->color('success')
+            ->action(function (): void {
+                $this->postPayment();
+            })
+            ->disabled(
+                fn (): bool => empty($this->selectedItems)
+                    || $this->totalAmount <= 0
+            );
     }
 
     public function loadTransactionItems(): void

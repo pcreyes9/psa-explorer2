@@ -27,7 +27,7 @@ class PaymentsTable
                     ->searchable()
                     ->sortable(),
 
-                TextColumn::make('member.member_id_no')
+                TextColumn::make('member_id_no')
                     ->label('PSA ID No.')
                     ->sortable(),
 

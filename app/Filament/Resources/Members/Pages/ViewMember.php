@@ -31,7 +31,7 @@ class ViewMember extends ViewRecord
 
     public $financialLedger = [];
 
-    public $advancePayments = [];
+    public $incompletePayments = [];
 
     public function loadFinancialRecords(): void
     {
@@ -290,6 +290,75 @@ class ViewMember extends ViewRecord
                     ),
                 ];
             });
+
+        $chargeItems = DB::table('transaction_type_item')
+            ->select([
+                'tran_code',
+                'fiscal_year',
+                'item_code',
+                'item_details',
+                'item_amount',
+            ])
+            ->where('charge_code', $memberType)
+            ->where('stat', 1)
+            ->whereBetween('fiscal_year', [2020, 2027])
+            ->orderByDesc('fiscal_year')
+            ->orderBy('tran_code')
+            ->orderBy('item_code')
+            ->get();
+
+        $paidItems = DB::table('payment_items as pi')
+            ->join('payments as p', function ($join) {
+                $join->on('p.payment_ref_no', '=', 'pi.payment_ref_no')
+                    ->on('p.member_id_no', '=', 'pi.member_id_no');
+            })
+            ->where('pi.member_id_no', $memberId)
+            ->where('pi.stat', 1)
+            ->where('p.stat', 1)
+            ->whereBetween('pi.fiscal_year', [2020, 2027])
+            ->select([
+                'pi.tran_code',
+                'pi.fiscal_year',
+                'pi.item_code',
+            ])
+            ->selectRaw('SUM(COALESCE(pi.amount_paid, pi.amount_due)) AS total_paid')
+            ->groupBy('pi.tran_code', 'pi.fiscal_year', 'pi.item_code')
+            ->get()
+            ->keyBy(
+                fn ($item) => implode('|', [
+                    $item->fiscal_year,
+                    $item->tran_code,
+                    $item->item_code,
+                ])
+            );
+
+        $this->incompletePayments = $chargeItems
+            ->map(function ($item) use ($paidItems) {
+                $key = implode('|', [
+                    $item->fiscal_year,
+                    $item->tran_code,
+                    $item->item_code,
+                ]);
+
+                $paid = (float) ($paidItems->get($key)->total_paid ?? 0);
+                $due = (float) $item->item_amount;
+                $balance = round(max($due - $paid, 0), 2);
+
+                return (object) [
+                    'fiscal_year' => $item->fiscal_year,
+                    'tran_code' => $item->tran_code,
+                    'item_code' => $item->item_code,
+                    'item_details' => $item->item_details,
+                    'amount_due' => $due,
+                    'amount_paid' => $paid,
+                    'balance' => $balance,
+                ];
+            })
+            ->filter(
+                fn ($item) => $item->amount_paid > 0 && $item->balance > 0
+            )
+            ->values()
+            ->all();
 
         $this->cmePayments = DB::table('cme_program_registration as c')
             ->join('payments as p', function ($join) {

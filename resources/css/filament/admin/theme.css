@@ -6,3 +6,85 @@
 .fi-in-entry-label {
     @apply font-bold;
 }
+
+.fi-wi-stats-overview .fi-section,
+.fi-wi-chart .fi-section,
+.fi-wi-table .fi-section {
+    border: 1px solid color-mix(in srgb, var(--color-gray-200) 80%, transparent);
+    border-radius: 1rem;
+    box-shadow: 0 10px 30px -24px rgb(15 23 42 / 0.5);
+}
+
+.fi-wi-stats-overview .fi-section {
+    background: linear-gradient(135deg, rgb(239 246 255 / 0.9), rgb(255 255 255 / 0.98));
+}
+
+.fi-wi-chart .fi-section,
+.fi-wi-table .fi-section {
+    background: rgb(255 255 255 / 0.98);
+}
+
+.fi-wi-stats-overview .fi-section-header,
+.fi-wi-chart .fi-section-header,
+.fi-wi-table .fi-section-header {
+    padding: 1.25rem 1.5rem 0.75rem;
+}
+
+.fi-wi-stats-overview .fi-section-content,
+.fi-wi-chart .fi-section-content,
+.fi-wi-table .fi-section-content {
+    padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.fi-wi-stats-overview .fi-sc-component {
+    transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.fi-wi-stats-overview .fi-sc-component:hover {
+    transform: translateY(-2px);
+}
+
+.fi-wi-chart .fi-wi-chart-canvas-ctn {
+    min-height: 320px;
+}
+
+.dark .fi-wi-stats-overview .fi-section,
+.dark .fi-wi-chart .fi-section,
+.dark .fi-wi-table .fi-section {
+    border-color: color-mix(in srgb, var(--color-gray-700) 70%, transparent);
+    box-shadow: 0 10px 30px -24px rgb(0 0 0 / 0.8);
+}
+
+.dark .fi-wi-stats-overview .fi-section {
+    background: linear-gradient(135deg, rgb(30 58 138 / 0.22), rgb(17 24 39 / 0.96));
+}
+
+.dark .fi-wi-chart .fi-section,
+.dark .fi-wi-table .fi-section {
+    background: rgb(17 24 39 / 0.96);
+}
+
+.member-profile-hero .fi-section-content {
+    padding: 0;
+}
+
+.member-profile-details .fi-tabs {
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--color-gray-200) 80%, transparent);
+    border-radius: 1rem;
+    box-shadow: 0 10px 30px -24px rgb(15 23 42 / 0.5);
+}
+
+.member-profile-details .fi-section {
+    border-radius: 0.875rem;
+}
+
+.member-financial-records > .fi-section {
+    border-radius: 1rem;
+    box-shadow: 0 10px 30px -24px rgb(15 23 42 / 0.5);
+}
+
+.dark .member-profile-details .fi-tabs {
+    border-color: color-mix(in srgb, var(--color-gray-700) 70%, transparent);
+    box-shadow: 0 10px 30px -24px rgb(0 0 0 / 0.8);
+}
